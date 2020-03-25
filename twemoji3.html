@@ -55,7 +55,7 @@
         function click(e) {
           if (window.parent == window.self) { this.oncontextmenu(e); return; }
           var url = this.src.replace("/72x72/","/svg/").replace(".png",".svg");
-          window.parent.postMessage("app.open(\""+url+"\",null,false);", "*");
+          window.parent.postMessage("app.open(\""+url+"\",null,true);", "*");
         }
         for (var i = 0; i < img.length; i++) {
           img[i].onclick = click;
