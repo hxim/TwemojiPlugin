@@ -98,7 +98,7 @@
         };
         var OpenMojiUrl = function(s) {
           s = s.substring(s.lastIndexOf("/")+1).replace(".png","").toUpperCase() + ".svg";
-          return "https://openmoji.org/data/color/svg/" + s;
+          return "https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/" + s;
         };      
         for (var i = 0; i < img.length; i++) {
           img[i].onclick = function () { insertImage(TwemojiUrl(this.src)); };
