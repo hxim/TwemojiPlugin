@@ -108,10 +108,10 @@
             document.getElementById("menu").style.top=(e.clientY+mh>window.innerHeight?e.clientY-mh:e.clientY)+"px";
             document.getElementById("menu").style.width=mw+"px";
             document.getElementById("menu").style.display="block";
-            var html = "<div onmousedown=\"insertImage(this.firstElementChild.src)\"><img src=\""+TwemojiUrl(this.src)+"\"/>Twemoji</div>";
-            html += "<div onmousedown=\"insertImage(this.firstElementChild.src)\"><img src=\""+NotoEmojiUrl(this.src)+"\" onerror=\"this.parentElement.style.display='none';\"/>Noto Emoji</div>";
-            html += "<div onmousedown=\"insertImage(this.firstElementChild.src)\"><img src=\""+OpenMojiUrl(this.src)+"\" onerror=\"this.parentElement.style.display='none';\"/>OpenMoji</div>";
-            html += "<hr/><div onmousedown=\"window.open('https://emojipedia.org/"+ this.title.split(" ")[0]+"','_blank');\">Go to Emojipedia ...</div>";
+            var html = "<div onclick=\"insertImage(this.firstElementChild.src)\"><img src=\""+TwemojiUrl(this.src)+"\"/>Twemoji</div>";
+            html += "<div onclick=\"insertImage(this.firstElementChild.src)\"><img src=\""+NotoEmojiUrl(this.src)+"\" onerror=\"this.parentElement.style.display='none';\"/>Noto Emoji</div>";
+            html += "<div onclick=\"insertImage(this.firstElementChild.src)\"><img src=\""+OpenMojiUrl(this.src)+"\" onerror=\"this.parentElement.style.display='none';\"/>OpenMoji</div>";
+            html += "<hr/><div onclick=\"window.open('https://emojipedia.org/"+ this.title.split(" ")[0]+"','_blank');\">Go to Emojipedia ...</div>";
             document.getElementById("menu").innerHTML = html;
             return false;
           };
@@ -121,7 +121,12 @@
       ));
       cont.onscroll = function(e) { document.getElementById("menu").style.display="none"; };
     }
-    document.onmousedown = function(e) { document.getElementById("menu").style.display="none"; };
+    document.onmousedown = function(e) {
+      e = e || window.event; e = e.target || e.srcElement;
+      while (e != null && e.id != "menu") e = e.parentElement;
+      if (e == null) document.getElementById("menu").style.display="none";
+    };
+    document.onmouseup = function(e) { document.getElementById("menu").style.display="none"; };
     document.onmouseout = function(e) { var e = e.toElement || e.relatedTarget; if (e != null && e.tagName!='HTML') return; document.getElementById("menu").style.display="none"; };
     </script>    
   </head>
