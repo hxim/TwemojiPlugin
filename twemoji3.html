@@ -46,6 +46,8 @@
 			#menu > hr { border: 0; height: 1px; margin: 0.25em 0; background: #bebebe; }
 			#menu > div > img { cursor: default; background-color: transparent; width: 24px; height: 24px; position: absolute; right: 15px; top: 3px; margin: 0; }
 			#menu > div > img:hover { background-color: transparent; }
+			#menu > div.disabled { color: #bbbbbb; pointer-events: none; }
+			#menu > div.disabled img { display: none; }
 		</style>
     <script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js" crossorigin="anonymous"></script>
     <script>
@@ -53,6 +55,7 @@
     function insertImage(url) {
       if (window.parent == window.self) window.open(url,'_blank');
       else window.parent.postMessage("app.open(\""+url+"\",null,true);", "*");
+      document.getElementById("menu").style.display="none";
     }
     function update(max) {
       var catsel = document.getElementById("category");
@@ -92,25 +95,29 @@
         var TwemojiUrl = function(s) {
           return s.replace("/72x72/","/svg/").replace(".png",".svg");
         };
-        var NotoEmojiUrl = function(s) {
-          s = s.substring(s.lastIndexOf("/")+1).replace(".png","").split("-").join("_") + ".svg";
-          return "https://raw.githubusercontent.com/googlefonts/noto-emoji/master/svg/emoji_u" + s;
+        var EmojiItemHtml = function(base, src, name, separator, uppercase) {
+          var s = src;
+          if (s.length > 0) {
+            s = s.substring(s.lastIndexOf("/")+1).replace(".png","");
+            if (separator != "-") s = s.split("-").join(separator);
+            s = uppercase ? s.toUpperCase() : s.toLowerCase();
+            s += ".svg";
+          }
+          return "<div onclick=\"insertImage(this.firstElementChild.src)\"><img src=\""+base+s+"\" onerror=\"this.parentElement.onclick=null;this.parentElement.className='disabled';\"/>"+name+"</div>"
         };
-        var OpenMojiUrl = function(s) {
-          s = s.substring(s.lastIndexOf("/")+1).replace(".png","").toUpperCase() + ".svg";
-          return "https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/" + s;
-        };      
+
         for (var i = 0; i < img.length; i++) {
           img[i].onclick = function () { insertImage(TwemojiUrl(this.src)); };
           img[i].oncontextmenu = function(e) {
-            var mw = 180, mh = 31*4+8;
+            var mw = 180, mh = 31*5+8;
             document.getElementById("menu").style.left=(e.clientX+mw>window.innerWidth?e.clientX-mw:e.clientX)+"px";
             document.getElementById("menu").style.top=(e.clientY+mh>window.innerHeight?e.clientY-mh:e.clientY)+"px";
             document.getElementById("menu").style.width=mw+"px";
             document.getElementById("menu").style.display="block";
-            var html = "<div onclick=\"insertImage(this.firstElementChild.src)\"><img src=\""+TwemojiUrl(this.src)+"\"/>Twemoji</div>";
-            html += "<div onclick=\"insertImage(this.firstElementChild.src)\"><img src=\""+NotoEmojiUrl(this.src)+"\" onerror=\"this.parentElement.style.display='none';\"/>Noto Emoji</div>";
-            html += "<div onclick=\"insertImage(this.firstElementChild.src)\"><img src=\""+OpenMojiUrl(this.src)+"\" onerror=\"this.parentElement.style.display='none';\"/>OpenMoji</div>";
+            var html = EmojiItemHtml(TwemojiUrl(this.src),"","Twemoji")
+                     + EmojiItemHtml("https://raw.githubusercontent.com/googlefonts/noto-emoji/master/svg/emoji_u",this.src,"Noto Emoji","_",false)
+                     + EmojiItemHtml("https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/svg/",this.src,"OpenMoji","-",true)
+                     + EmojiItemHtml("https://raw.githubusercontent.com/joypixels/emojione-legacy/master/svg/",this.src,"Emoji One","-",true)
             html += "<hr/><div onclick=\"window.open('https://emojipedia.org/"+ this.title.split(" ")[0]+"','_blank');\">Go to Emojipedia ...</div>";
             document.getElementById("menu").innerHTML = html;
             return false;
@@ -121,12 +128,11 @@
       ));
       cont.onscroll = function(e) { document.getElementById("menu").style.display="none"; };
     }
-    document.onmousedown = function(e) {
+    document.onmousedown = document.onmouseup = function(e) {
       e = e || window.event; e = e.target || e.srcElement;
       while (e != null && e.id != "menu") e = e.parentElement;
       if (e == null) document.getElementById("menu").style.display="none";
     };
-    document.onmouseup = function(e) { document.getElementById("menu").style.display="none"; };
     document.onmouseout = function(e) { var e = e.toElement || e.relatedTarget; if (e != null && e.tagName!='HTML') return; document.getElementById("menu").style.display="none"; };
     </script>    
   </head>
