@@ -24,22 +24,9 @@
             #bar { height: 26px; white-space: nowrap; }
             #bar a { display: inline-block; line-height: 0; border-radius: 3px; padding: 1px; }
             #bar a:hover { background-color: rgba(0,0,0,0.25); }
-			#cont {
-				margin-top:4px;
-				overflow-y: scroll;
-				font-size: 0px;
-				/* for Firefox: */
-				scrollbar-color: #222222 rgba(0,0,0, 0.2 );
-				scrollbar-width: thin;
-			}
-			#cont::-webkit-scrollbar {
-			  width: 10px;
-			  background: rgba(0,0,0,0.2);
-			}
-			#cont::-webkit-scrollbar-thumb {
-				background: #222222;
-				margin: 2px;
-			}
+			#cont { margin-top:4px; font-size: 0px; overflow-y: scroll; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin; }
+			#cont::-webkit-scrollbar, #info > div.body::-webkit-scrollbar { width: 10px; background: rgba(0,0,0,0.2); }
+			#cont::-webkit-scrollbar-thumb,  #info > div.body::-webkit-scrollbar-thumb { background: #222222; margin: 2px; }
 			#menu { position: absolute; background-color: #ffffff; }
 			#menu > div { padding: 0.5em 1em 0.5em 0.7em; font-size: 13px; color: black; text-shadow: none; user-select: none; border-left: 15px solid transparent; position: relative; }
 			#menu > div:hover { background-color: rgba(190,230,255,1); }
@@ -52,7 +39,7 @@
 			#info > div.head { font-size: 1.3em;color: #ffffff;background: linear-gradient(to bottom, #595959 0%,#626262 3%,#575757 7%,#3c3c3c 90%,#3a3a3a 97%,#2e2e2e 100%);background-size: auto 100%; height: 33px; }
 			#info > div.head span.label { display: inline-block;padding: 0.3em 0.5em;text-shadow: 0 -1px 0 rgba(0,0,0,0.45);font-weight: bold; }
 			#info > div.head span.cross { width: 0.8em;height: 0.8em;display: inline-block;background-size: cover;font-size: 1.3em;margin: 0.3em;position: absolute;right: 0;cursor: pointer;filter: invert(1);background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAgMAAAAhHED1AAAADFBMVEUAAAAAAAAAAAAAAAA16TeWAAAABHRSTlMA/8ky3+Rv8AAABVtJREFUeJyt289x22gMxmGNdNLs0F1oz7nw4Nk6mN0Z70EF+JAS1IT6UAlugunAtxQRSdYfit+LFz+slkcM/A3xxJZIAFks/rfrj0ryXyL250fhgJ8ieX/gP78a2uTl8M4P6ETyenjjB/QieTN8/8AHjCJ5P4i6gms1tMnLYwwjdCJ5fYxhhF4kb44xjDCK5CMBRjgRzJOX5xhE6ETy+hyDCL1I3pxjEGEUyWcCiPBF8Ji8vMQQQieS15cYQuhF8uYSQwijSL4QIIQrwTR5eYsBhE4kr28xgNCL5HsMIIwi+R7LEe4E9+RpLEXoRPI0liL0InkaSxFGkTyNZQjTcq/Jj7EEoRPJj7EEoRfJj7EEYS+SHwgShOXQJq9mMYuwFsndLGYRNiK5n8Uswl4kzwgswpzglDwnsAhzglPySxMzCHOCU3J7qEGYEwzDv+IOYoSWYPixWLWnhgjt3Q7Hu/3kCC3B38foK0dQBIsCgiRYFBA0QQFBExQQNAFHCAg4QkSAESICjBARUISQgCLEBBAhJoAIMQFDMAQMwREgBEeAEBwBQbAEBMETAARPABA8QY6QEOQIGUGKkBGkCBlBhiAI5n8sHoF8hVsE9VwwvyyCvT2AAAg8AnuKMQiEwCIQAoeACBwCfZALERiBQWAEMQIkiBH4s2yAQAlCBEoQIWCCCKHyOC8ROEGAwAk0QoFAI5TeaBRChUAiVAgkQoVAIpQIFEJz+QZDi9BcvsUBEHyTJUfI2jwpQtZoShGyVleKkDXbMoS83Zcg5A3HBCFveSYIedPVI5C2r0UgjWeLQFrfFoE03x0Ca/8bBDaAMAhsBGIQ2BAmRqBjoBCBDqJCBDoKCxHoMC5C4OPAAIEPJAMEPhINEPhQViMUJqIaoTCT1QiFqbBGKMylJUKFQCJUCCRChaBt+Q/zfsF/uINt6QBh8E/l5+W/QuUA+XuwKxwgfxO3hQPk30IBIfhr5AcEnwc7fEDwibTFBwSfiRgh/FSmB4TfCzt4QPjNtIUHhN+NEMF8O7MDzPPBDh1gnlC26ADzjIQQ7FMaOcA+J+7AAfZJdQsOsM/KACF5Ws8PSN4XdukByRvL9jkCgJC+tT1JkCOkb64ZQvrunCCAt/cnCTIE0MHwCKCHYhFQF+dJAo+AOlkOQfTS2pBBUN08cVMlgoOIxQiqoynuKkaQPdUCgu7qFhB0X7mAoDvbBYSgt44Rou4+RojmCxghmnBghHDGAhHiKQ9EiOdMECGedEEEM2tDCG7ahxDcvBEhuIknQrAzV4Dgp74Awc+dAYKffAOEZPaeImTT/xQh2z9IEbINiBQh3cFoEx72B/ItkPYWHzYY8j0UkfFhz593jcQ9TrsyYBfHIpBtIItA9pEsAtmIsghoJ8sgsK0wg8D20gwC24wzCHA3L0Sg24EhAt1PDBHohmSIgHc0AwS+JRog8D3VAIFvygYIhV1diVDZFpYIlX1liVDZL5AI7YaDaaK3CO9izcQ00VuEg9jyMHOEBuFU7hzBzREahFO5cwQ7R5gjnMvdixhFOJe7ETGI8FXuWsQgwle5SxGDCJdy9yLGEC7lbkQMIVzLXYtYdD0gXMtdilh4TRFu5e5FLLp6Ve5GxKJrMoG6l7sWseia/J+PNxEEA7VRlTuKWHTdEQ4iCGaKN4RpuZ2IRdet3jcRRDPFa73vIohmitd6DyKIxqqdKrfDBLd630QQjlVHVe6ICa71HkQQTpY7VW6HCS71zstdcYKveptyPwuT5V6V+1oYrneq3JfCcH2lyl3tC8P1UZX7WRiu96rc18J+QafKfRGx6FrVdgnE9evZA749e8D9+g2w4Fwzf7ERbQAAAABJRU5ErkJggg==); }
-			#info > div.body { padding: 13px; overflow-y: auto; overflow-x: hidden; height: 281px; }
+			#info > div.body { padding: 13px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin;  height: 281px; }
 			#info a { color: #d5d5d5; }
 			#info p { margin: 0 0 1em 0; padding: 0; text-align: justify; text-justify: inter-word; }
 			#info .name { font-weight: bold; }
