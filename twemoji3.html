@@ -141,11 +141,15 @@
     document.onmouseout = function(e) { var e = e.toElement || e.relatedTarget; if (e != null && e.tagName!='HTML') return; document.getElementById("menu").style.display="none"; };
     var state = null;
     function savestate() {
+      try { if (typeof window.sessionStorage !== 'undefined') {
         var s = JSON.stringify({search:document.getElementById("search").value, category:document.getElementById("category").selectedIndex}); 
-        if (state != s) { state = s; localStorage.setItem("twemoji3_state", state); }
-     }
+        if (state != s) { state = s; window.sessionStorage.setItem("twemoji3_state", state); }
+      } } catch {}
+    }
     function loadstate() {
-        if (state = localStorage.getItem("twemoji3_state")) { var s = JSON.parse(state); document.getElementById("search").value = s.search; document.getElementById("category").selectedIndex = s.category; }
+      try { if (typeof window.sessionStorage !== 'undefined') {
+        if (state = window.sessionStorage.getItem("twemoji3_state")) { var s = JSON.parse(state); document.getElementById("search").value = s.search; document.getElementById("category").selectedIndex = s.category; }
+      } } catch {}
     }
     </script>
   </head>
