@@ -3,15 +3,15 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
-		<!-- Global site tag (gtag.js) - Google Analytics -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-172920861-2"></script>
-		<script>
-		  window.dataLayer = window.dataLayer || [];
-		  function gtag(){dataLayer.push(arguments);}
-		  gtag('js', new Date());
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-172920861-2"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
 
-		  gtag('config', 'UA-172920861-2');
-		</script>
+          gtag('config', 'UA-172920861-2');
+        </script>
 		<style>
             * { border-style: solid; border-width: 0; }
 			body {  background-color:#474747; overflow: hidden; margin: 3px 8px 0 8px; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45); }
@@ -20,14 +20,14 @@
 			label { line-height:21px; display: inline-block; margin-top: 2px; }
             input { background-color: #252525; border-radius: 3px; padding: 3px; box-sizing: border-box; width: 106px; margin: 1px 2px 0 2px; line-height: 17.5px; }
 
-            select { background-color: #606060; padding: 2px 15px 3px 5px; width: 137px; margin: 0 0 0 2px; overflow: hidden;
+            select { background-color: #606060; padding: 2px 15px 3px 5px; width: 115px; margin: 0 0 0 2px; overflow: hidden;
                      background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
                      background-position: calc(100% - 9px) calc(10px), calc(100% - 4px) calc(10px); background-size: 5px 5px, 5px 5px;
                      background-repeat: no-repeat; -webkit-appearance: none; line-height: 1.5em;
             }
             select, .loadmore { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
-			img { margin: 0 4px 4px 0; cursor:pointer; height: 36px; width: 36px; background-color: #606060;  }
-            .loadmore { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 35px; height: 35px; width: 76px; vertical-align: top; text-decoration: none; padding: 0; text-align: center; }
+			img { margin: 0 4px 4px 0; padding: 2px; cursor:pointer; height: 36px; width: 36px; background-color: #606060;  }
+            .loadmore { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 35px; height: 35px; width: 76px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; }
             img:hover, select:hover, .loadmore:hover { background-color: #6a6a6a; }
             #bar { height: 26px; white-space: nowrap; }
             #bar a { display: inline-block; line-height: 0; border-radius: 3px; padding: 1px; }
@@ -43,11 +43,11 @@
 			#menu > div > img:hover { background-color: transparent; }
 			#menu > div.disabled { color: #bbbbbb; pointer-events: none; }
 			#menu > div.disabled img { display: none; }
-			#info { position: absolute; z-index: 10; background-color: #474747; width: 360px; height: 340px; top: 40px; left: 20px; box-shadow: 0px 8px 40px rgba(0,0,0,0.2); display: none; }
+			#info { position: absolute; z-index: 10; background-color: #474747; width: 340px; height: 282px; top: 33px; left: 10px; box-shadow: 0px 8px 40px rgba(0,0,0,0.2); display: none; }
 			#info > div.head { font-size: 1.3em;color: #ffffff;background: linear-gradient(to bottom, #595959 0%,#626262 3%,#575757 7%,#3c3c3c 90%,#3a3a3a 97%,#2e2e2e 100%);background-size: auto 100%; height: 33px; }
 			#info > div.head span.label { display: inline-block;padding: 0.3em 0.5em;text-shadow: 0 -1px 0 rgba(0,0,0,0.45);font-weight: bold; }
 			#info > div.head span.cross { width: 0.8em;height: 0.8em;display: inline-block;background-size: cover;font-size: 1.3em;margin: 0.3em;position: absolute;right: 0;cursor: pointer;filter: invert(1);background-image:url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2IiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiI+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTIuMDkgMzguNUw5MSAxMjcuNUwxLjkxIDIxNi41TDM5LjUgMjUyLjg2TDEyOCAxNjQuNUwyMTcuNSAyNTQuMDFMMjU0LjA2IDIxNy41TDE2NS4xNiAxMjcuNUwyNTUuMDEgMzcuNUwyMTguNDkgMUwxMjcuODQgOTAuNUwzOC40OSAwLjg1TDIuMDkgMzguNVoiIC8+PC9zdmc+); }
-			#info > div.body { padding: 13px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin;  height: 281px; }
+			#info > div.body { padding: 11px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin;  height: 227px; }
 			#info a { color: #d5d5d5; }
 			#info p { margin: 0 0 1em 0; padding: 0; text-align: justify; text-justify: inter-word; }
 			#info .name { font-weight: bold; }
@@ -93,9 +93,15 @@
 
         }
       }
-      var cont = document.getElementById("cont");
-      cont.innerHTML = str;
-      cont.setAttribute("style","height:"+(window.innerHeight-40)+"px;");
+      document.getElementById("cont").innerHTML = str;
+      var setsize = function() {
+        document.getElementById("cont").setAttribute("style","height:"+(window.innerHeight-40)+"px;");
+        document.getElementById("search").setAttribute("style","width:"+Math.max(106,window.innerWidth-272)+"px;");
+        document.getElementById("info").setAttribute("style","height:"+(window.innerHeight-42)+"px;"+"width:"+Math.max(340,window.innerWidth-34)+"px;");
+        document.getElementById("infobody").setAttribute("style","height:"+(window.innerHeight-42-55)+"px;");
+      }
+      setsize();
+      window.onresize = setsize;
       if (max == null) cont.scrollTo(0, 0);
       cont.style.display = "block";
       (function (img) {
@@ -116,9 +122,9 @@
         for (var i = 0; i < img.length; i++) {
           img[i].onclick = function () { insertImage(TwemojiUrl(this.src)); };
           img[i].oncontextmenu = function(e) {
-            var mw = 180, mh = 31*5+8;
-            document.getElementById("menu").style.left=(e.clientX+mw>window.innerWidth?e.clientX-mw:e.clientX)+"px";
-            document.getElementById("menu").style.top=(e.clientY+mh>window.innerHeight?e.clientY-mh:e.clientY)+"px";
+            var mw = 180, mh = 31*6+8;
+            document.getElementById("menu").style.left=Math.max(0,e.clientX+mw>window.innerWidth?e.clientX-mw:e.clientX)+"px";
+            document.getElementById("menu").style.top=Math.max(0,e.clientY+mh>window.innerHeight?e.clientY-mh:e.clientY)+"px";
             document.getElementById("menu").style.width=mw+"px";
             document.getElementById("menu").style.display="block";
             var html = EmojiItemHtml(TwemojiUrl(this.src),"","Twemoji")
