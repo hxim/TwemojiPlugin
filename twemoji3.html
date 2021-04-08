@@ -133,7 +133,7 @@
         for (var i = 0; i < img.length; i++) {
           img[i].onclick = function () { insertImage(TwemojiUrl(this.src)); };
           img[i].oncontextmenu = function(e) {
-            var mw = 180, mh = 31*6+8;
+            var mw = 180, mh = 31*7+8;
             document.getElementById("menu").style.left=Math.max(0,e.clientX+mw>window.innerWidth?e.clientX-mw:e.clientX)+"px";
             document.getElementById("menu").style.top=Math.max(0,e.clientY+mh>window.innerHeight?e.clientY-mh:e.clientY)+"px";
             document.getElementById("menu").style.width=mw+"px";
@@ -143,6 +143,7 @@
                      + EmojiItemHtml("https://raw.githubusercontent.com/googlefonts/noto-emoji/master/svg/emoji_u",this.src,"Noto Emoji","_",false)
                      + EmojiItemHtml("https://raw.githubusercontent.com/C1710/blobmoji/master/svg/emoji_u",this.src,"Blobmoji","_",false)
                      + EmojiItemHtml("https://raw.githubusercontent.com/joypixels/emojione-legacy/master/svg/",this.src,"Emoji One","-",true)
+                     + EmojiItemHtml("https://raw.githubusercontent.com/EmojiTwo/emojitwo/master/svg/",this.src,"EmojiTwo","-",false)
             html += "<hr/><div onclick=\"window.open('https://emojipedia.org/"+ this.title.split(" ")[0]+"','_blank');\">Go to Emojipedia ...</div>";
             document.getElementById("menu").innerHTML = html;
             return false;
@@ -215,6 +216,10 @@
                 License: Creative Commons Attribution-ShareAlike 4.0 International</br>
                 <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">http://creativecommons.org/licenses/by-sa/4.0/</a></br>
                 <a href="http://creativecommons.org/licenses/by-sa/4.0/legalcode" target="_blank">http://creativecommons.org/licenses/by-sa/4.0/legalcode</a>
+            </p>
+            <hr/><div class="name"><a href="https://github.com/EmojiTwo/emojitwo" target="_blank">Emojitwo</a></div>
+            <p>
+                Emoji artwork is provided by <a href="https://emojitwo.github.io/" target="_blank">Emojitwo</a>, originally released as <a href="https://www.emojione.com" target="_blank">Emojione 2.2</a> by <a href="http://www.ranks.com" target="_blank">Ranks.com</a> with contributions from the Emojitwo community and is licensed under <a href="https://creativecommons.org/licenses/by/4.0/legalcode" target="_blank">CC-BY 4.0</a>.</p>
             </p>
         </div>
     </div>
