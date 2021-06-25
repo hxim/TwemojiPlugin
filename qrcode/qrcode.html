@@ -17,7 +17,7 @@
             select, a { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
 			.ew {  background-color: #ffffff; display: inline-block; position: relative; width: 100%; height: 100%; }
             .ew > div { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
-            .ew svg { width: 100%; height: 100%; }
+            .ew img { width: 100%; height: 100%; }
 		    select:hover, a:hover { background-color: #6a6a6a; }
             a { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 20.5px; height: 20.5px; width: 140px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; margin: 10px auto; position: absolute; left: 0; right: 0; }
             #margin { width: 50px; }
@@ -28,20 +28,9 @@
         </style>
     <script>
 
-    function insertImage(svgElement) {
-        var dataURI =  'data:image/svg+xml,' + encodeURIComponent(svgElement.innerHTML);
-        if (window.parent == window.self) {
-            if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) { alert('not supported in IE.'); return; }
-            var element = document.createElement('a');
-            element.setAttribute('href', dataURI);
-            element.setAttribute('download', 'qr.svg');
-            element.style.display = 'none';
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
-        } else {
-            window.parent.postMessage('app.open("' + dataURI + '", null, true)', '*');
-        }
+    function insertImage(url) {
+      if (window.parent == window.self) window.open(url,'_blank');
+      else window.parent.postMessage("app.open(\""+url+"\",null,true);", "*");
     }
     function update() {
       var d = document;
@@ -52,25 +41,17 @@
       while (e.firstChild) e.removeChild(e.firstChild);      
       if (data.length > 0) {
         var div1 = d.createElement('div'), div2 = d.createElement('div'), div3 = d.createElement('div');
-        var url = (data == "https://www.photopea.com" && ecc == "L" && margin == "1") ? "https://hxim.github.io/TwemojiPlugin/qrcode/photopea.svg" : "https://api.qrserver.com/v1/create-qr-code/?data="+encodeURIComponent(data)+"&ecc="+ecc+"&qzone="+margin+"&format=svg";
-        var x = new XMLHttpRequest();
-        x.open("GET", url); 
-        x.onload = function () {
-            if (x.readyState === x.DONE && x.status === 200) {
-                var svg = x.responseXML.getElementsByTagName("svg")[0];
-                svg.setAttribute("viewBox", "0 0 "+svg.getAttribute("width")+" "+svg.getAttribute("height"));
-                div2.appendChild(svg);
-            }
-        };
-        x.send();
-        div2.id = "qr";
+        var img = d.createElement('img');
+        img.id = "qr";
+        img.src = (data == "https://www.photopea.com" && ecc == "L" && margin == "1") ? "photopea.svg" : "https://api.qrserver.com/v1/create-qr-code/?data="+encodeURIComponent(data)+"&ecc="+ecc+"&qzone="+margin+"&format=svg";
+        div2.appendChild(img);
         div1.className = "ew";
         div1.title = data;
         div1.appendChild(div2);
         e.appendChild(div1);
         var b = d.createElement('a');
         b.href = "#";
-        b.onclick = function() { if (div2.firstChild != null) insertImage(div2.firstChild); };
+        b.onclick = function() { insertImage(d.getElementById('qr').src); };
         b.appendChild(d.createTextNode("Insert to Photopea"));
         div3.setAttribute("style","position: relative;margin:0 -144px;");
         div3.appendChild(b);
