@@ -49,7 +49,7 @@
         if (data == "https://www.photopea.com" && ecc == "L" && margin == "1")
             img.src = "photopea.svg";
         else
-            img.src = "http://api.qrserver.com/v1/create-qr-code/?data="+encodeURIComponent(data)+"&ecc="+ecc+"&qzone="+margin+"&format=svg";
+            img.src = "https://api.qrserver.com/v1/create-qr-code/?data="+encodeURIComponent(data)+"&ecc="+ecc+"&qzone="+margin+"&format=svg";
         div2.appendChild(img);
         div.appendChild(div2);
         e.appendChild(div);
