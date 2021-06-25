@@ -7,7 +7,6 @@
             * { border-style: solid; border-width: 0; }
 			body {  background-color:#474747; overflow: hidden; margin: 3px 8px 0 8px; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45); }
             body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
-            svg { filter: invert( 0.78 ) drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.45)); }
 			label { line-height:21px; display: inline-block; margin-top: 2px; }
             input { background-color: #252525; border-radius: 3px; padding: 3px; box-sizing: border-box; width: 80px; margin: 1px 0 0 0; line-height: 17.5px; }
             select { background-color: #606060; padding: 2px 15px 3px 5px; width: 80px; margin: 0 0 2px 2px; overflow: hidden;
@@ -15,12 +14,12 @@
                      background-position: calc(100% - 9px) calc(10px), calc(100% - 4px) calc(10px); background-size: 5px 5px, 5px 5px;
                      background-repeat: no-repeat; -webkit-appearance: none; line-height: 1.5em;
             }
-            select, .insertbutton { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
-			div.ew {  background-color: #ffffff; display: inline-block; position: relative; width: 100%; height: 100%; }
-            div.ew > div { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
-            div.ew img { width: 100%; height: 100%; }
-		    select:hover, .insertbutton:hover { background-color: #6a6a6a; }
-            .insertbutton { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 20.5px; height: 20.5px; width: 140px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; margin: 10px auto; position: absolute; left: 0; right: 0; }
+            select, a { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
+			.ew {  background-color: #ffffff; display: inline-block; position: relative; width: 100%; height: 100%; }
+            .ew > div { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
+            .ew img { width: 100%; height: 100%; }
+		    select:hover, a:hover { background-color: #6a6a6a; }
+            a { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 20.5px; height: 20.5px; width: 140px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; margin: 10px auto; position: absolute; left: 0; right: 0; }
             #margin { width: 50px; }
             #bar { height: 117px; white-space: nowrap; }
             #data { margin-bottom: 10px; }
@@ -34,32 +33,35 @@
       else window.parent.postMessage("app.open(\""+url+"\",null,true);", "*");
     }
     function update() {
-      var data = document.getElementById("data").value;
-      var ecc = document.getElementById("ecc").options[document.getElementById("ecc").selectedIndex].value;
-      var margin = document.getElementById("margin").options[document.getElementById("margin").selectedIndex].value;
-      var e = document.getElementById("cont").firstChild;      
+      var d = document;
+      var data = d.getElementById("data").value;
+      var ecc = d.getElementById("ecc").options[d.getElementById("ecc").selectedIndex].value;
+      var margin = d.getElementById("margin").options[d.getElementById("margin").selectedIndex].value;
+      var e = d.getElementById("cont").firstChild;      
       while (e.firstChild) e.removeChild(e.firstChild);      
       if (data.length > 0) {
-        var div = document.createElement('div');
-        var div2 = document.createElement('div');
-        var img = document.createElement('img');
-        div.className = "ew";
-        div.title = data;
+        var div1 = d.createElement('div'), div2 = d.createElement('div'), div3 = d.createElement('div');
+        var img = d.createElement('img');
         img.id = "qr";
-        if (data == "https://www.photopea.com" && ecc == "L" && margin == "1")
-            img.src = "photopea.svg";
-        else
-            img.src = "https://api.qrserver.com/v1/create-qr-code/?data="+encodeURIComponent(data)+"&ecc="+ecc+"&qzone="+margin+"&format=svg";
+        img.src = (data == "https://www.photopea.com" && ecc == "L" && margin == "1") ? "photopea.svg" : "https://api.qrserver.com/v1/create-qr-code/?data="+encodeURIComponent(data)+"&ecc="+ecc+"&qzone="+margin+"&format=svg";
         div2.appendChild(img);
-        div.appendChild(div2);
-        e.appendChild(div);
-e.innerHTML+="<div style=\"position: relative;margin:0 -144px;\"><a href=\"#\" class=\"insertbutton\" onclick=\"insertImage(document.getElementById('qr').src)\">Insert to Photopea</a></div>";
+        div1.className = "ew";
+        div1.title = data;
+        div1.appendChild(div2);
+        e.appendChild(div1);
+        var b = d.createElement('a');
+        b.href = "#";
+        b.onclick = function() { insertImage(d.getElementById('qr').src); };
+        b.appendChild(d.createTextNode("Insert to Photopea"));
+        div3.setAttribute("style","position: relative;margin:0 -144px;");
+        div3.appendChild(b);
+        e.appendChild(div3);
       }
       var setsize = function() {
-        document.getElementById("cont").setAttribute("style","height:"+(window.innerHeight-144)+"px;");
-        document.getElementById("data").setAttribute("style","width:"+Math.max(185,window.innerWidth-16)+"px;");
+        d.getElementById("cont").setAttribute("style","height:"+(window.innerHeight-144)+"px;");
+        d.getElementById("data").setAttribute("style","width:"+Math.max(185,window.innerWidth-16)+"px;");
         var s = Math.max(64, Math.min(window.innerHeight-170, window.innerWidth-16));
-        document.getElementById("cont").firstChild.setAttribute("style","width:"+s+"px;height:"+s+"px;");
+        d.getElementById("cont").firstChild.setAttribute("style","width:"+s+"px;height:"+s+"px;");
       }
       setsize();
       window.onresize = setsize;
