@@ -25,6 +25,7 @@
         var ds = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2) + ":" + ("0" + d.getSeconds()).slice(-2);
         if (document.getElementById("output").value.length > 0) document.getElementById("output").value += "\n";
         document.getElementById("output").value += ds + " - " + e.data;
+        document.getElementById("output").scrollTop = document.getElementById("output").scrollHeight;
     }
     function load()
     {
