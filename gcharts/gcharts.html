@@ -282,6 +282,7 @@
         div1.appendChild(div2);
         e.appendChild(div1);
         var b = d.createElement('a');
+        b.id = "ib";
         b.href = "#";
         b.appendChild(d.createTextNode("Insert to Photopea"));
         div3.setAttribute("style", "position: relative;margin:0 -144px;");
@@ -326,7 +327,7 @@
         if (svg != null) {
             svg.setAttribute("viewBox", "0 0 "+svg.getAttribute("width")+" "+svg.getAttribute("height"));
             svg.parentNode.parentNode.style = "";
-            b.onclick = function() { insertImage(svg); };
+            document.getElementById("ib").onclick = function() { insertImage(svg); };
         }
       }
       cont.style.display = "block";
@@ -354,7 +355,8 @@
                     chtype:document.getElementById("chtype").selectedIndex,
                     title:document.getElementById("title").value,
                     width:document.getElementById("width").value,
-                    height:document.getElementById("height").value }
+                    height:document.getElementById("height").value,
+                    fl:document.getElementById("fl").checked }
         var optionChildren = document.getElementById('winbody').children;
         for (var i = 0; i < optionChildren.length; i++) {
             var e = optionChildren[i];
@@ -374,6 +376,7 @@
             document.getElementById("title").value = s.title;
             document.getElementById("width").value = s.width;
             document.getElementById("height").value = s.height;
+            document.getElementById("fl").checked = s.fl;
             var optionChildren = document.getElementById('winbody').children;
             for (var i = 0; i < optionChildren.length; i++) {
                 var e = optionChildren[i];
