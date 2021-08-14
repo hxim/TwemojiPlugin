@@ -275,7 +275,8 @@
       d.getElementById("olink").href = 'https://developers.google.com/chart/interactive/docs/gallery/'+chtype.toLowerCase()+'#configuration-options';
       var e = d.getElementById("c2");
       while (e.firstChild) e.removeChild(e.firstChild);
-      if (data.length > 0) {
+
+      {
         var div1 = d.createElement('div'), div2 = d.createElement('div'), div3 = d.createElement('div');
         div1.className = "ew";
         div1.appendChild(div2);
@@ -327,7 +328,6 @@
             svg.parentNode.parentNode.style = "";
             b.onclick = function() { insertImage(svg); };
         }
-
       }
       cont.style.display = "block";
       setsize();
