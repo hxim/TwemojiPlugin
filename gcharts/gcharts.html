@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+		<style>
+            * { border-style: solid; border-width: 0; }
+			body {  background-color:#474747; overflow: hidden; margin: 3px 8px 0 8px; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45); }
+            body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
+			label { line-height:21px; display: inline-block; margin-top: 2px; user-select: none; width: 44px; }
+            input { background-color: #252525; border-radius: 3px; padding: 3px; box-sizing: border-box; margin: 1px; line-height: 17.5px; height: 23px; }
+            input[type="checkbox"] { margin: 1px 5px 1px 1px; vertical-align: middle; background-color: white; opacity: 0.8; }
+            input[type="number"] { width: 68px; }
+            input[type="color"] { margin: 1px; background-color: #252525; width: 44px; padding: revert; }
+            select { background-color: #606060; padding: 2px 15px 3px 5px; width: 150px; margin: 1px; overflow: hidden;
+                     background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
+                     background-position: calc(100% - 9px) calc(10px), calc(100% - 4px) calc(10px); background-size: 5px 5px, 5px 5px;
+                     background-repeat: no-repeat; -webkit-appearance: none; line-height: 1.5em;
+            }
+            select, #cont a { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
+            button { padding: 2px 5px 3px 5px; border-radius: 3px; background-color: #606060; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px;
+                     border-bottom-color: rgba(0, 0, 0, 0.6); overflow: hidden; text-align: center; white-space: nowrap; user-select: none; cursor: default; line-height: 17.5px; height: 26px;
+                     margin: 1px; }
+			.ew {  background-color: #474747; position: relative; width: 100%; height: 100%; }
+            .ew > div { width: 100% !important; height: 100% !important; }
+            .ew svg { width: 100%; height: 100%; }
+		    select:hover, a:hover, button:hover { background-color: #6a6a6a; }
+            #cont a { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 20.5px; height: 20.5px; width: 140px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; margin: 5px auto; position: absolute; left: 0; right: 0; }
+            #margin { width: 50px; }
+            #topbar { height: 103px; white-space: nowrap; position: relative; }
+			#cont { position: relative; font-size: 16px; }
+            #cont > div { position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: 0 auto; }
+            #data { margin: 0; background-color: #252525; border-radius: 3px; width: 100%; box-sizing: border-box; padding: 4px; resize: none; }
+            #splitter { cursor: ns-resize; margin: 0; padding: 0; height: 6px; }
+
+        #win { position: absolute; z-index: 10; background-color: #474747; top: 32px; left: 0px; right: 0px; bottom: 0px; box-shadow: 0px 8px 40px rgba(0,0,0,0.2); display: none; max-width: 400px;}
+        #win > .head { font-size: 1.3em; color: #ffffff; background: linear-gradient(to bottom, #595959 0%,#626262 3%,#575757 7%,#3c3c3c 90%,#3a3a3a 97%,#2e2e2e 100%); background-size: auto 100%; height: 33px; user-select: none; }
+        #win > .head .label { display: inline-block; padding: 0.3em 0.5em; text-shadow: 0 -1px 0 rgba(0,0,0,0.45); font-weight: bold; }
+        #win > .head .label { display: inline-block; padding: 0.3em 0.5em; text-shadow: 0 -1px 0 rgba(0,0,0,0.45); font-weight: bold; }
+        #win > .head .cross { width: 0.8em; height: 0.8em; display: inline-block; background-size: cover; font-size: 1.3em; margin: 0.3em; position: absolute; right: 0; cursor: pointer; filter: invert(1); background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2IiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiI+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTIuMDkgMzguNUw5MSAxMjcuNUwxLjkxIDIxNi41TDM5LjUgMjUyLjg2TDEyOCAxNjQuNUwyMTcuNSAyNTQuMDFMMjU0LjA2IDIxNy41TDE2NS4xNiAxMjcuNUwyNTUuMDEgMzcuNUwyMTguNDkgMUwxMjcuODQgOTAuNUwzOC40OSAwLjg1TDIuMDkgMzguNVoiIC8+PC9zdmc+); }
+        #win > .body { padding: 6px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin; height: calc(100% - 78px); }
+        #winbody label { width: calc(50% - 2px); }
+        #winbody select, #winbody input[type="number"], #winbody input[type="text"] { width: calc(50% - 2px); }
+        #winbody  input.colortext[type="text"] { width: calc(50% - 48px); }
+        #winbody a { color: #d5d5d5; }
+        #winbody a:hover { background-color: #333333; }
+        #winbody label.pad { padding-left: 18px; width: calc(50% - 20px); }
+        #winbody label.arr { cursor: pointer;  width: calc(100% - 20px); }
+        #winbody label.arr.open   { background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
+                                    background-position: calc(1px) calc(8px), calc(6px) calc(8px); background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+        #winbody label.arr.closed { background-image: linear-gradient(225deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
+                                    background-position: calc(4px) calc(6px), calc(4px) calc(11px); background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
+        #winbody hr { background-color: #252525; height: 1px; }
+        #winbody .hidden { display: none; }
+    </style>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(function() { loadstate(); update(); });
+      function drawChart(elem, chtype, data, hasLabels, options) {
+        var chart = new google.visualization[chtype](elem);
+        chart.draw(google.visualization.arrayToDataTable(data, !hasLabels), options);
+      }
+
+    function drawError(elem, message) {
+        var err1 = document.createElement("div"); err1.id = 'google-visualization-errors-all-1'; err1.style = 'display: block; padding-top: 2px;';
+        var err2 = document.createElement("div"); err2.id = 'google-visualization-errors-all-0'; err2.style = 'font: 0.8em arial, sans-serif; margin-bottom: 5px;';
+        var err3 = document.createElement("span"); err3.style = 'background-color: rgb(192, 0, 0); color: white; padding: 2px;';
+        var err4 = document.createElement("span"); err4.style = 'font-size: 1.1em; font-weight: bold; cursor: pointer; padding-left: 10px; color: black; text-align: right; vertical-align: top;'
+        err4.onclick = function() { err1.removeChild(err2); }
+        err4.appendChild(document.createTextNode("×"));
+        err3.appendChild(document.createTextNode(message));
+        err3.appendChild(err4);
+        err2.appendChild(err3);
+        err1.appendChild(err2);
+        elem.insertBefore(err1, elem.firstChild);
+    }
+ 
+    function insertImage(svgElement) {
+        var dataURI =  'data:image/svg+xml,' + encodeURIComponent(svgElement.outerHTML.trim());
+        if (window.parent == window.self) {
+            if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) { alert('not supported in IE.'); return; }
+            var element = document.createElement('a');
+            element.setAttribute('href', dataURI);
+            element.setAttribute('download', 'chart.svg');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        } else {
+            window.parent.postMessage('app.open("' + dataURI + '", null, false)', '*');
+        }
+    }
+    function setsize() {
+        var ratio = document.getElementById("cont").firstChild.getBoundingClientRect().height/document.getElementById("data").getBoundingClientRect().height;
+        var width = Math.max(268, window.innerWidth - 16);
+        var height = Math.max(128, window.innerHeight - 148), hdata = 1 + ratio == 0 ? height / 2 : height / (1 + ratio);
+        var min = 40;
+        if (hdata < min) hdata = min; else if (height-hdata < min) hdata = height - min;
+        document.getElementById("title").setAttribute("style","width:"+(width-44)+"px;");
+        document.getElementById("data").setAttribute("style","width:"+(width)+"px;height:"+(hdata)+"px;");
+        document.getElementById("cont").setAttribute("style","height:"+(height+26)+"px;");
+        document.getElementById("c2").setAttribute("style","width:"+(width)+"px;height:"+(height-hdata)+"px;");
+        var optionssize = function() { if (document.getElementById("win").display != "none" && document.getElementById("win").style.height != "") document.getElementById("win").style.height = (document.body.getBoundingClientRect().height-document.getElementById("cont").getBoundingClientRect().height-35) + "px"; }
+        optionssize();
+        document.getElementById("splitter").onmousedown = function() { splitterMouseDown(event,"data","c2", min, optionssize); }
+
+    }
+    function splitterMouseDown(e, id1, id2, min, func) {
+        var elem = [document.getElementById(id1), document.getElementById(id2)];
+        var md = e, h = [elem[0].offsetHeight, elem[1].offsetHeight];
+        document.onmousemove = function(e) {
+            var d = Math.min(Math.max(e.clientY - md.clientY, -h[0] + min), h[1] - min);
+            elem[0].style.height = (h[0] + d) + "px";
+            elem[1].style.height = (h[1] - d) + "px";
+            func();
+            e.preventDefault();
+        };
+        document.onmouseup = function() { document.onmousemove = document.onmouseup = null; }
+    }
+    function generateOptions() {
+        const optionsDef = "s;aggregationTarget;1705;auto;category,series,auto,none|b;annotations.alwaysOutside;18|o;annotations.boxStyle;691|o;annotations.datum;691|o;annotations.domain;691|b;annotations.highContrast;691;true|o;annotations.stem;691|s;annotations.style;691;point;line,point|o;annotations.textStyle;691|n;areaOpacity;1057;0.3;0.01|s;axisTitlesPosition;1791;out;in,out,none|c;backgroundColor.fill;2047;white|c;backgroundColor.stroke;2047;#666|n;backgroundColor.strokeWidth;2047;0|s;bar.groupWidth;122;61.8%|s;bars;18;vertical;horizontal,vertical|n;bubble.opacity;4;0.8;0.1|c;bubble.stroke;4;#ccc|o;bubble.textStyle;4|s;candlestick.fallingColor.fill;40;auto|s;candlestick.fallingColor.stroke;40;auto|n;candlestick.fallingColor.strokeWidth;40;2|b;candlestick.hollowIsRising;40|s;candlestick.risingColor.fill;40;auto|s;candlestick.risingColor.stroke;40;auto|n;candlestick.risingColor.strokeWidth;40;2|c;chartArea.backgroundColor;2047;white|s;chartArea.height;2047|s;chartArea.left;2047|s;chartArea.top;2047|s;chartArea.width;2047|o;colorAxis.colors;4|s;colorAxis.legend.numberFormat;4|o;colorAxis.legend.position;4|o;colorAxis.legend.textStyle;4|n;colorAxis.maxValue;4|n;colorAxis.minValue;4|o;colorAxis.values;4|o;colors;2047|b;connectSteps;1024;true|c;crosshair.color;673|o;crosshair.focused;673|n;crosshair.opacity;673;1.0;0.01|s;crosshair.orientation;673;both;vertical,horizontal,both|o;crosshair.selected;673|s;crosshair.trigger;673;both;focus,selection,both|s;curveType;672;none;none,function|n;dataOpacity;755;1.0;0.01|b;enableInteractivity;2047;true|s;focusTarget;1275;datum;datum,category|s;fontName;2047;Arial|n;fontSize;2047|o;hAxes;2|b;hAxis.allowContainerBoundaryTextCutoff;1273|n;hAxis.baseline;703|c;hAxis.baselineColor;703;black|s;hAxis.direction;1727;1|s;hAxis.format;703|c;hAxis.gridlines.color;767;#CCC|n;hAxis.gridlines.count;767|n;hAxis.gridlines.interval;249|n;hAxis.gridlines.minSpacing;249|n;hAxis.gridlines.multiple;249;1|o;hAxis.gridlines.units;767|b;hAxis.logScale;703|n;hAxis.maxAlternation;1273;2|n;hAxis.maxTextLines;1273|n;hAxis.maxValue;703|n;hAxis.minTextSpacing;1273|n;hAxis.minValue;703|c;hAxis.minorGridlines.color;767|n;hAxis.minorGridlines.count;767|n;hAxis.minorGridlines.interval;249|n;hAxis.minorGridlines.minSpacing;249|n;hAxis.minorGridlines.multiple;249;1|o;hAxis.minorGridlines.units;767|s;hAxis.scaleType;703|n;hAxis.showTextEvery;1273|b;hAxis.slantedText;1273|n;hAxis.slantedTextAngle;1273;30|s;hAxis.textPosition;1791;out;out,in,none|o;hAxis.textStyle;1791|o;hAxis.ticks;1727|s;hAxis.title;1791|o;hAxis.titleTextStyle;1791|n;hAxis.viewWindow.max;1791|n;hAxis.viewWindow.min;1791|s;hAxis.viewWindowMode;767;;,pretty,maximized,explicit|n;histogram.bucketSize;64|b;histogram.hideBucketItems;64|n;histogram.lastBucketPercentile;64;0|n;histogram.maxValue;64|n;histogram.minValue;64|s;histogram.numBucketsRule;64;sqrt;sqrt,sturges,rice|b;interpolateNulls;225|b;is3D;256|b;isStacked;1139|s;legend.alignment;2047;;,start,center,end|n;legend.maxLines;2029;1|n;legend.pageIndex;767;0|s;legend.position;2047;right;bottom,left,in,none,right,top,labeled|o;legend.textStyle;2047|o;lineDashStyle;1185|n;lineWidth;673|s;orientation;763;;,horizontal,vertical|n;pieHole;256;0;0.01|c;pieResidueSliceColor;256;#ccc|s;pieResidueSliceLabel;256;Other|c;pieSliceBorderColor;256;white|s;pieSliceText;256;percentage;percentage,value,label,none|o;pieSliceTextStyle;256|n;pieStartAngle;256;0|s;pointShape;673;circle;circle,triangle,square,diamond,star,polygon|n;pointSize;673|b;pointsVisible;673;true|b;reverseCategories;1531|s;selectionMode;1709;single;single,multiple|o;series;1791|s;seriesType;32;line;line,area,bars,candlesticks,steppedArea|n;sizeAxis.maxSize;4;30|n;sizeAxis.maxValue;4|n;sizeAxis.minSize;4;5|n;sizeAxis.minValue;4|n;sliceVisibilityThreshold;256;0.0014;0.0001|o;slices;256|b;sortBubblesBySize;4;true|s;theme;1791;;,maximized|s;titlePosition;1791;out;in,out,none|o;titleTextStyle;2047|b;tooltip.ignoreBounds;1979|b;tooltip.isHtml;2047|b;tooltip.showColorCode;2043|s;tooltip.text;256;both;both,value,percentage|o;tooltip.textStyle;2047|s;tooltip.trigger;2047;focus;focus,none,selection|c;trendlines.n.color;658|n;trendlines.n.degree;658;3|s;trendlines.n.labelInLegend;658|n;trendlines.n.lineWidth;658;2|n;trendlines.n.opacity;658;1.0;0.01|n;trendlines.n.pointSize;658;1|b;trendlines.n.pointsVisible;658;true|b;trendlines.n.showR2;658|s;trendlines.n.type;658;linear;linear,exponential,polynomial|b;trendlines.n.visibleInLegend;658|o;vAxes;1273|n;vAxis.baseline;1791|c;vAxis.baselineColor;1791;black|s;vAxis.direction;1791;1|s;vAxis.format;1791|c;vAxis.gridlines.color;1791;#CCC|n;vAxis.gridlines.count;1791|n;vAxis.gridlines.interval;249|n;vAxis.gridlines.minSpacing;249|n;vAxis.gridlines.multiple;249;1|o;vAxis.gridlines.units;767|b;vAxis.logScale;767|n;vAxis.maxValue;1791|n;vAxis.minValue;1791|c;vAxis.minorGridlines.color;1791|n;vAxis.minorGridlines.count;1791|n;vAxis.minorGridlines.interval;1|n;vAxis.minorGridlines.minSpacing;249|n;vAxis.minorGridlines.multiple;249;1|o;vAxis.minorGridlines.units;248|s;vAxis.scaleType;1791|s;vAxis.textPosition;1791;out;out,in,none|o;vAxis.textStyle;1791|o;vAxis.ticks;1791|s;vAxis.title;1791|o;vAxis.titleTextStyle;1791|n;vAxis.viewWindow.max;1791|n;vAxis.viewWindow.min;1791|s;vAxis.viewWindowMode;1791;;,pretty,maximized,explicit";
+        var optionsDef2 = optionsDef.split('|'), cgroup = '', cgrouppos = -1, optionsDef3 = [];
+        function compGroupBits(start, end) {
+            var b = 0;
+            for (var j = start; j <= end; j++) b |= parseInt(optionsDef3[j].split(';')[2]);
+            return b;
+        }
+        for (var i = 0; i < optionsDef2.length; i++) {
+            var a1 = optionsDef2[i].split(';')[1];
+            if ((a1.indexOf('.') < 0 || a1.slice(0, a1.indexOf('.')) != cgroup) && cgrouppos != -1) {
+                optionsDef3[cgrouppos] += ";" + compGroupBits(cgrouppos+1, optionsDef3.length-1);
+                cgrouppos = -1;
+            }
+            if (a1.indexOf('.') >= 0 && a1.slice(0, a1.indexOf('.')) != cgroup) {
+                cgroup = a1.slice(0, a1.indexOf('.'));
+                cgrouppos = optionsDef3.length;
+                optionsDef3.push("g;"+cgroup);
+            }
+            optionsDef3.push(optionsDef2[i]);
+        }
+        if (cgrouppos != -1) optionsDef3[cgrouppos] += ";" + compGroupBits(cgrouppos+1, optionsDef3.length-1);
+        var winbody = document.getElementById('winbody'), group = '', gelem = null;
+        while (winbody.firstChild) winbody.removeChild(winbody.firstChild);
+        for (var i = 0; i < optionsDef3.length; i++) {
+            var a = optionsDef3[i].split(';'), aid = a[1].replaceAll('.','_');
+            var bits = a[2];
+            var labeltext = a[1].replaceAll('.',' - ') + (a[0] == 'g' ? '' : ':'), labeltext2 = '';
+            for (var j = 0; j < labeltext.length; j++) {
+                if (j == 0 || labeltext[j - 1] == ' ') labeltext[j] = labeltext[j].toUpperCase();
+                if (j > 0 && (labeltext[j].toLowerCase() != labeltext[j] || (labeltext[j] >= '0' && labeltext[j] <= '9')) && labeltext[j - 1] != ' ' && !(labeltext[j-1] >= '0' && labeltext[j-1] <= '9')) labeltext2 += ' ';
+                labeltext2 += (j == 0 || labeltext2[labeltext2.length - 1] == ' ') ? labeltext[j].toUpperCase() : labeltext[j];
+            }
+            var labeltext3 = labeltext2;
+            var elem1 = document.createElement('label');
+            elem1.id = "_" + aid;
+            elem1.bits = bits;
+            elem1.htmlFor = aid;
+            elem1.className = "hidden";
+            if (group != aid && gelem != null && aid.indexOf(group+'_') == 0) { elem1.className = 'hidden pad'; labeltext2 = labeltext2.slice(labeltext2.indexOf(' - ')+3); elem1.style.display = 'none'; gelem.gm.push(elem1.id); }
+            elem1.appendChild(document.createTextNode(labeltext2));
+            if (a[0] == 'g') { elem1.className = 'hidden arr pad closed'; group = aid; elem1.onclick = function() {
+                var state = this.className.indexOf('open') < 0;
+                this.className = state ? this.className.replace('closed','open') : this.className.replace('open','closed');
+                for (var j = 0; j < this.gm.length; j++) document.getElementById(this.gm[j]).style.display = state ? '' : 'none';
+                
+            }; gelem = elem1; gelem.gm = []; }
+            winbody.appendChild(elem1);
+
+            var defaultvalue = a.length >= 4 ? (a[0] == 's' || a[0] == 'c' ? a[3] : JSON.parse("["+a[3]+"]")[0]) : null;
+            var elem2;
+            if (a[0] == 'g') {
+                elem2 = document.createElement('div');
+            } else  if (a[0] == 's' && a.length == 5) {
+                elem2 = document.createElement('select');
+                elem2.onchange = update;
+                var items = a[4].split(',');
+                for (var j = 0; j < items.length; j++) {
+                    var elem3 = document.createElement('option');
+                    var t = items[j];
+                    if (t.length == 0) t = "(default)";
+                    elem3.appendChild(document.createTextNode(t[0].toUpperCase() + t.slice(1)));
+                    elem3.value = items[j];
+                    elem3.selected = items[j] == defaultvalue;
+                    elem2.appendChild(elem3);
+                }
+            } else {
+                elem2 = document.createElement('input');
+                elem2.setAttribute(a[0] == 'b' ? 'onclick' : 'onchange', 'update();');
+                elem2.type = a[0] == 'b' ? 'checkbox' : a[0] == 'n' ? 'number' : 'text';
+                if (a[0] == 'b') elem2.checked = defaultvalue == true; else elem2.value = defaultvalue;
+                if (a[0] == 'n') elem2.step = (a[4] != null ? a[4] : 1);
+                if (a[0] == 'o') elem2.obj = true;
+            }
+            elem2.id = aid;
+            elem2.bits = bits;
+            elem2.className = "hidden";
+            if (a[0] == 'c') elem2.className += ' colortext';
+            if (group != aid && gelem != null && aid.indexOf(group+'_') == 0) {
+                if (elem1.style.display == 'none') elem2.style.display = 'none';
+                gelem.gm.push(elem2.id);
+            }
+            elem2.dname = labeltext3;
+            winbody.appendChild(elem2);
+            if (a[0] == 'c') {
+                var elem4 = document.createElement('input');
+                elem4.oninput = function(e) { this.previousSibling.value = e.target.value; update(); };
+                elem4.type = 'color';
+                elem4.id = aid+"_COLOR";
+                elem4.bits = bits;
+                elem4.className = "hidden";
+                if (group != aid && gelem != null && aid.indexOf(group+'_') == 0) {
+                    if (elem1.style.display == 'none') elem4.style.display = 'none';
+                    gelem.gm.push(elem4.id);
+                }
+                winbody.appendChild(elem4);
+                elem4.convertColor = function() { var ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = this.previousSibling.value; this.value = ctx.fillStyle; }
+                elem2.onchange = function() { this.nextSibling.convertColor(); update(); };
+                elem4.convertColor();
+            }
+        }
+        winbody.appendChild(document.createElement('hr'));
+        winbody.appendChild(document.createTextNode('Read more about configuration options for this chart type in '));
+        var link = document.createElement('a');
+        link.id = 'olink';
+        link.target = '_blank';
+        link.appendChild(document.createTextNode('Google Charts Guide'));
+        winbody.appendChild(link);
+        winbody.appendChild(document.createTextNode('. Detailed description, default values and required format for all options are available there. Complex objects sholud be entered in JSON format - with quotes for attribute name (i.e. {"color": "red", "bold": true}). To reset all options to original values click here: '));
+        var reset = document.createElement('a');
+        reset.href="#";
+        reset.onclick = function() { if (confirm('This action cannot be undone. Are you sure you want to reset all options?')) { generateOptions(); setupCtrls(document.getElementById('winbody')); optionFieldsFor = null; update(); } };
+        reset.appendChild(document.createTextNode('RESET ALL'));
+        winbody.appendChild(reset);
+    }
+    function setupCtrls(parent) {
+       var labels = parent.getElementsByTagName('label');
+        for (var i = 0; i < labels.length; i++) if (labels[i].htmlFor != null) document.getElementById(labels[i].htmlFor).label = labels[i];
+        var inputs = parent.querySelectorAll('input[type="number"]');
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].label.style.cursor = "col-resize";
+            inputs[i].label.onmousedown = function(e) {
+                var md = e, input = document.getElementById(this.htmlFor), old = parseFloat(input.value) || 0;
+                document.onmousemove = function(e) { input.value = old + (e.clientX - md.clientX) * (input.step); input.onchange(e); e.preventDefault(); }
+                document.onmouseup = function() { document.onmousemove = document.onmouseup = null; }
+            }
+        }
+    }
+
+    function setup() {
+        generateOptions();
+        setupCtrls(document);
+        setsize();
+    }
+    var optionFieldsFor = null;
+    function updateOptionFields() {
+        var chtype = document.getElementById("chtype").options[document.getElementById("chtype").selectedIndex].value;
+        if (optionFieldsFor == chtype) return;
+        var index = document.getElementById("chtype").selectedIndex;
+        var optionChildren = document.getElementById('winbody').children;
+        for (var i = 0; i < optionChildren.length; i++) {
+            var e = optionChildren[i];
+            var visible = (e.bits & (1 << index)) != 0;
+            if (visible && e.className.indexOf("hidden") >= 0) e.className = e.className.replace("hidden", "visible");
+            if (!visible && e.className.indexOf("hidden") < 0) e.className = e.className.replace("visible", "hidden");
+        }
+        optionFieldsFor = chtype;
+    }
+
+    function update() {
+      var d = document;
+      var data = d.getElementById("data").value;
+      var chtype = d.getElementById("chtype").options[d.getElementById("chtype").selectedIndex].value;
+      var fl = d.getElementById("fl").checked;
+      d.getElementById("olink").href = 'https://developers.google.com/chart/interactive/docs/gallery/'+chtype.toLowerCase()+'#configuration-options';
+      var e = d.getElementById("c2");
+      while (e.firstChild) e.removeChild(e.firstChild);
+      if (data.length > 0) {
+        var div1 = d.createElement('div'), div2 = d.createElement('div'), div3 = d.createElement('div');
+        div1.className = "ew";
+        div1.appendChild(div2);
+        e.appendChild(div1);
+        var b = d.createElement('a');
+        b.href = "#";
+        b.appendChild(d.createTextNode("Insert to Photopea"));
+        div3.setAttribute("style", "position: relative;margin:0 -144px;");
+        div3.appendChild(b);
+        e.appendChild(div3);
+
+        updateOptionFields();
+        var optionsObj = { };
+        var title = d.getElementById("title").value, width = d.getElementById("width").value, height = d.getElementById("height").value;
+        if (title != null && title.length > 0) optionsObj["title"] = title;
+        if (width != null && width.length > 0) optionsObj["width"] = width;
+        if (height != null && height.length > 0) optionsObj["height"] = height;
+        var optionChildren = document.getElementById('winbody').children, optionError = null;
+        for (var i = 0; i < optionChildren.length; i++) {
+            var e = optionChildren[i];
+            if (e.tagName != "SELECT" &&  e.tagName != "INPUT") continue;
+            if (e.type != 'checkbox' && (e.value == null || e.value.length == 0)) continue;
+            if (e.className.indexOf("hidden") >= 0) continue;
+            var val = e.type == 'checkbox' ? e.checked : e.value;
+            if (e.obj) { try { val = JSON.parse(val); } catch (err) { if (optionError == null) optionError = 'Unable to parse option ' + e.dname + ' ' + err.message; continue; } }
+            var a = e.id.split("_");
+            var b = optionsObj;
+            for (var j = 0; j < a.length; j++) {
+                if (a.length == j + 1) b[a[j]] = val;
+                if (a.length >= j + 2 && b[a[j]] == null) b[a[j]] = {};
+                b = b[a[j]];
+            }
+        }
+        var dataObj = null;
+        try { dataObj = JSON.parse(data); }
+        catch (err) { drawError(div1, err.message); }
+        if (dataObj != null) {
+            if (optionError != null) {
+                drawError(div1, optionError);
+            } else {
+                try { drawChart(div1, chtype, dataObj, fl, optionsObj); }
+                catch (err) { drawError(div1, err.message); }
+            }
+        }
+        var svg = div1;
+        while (svg != null && svg.tagName != 'SVG' && svg.tagName != 'svg') svg = svg.firstChild;
+        if (svg != null) {
+            svg.setAttribute("viewBox", "0 0 "+svg.getAttribute("width")+" "+svg.getAttribute("height"));
+            svg.parentNode.parentNode.style = "";
+            b.onclick = function() { insertImage(svg); };
+        }
+
+      }
+      cont.style.display = "block";
+      setsize();
+      window.onresize = function() { setsize(); };
+      savestate();
+    }
+
+    function options() {
+        var visible = document.getElementById('win').style.display == 'block';
+        document.getElementById('winbody').scroll(0, 0);
+        document.getElementById('win').style.display = visible ? 'none' : 'block';
+    }
+    function optionsHeight() {
+        var win = document.getElementById('win');
+        var state = win.style.height == '';
+        win.style.height = state ? win.getBoundingClientRect().height + 'px' : '';
+        setsize();
+    }
+
+    var state = null;
+    function savestate() {
+      try { if (typeof window.sessionStorage !== 'undefined') {
+        var s = JSON.stringify({data:document.getElementById("data").value, chtype:document.getElementById("chtype").selectedIndex, title:document.getElementById("title").value }); 
+        if (state != s) { state = s; window.sessionStorage.setItem("googlecharts_state", state); }
+      } } catch {}
+    }
+    function loadstate() {
+      try { if (typeof window.sessionStorage !== 'undefined') {
+        if (state = window.sessionStorage.getItem("googlecharts_state")) { var s = JSON.parse(state); document.getElementById("data").value = s.data; document.getElementById("chtype").selectedIndex = s.chtype; document.getElementById("margin").title = s.title; }
+      } } catch {}
+    }
+    </script>
+  </head>
+  <body>
+    <div id="topbar">
+
+<label for="chtype">Type:</label><select id="chtype" onchange="update()">
+        <option value="AreaChart">Area Chart</option>
+        <option value="BarChart">Bar Chart</option>
+        <option value="BubbleChart">Bubble Chart</option>
+        <option value="CandlestickChart">Candlestick Chart</option>
+        <option value="ColumnChart">Column Chart</option>
+        <option value="ComboChart">Combo Chart</option>
+        <option value="Histogram">Histogram</option>
+        <option value="LineChart">Line Chart</option>
+        <option value="PieChart" selected>Pie Chart</option>
+        <option value="ScatterChart">Scatter Chart</option>
+        <option value="SteppedAreaChart">Stepped Area Chart</option>
+      </select> <button onclick="options();">Options...</button>
+<br/><label for="title">Title:</label><input type="text" id="title" value="What country are you from?" onchange="update()"></input>
+<br/><label for="width">Width:</label><input type="number" step="1" id="width" value="600" onchange="update()"></input>
+<label for="height" style="width:50px;padding-left:33px">Height:</label><input type="number" step="1" id="height" value="300" onchange="update()"></input>
+
+      <div style="position:absolute;bottom:0;"><label for="data">Data:</label></div>
+<div style="position:absolute;bottom:0;right:0;line-height: 23px;">
+<input class="" type="checkbox" id="fl" onclick="update()" checked><label for="fl" style="width:auto;">First row contains labels</label>
+      </div>
+</div>
+
+<textarea id="data" onchange="update()" spellcheck="false" style="height:114px;">
+[["Country","2021","2020","2019","2018"],
+["United States",21.94,17.70,17.32,20.26],
+["India",14.85,10.43,12.62,11.22],
+["United Kingdom",5.54,3.05,3.42,3.55],
+["Indonesia",4.48,5.27,3.36,1.91],
+["Brazil",4.09,7.55,5.22,3.50],
+["Philippines",3.02,3.90,3.21,3.56]]</textarea>
+<hr id="splitter"/>
+    <div id="cont"><div id="c2" style="height:150px"></div></div>
+
+    <div id="win">
+        <div class="head" ondblclick="optionsHeight();"><span class="label">Options</span><span class="cross" onclick="options();"></span></div>
+        <div class="body" id="winbody"></div>
+        <div style="margin:0 12px;"><button onclick="options();" style="width:100%">OK</button></div>
+    </div>
+
+    <script>setup();</script>
+
+  </body>
+</html>
+
