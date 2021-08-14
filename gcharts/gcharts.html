@@ -350,13 +350,37 @@
     var state = null;
     function savestate() {
       try { if (typeof window.sessionStorage !== 'undefined') {
-        var s = JSON.stringify({data:document.getElementById("data").value, chtype:document.getElementById("chtype").selectedIndex, title:document.getElementById("title").value }); 
+        var obj = { data:document.getElementById("data").value, 
+                    chtype:document.getElementById("chtype").selectedIndex,
+                    title:document.getElementById("title").value,
+                    width:document.getElementById("width").value,
+                    height:document.getElementById("height").value }
+        var optionChildren = document.getElementById('winbody').children;
+        for (var i = 0; i < optionChildren.length; i++) {
+            var e = optionChildren[i];
+            if (e.tagName != "SELECT" &&  e.tagName != "INPUT") continue;
+            obj[e.id] = e.type == 'checkbox' ? e.checked : e.value;;
+        }
+        var s = JSON.stringify(obj); 
         if (state != s) { state = s; window.sessionStorage.setItem("googlecharts_state", state); }
       } } catch {}
     }
     function loadstate() {
       try { if (typeof window.sessionStorage !== 'undefined') {
-        if (state = window.sessionStorage.getItem("googlecharts_state")) { var s = JSON.parse(state); document.getElementById("data").value = s.data; document.getElementById("chtype").selectedIndex = s.chtype; document.getElementById("margin").title = s.title; }
+        if (state = window.sessionStorage.getItem("googlecharts_state")) {
+            var s = JSON.parse(state);
+            document.getElementById("data").value = s.data;
+            document.getElementById("chtype").selectedIndex = s.chtype;
+            document.getElementById("title").value = s.title;
+            document.getElementById("width").value = s.width;
+            document.getElementById("height").value = s.height;
+            var optionChildren = document.getElementById('winbody').children;
+            for (var i = 0; i < optionChildren.length; i++) {
+                var e = optionChildren[i];
+                if (e.tagName != "SELECT" &&  e.tagName != "INPUT") continue;
+                if (e.type == 'checkbox') e.checked = s[e.id]; else e.value = s[e.id];
+            }
+        }
       } } catch {}
     }
     </script>
