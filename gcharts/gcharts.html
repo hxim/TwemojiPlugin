@@ -12,6 +12,7 @@
             input[type="checkbox"] { margin: 1px 5px 1px 1px; vertical-align: middle; background-color: white; opacity: 0.8; }
             input[type="number"] { width: 68px; }
             input[type="color"] { margin: 1px; background-color: #252525; width: 44px; padding: revert; }
+            button.objbutton { margin: 1px; width: 44px; height: 23px; }
             select { background-color: #606060; padding: 2px 15px 3px 5px; width: 150px; margin: 1px; overflow: hidden;
                      background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
                      background-position: calc(100% - 9px) calc(10px), calc(100% - 4px) calc(10px); background-size: 5px 5px, 5px 5px;
@@ -39,26 +40,29 @@
         #win > .head .label { display: inline-block; padding: 0.3em 0.5em; text-shadow: 0 -1px 0 rgba(0,0,0,0.45); font-weight: bold; }
         #win > .head .cross { width: 0.8em; height: 0.8em; display: inline-block; background-size: cover; font-size: 1.3em; margin: 0.3em; position: absolute; right: 0; cursor: pointer; filter: invert(1); background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgMjU2IiB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiI+PHBhdGggZmlsbD0iIzAwMDAwMCIgZD0iTTIuMDkgMzguNUw5MSAxMjcuNUwxLjkxIDIxNi41TDM5LjUgMjUyLjg2TDEyOCAxNjQuNUwyMTcuNSAyNTQuMDFMMjU0LjA2IDIxNy41TDE2NS4xNiAxMjcuNUwyNTUuMDEgMzcuNUwyMTguNDkgMUwxMjcuODQgOTAuNUwzOC40OSAwLjg1TDIuMDkgMzguNVoiIC8+PC9zdmc+); }
         #win > .body { padding: 6px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin; height: calc(100% - 78px); }
-        #winbody label { width: calc(50% - 2px); }
-        #winbody select, #winbody input[type="number"], #winbody input[type="text"] { width: calc(50% - 2px); }
-        #winbody  input.colortext[type="text"] { width: calc(50% - 48px); }
-        #winbody a { color: #d5d5d5; }
-        #winbody a:hover { background-color: #333333; }
-        #winbody label.pad { padding-left: 18px; width: calc(50% - 20px); }
-        #winbody label.arr { cursor: pointer;  width: calc(100% - 20px); }
-        #winbody label.arr.open   { background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
+        #win .body label { width: calc(50% - 2px); }
+        #win .body select, #win .body input[type="number"], #win .body input[type="text"] { width: calc(50% - 2px); }
+        #win .body  input.colortext[type="text"], #win .body  input.objtext[type="text"] { width: calc(50% - 48px); }
+        #win .body a { color: #d5d5d5; }
+        #win .body a:hover { background-color: #333333; }
+        #win .body label.pad { padding-left: 18px; width: calc(50% - 20px); }
+        #win .body label.arr { cursor: pointer;  width: calc(100% - 20px); }
+        #win .body label.arr.open   { background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
                                     background-position: calc(1px) calc(8px), calc(6px) calc(8px); background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
-        #winbody label.arr.closed { background-image: linear-gradient(225deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
+        #win .body label.arr.closed { background-image: linear-gradient(225deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
                                     background-position: calc(4px) calc(6px), calc(4px) calc(11px); background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
-        #winbody hr { background-color: #252525; height: 1px; }
-        #winbody .hidden { display: none; }
+        #win .body hr { background-color: #252525; height: 1px; }
+        #win .body .hidden { display: none; }
+        #editorbody button { min-width: 30px; }
+        #editorbody button[disabled], #editorbody button[disabled]:hover { background-color: #606060; color: #8e8e8e; pointer-events: none; }
     </style>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(function() { loadstate(); update(); });
-      function drawChart(elem, chtype, data, hasLabels, options) {
+      function drawChart(elem, chtype, data, hasLabels, options, readyHandler) {
         var chart = new google.visualization[chtype](elem);
+        google.visualization.events.addListener(chart, 'ready', readyHandler);
         chart.draw(google.visualization.arrayToDataTable(data, !hasLabels), options);
       }
 
@@ -75,7 +79,11 @@
         err1.appendChild(err2);
         elem.insertBefore(err1, elem.firstChild);
     }
- 
+    function clearElement(id) {
+        var element = document.getElementById(id);
+        while (element.firstChild) element.removeChild(element.firstChild);
+        return element;
+    }
     function insertImage(svgElement) {
         var dataURI =  'data:image/svg+xml,' + encodeURIComponent(svgElement.outerHTML.trim());
         if (window.parent == window.self) {
@@ -119,7 +127,7 @@
         document.onmouseup = function() { document.onmousemove = document.onmouseup = null; }
     }
     function generateOptions() {
-        const optionsDef = "s;aggregationTarget;1705;auto;category,series,auto,none|b;annotations.alwaysOutside;18|o;annotations.boxStyle;691|o;annotations.datum;691|o;annotations.domain;691|b;annotations.highContrast;691;true|o;annotations.stem;691|s;annotations.style;691;point;line,point|o;annotations.textStyle;691|n;areaOpacity;1057;0.3;0.01|s;axisTitlesPosition;1791;out;in,out,none|c;backgroundColor.fill;2047;white|c;backgroundColor.stroke;2047;#666|n;backgroundColor.strokeWidth;2047;0|s;bar.groupWidth;122;61.8%|s;bars;18;vertical;horizontal,vertical|n;bubble.opacity;4;0.8;0.1|c;bubble.stroke;4;#ccc|o;bubble.textStyle;4|s;candlestick.fallingColor.fill;40;auto|s;candlestick.fallingColor.stroke;40;auto|n;candlestick.fallingColor.strokeWidth;40;2|b;candlestick.hollowIsRising;40|s;candlestick.risingColor.fill;40;auto|s;candlestick.risingColor.stroke;40;auto|n;candlestick.risingColor.strokeWidth;40;2|c;chartArea.backgroundColor;2047;white|s;chartArea.height;2047|s;chartArea.left;2047|s;chartArea.top;2047|s;chartArea.width;2047|o;colorAxis.colors;4|s;colorAxis.legend.numberFormat;4|o;colorAxis.legend.position;4|o;colorAxis.legend.textStyle;4|n;colorAxis.maxValue;4|n;colorAxis.minValue;4|o;colorAxis.values;4|o;colors;2047|b;connectSteps;1024;true|c;crosshair.color;673|o;crosshair.focused;673|n;crosshair.opacity;673;1.0;0.01|s;crosshair.orientation;673;both;vertical,horizontal,both|o;crosshair.selected;673|s;crosshair.trigger;673;both;focus,selection,both|s;curveType;672;none;none,function|n;dataOpacity;755;1.0;0.01|b;enableInteractivity;2047;true|s;focusTarget;1275;datum;datum,category|s;fontName;2047;Arial|n;fontSize;2047|o;hAxes;2|b;hAxis.allowContainerBoundaryTextCutoff;1273|n;hAxis.baseline;703|c;hAxis.baselineColor;703;black|s;hAxis.direction;1727;1|s;hAxis.format;703|c;hAxis.gridlines.color;767;#CCC|n;hAxis.gridlines.count;767|n;hAxis.gridlines.interval;249|n;hAxis.gridlines.minSpacing;249|n;hAxis.gridlines.multiple;249;1|o;hAxis.gridlines.units;767|b;hAxis.logScale;703|n;hAxis.maxAlternation;1273;2|n;hAxis.maxTextLines;1273|n;hAxis.maxValue;703|n;hAxis.minTextSpacing;1273|n;hAxis.minValue;703|c;hAxis.minorGridlines.color;767|n;hAxis.minorGridlines.count;767|n;hAxis.minorGridlines.interval;249|n;hAxis.minorGridlines.minSpacing;249|n;hAxis.minorGridlines.multiple;249;1|o;hAxis.minorGridlines.units;767|s;hAxis.scaleType;703|n;hAxis.showTextEvery;1273|b;hAxis.slantedText;1273|n;hAxis.slantedTextAngle;1273;30|s;hAxis.textPosition;1791;out;out,in,none|o;hAxis.textStyle;1791|o;hAxis.ticks;1727|s;hAxis.title;1791|o;hAxis.titleTextStyle;1791|n;hAxis.viewWindow.max;1791|n;hAxis.viewWindow.min;1791|s;hAxis.viewWindowMode;767;;,pretty,maximized,explicit|n;histogram.bucketSize;64|b;histogram.hideBucketItems;64|n;histogram.lastBucketPercentile;64;0|n;histogram.maxValue;64|n;histogram.minValue;64|s;histogram.numBucketsRule;64;sqrt;sqrt,sturges,rice|b;interpolateNulls;225|b;is3D;256|b;isStacked;1139|s;legend.alignment;2047;;,start,center,end|n;legend.maxLines;2029;1|n;legend.pageIndex;767;0|s;legend.position;2047;right;bottom,left,in,none,right,top,labeled|o;legend.textStyle;2047|o;lineDashStyle;1185|n;lineWidth;673|s;orientation;763;;,horizontal,vertical|n;pieHole;256;0;0.01|c;pieResidueSliceColor;256;#ccc|s;pieResidueSliceLabel;256;Other|c;pieSliceBorderColor;256;white|s;pieSliceText;256;percentage;percentage,value,label,none|o;pieSliceTextStyle;256|n;pieStartAngle;256;0|s;pointShape;673;circle;circle,triangle,square,diamond,star,polygon|n;pointSize;673|b;pointsVisible;673;true|b;reverseCategories;1531|s;selectionMode;1709;single;single,multiple|o;series;1791|s;seriesType;32;line;line,area,bars,candlesticks,steppedArea|n;sizeAxis.maxSize;4;30|n;sizeAxis.maxValue;4|n;sizeAxis.minSize;4;5|n;sizeAxis.minValue;4|n;sliceVisibilityThreshold;256;0.0014;0.0001|o;slices;256|b;sortBubblesBySize;4;true|s;theme;1791;;,maximized|s;titlePosition;1791;out;in,out,none|o;titleTextStyle;2047|b;tooltip.ignoreBounds;1979|b;tooltip.isHtml;2047|b;tooltip.showColorCode;2043|s;tooltip.text;256;both;both,value,percentage|o;tooltip.textStyle;2047|s;tooltip.trigger;2047;focus;focus,none,selection|c;trendlines.n.color;658|n;trendlines.n.degree;658;3|s;trendlines.n.labelInLegend;658|n;trendlines.n.lineWidth;658;2|n;trendlines.n.opacity;658;1.0;0.01|n;trendlines.n.pointSize;658;1|b;trendlines.n.pointsVisible;658;true|b;trendlines.n.showR2;658|s;trendlines.n.type;658;linear;linear,exponential,polynomial|b;trendlines.n.visibleInLegend;658|o;vAxes;1273|n;vAxis.baseline;1791|c;vAxis.baselineColor;1791;black|s;vAxis.direction;1791;1|s;vAxis.format;1791|c;vAxis.gridlines.color;1791;#CCC|n;vAxis.gridlines.count;1791|n;vAxis.gridlines.interval;249|n;vAxis.gridlines.minSpacing;249|n;vAxis.gridlines.multiple;249;1|o;vAxis.gridlines.units;767|b;vAxis.logScale;767|n;vAxis.maxValue;1791|n;vAxis.minValue;1791|c;vAxis.minorGridlines.color;1791|n;vAxis.minorGridlines.count;1791|n;vAxis.minorGridlines.interval;1|n;vAxis.minorGridlines.minSpacing;249|n;vAxis.minorGridlines.multiple;249;1|o;vAxis.minorGridlines.units;248|s;vAxis.scaleType;1791|s;vAxis.textPosition;1791;out;out,in,none|o;vAxis.textStyle;1791|o;vAxis.ticks;1791|s;vAxis.title;1791|o;vAxis.titleTextStyle;1791|n;vAxis.viewWindow.max;1791|n;vAxis.viewWindow.min;1791|s;vAxis.viewWindowMode;1791;;,pretty,maximized,explicit";
+        const optionsDef = "s;aggregationTarget;1705;auto;category,series,auto,none|b;annotations.alwaysOutside;18|o;annotations.boxStyle;691;;cStroke,nStrokeWidth,nRx,nRy,cGradient.color1,cGradient.color2,sGradient.x1,sGradient.y1,sGradient.x2,sGradient.y2,0Gradient.useObjectBoundingBoxUnits|o;annotations.datum;691;;cStem.color,nStem.length,sStyle+line+point|o;annotations.domain;691;;cStem.color,nStem.length,sStyle+line+point|b;annotations.highContrast;691;true|o;annotations.stem;691;;cColor,nLength|s;annotations.style;691;point;line,point|o;annotations.textStyle;691;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|n;areaOpacity;1057;0.3;0.01|s;axisTitlesPosition;1791;out;in,out,none|c;backgroundColor.fill;2047;white|c;backgroundColor.stroke;2047;#666|n;backgroundColor.strokeWidth;2047;0|s;bar.groupWidth;122;61.8%|s;bars;18;vertical;horizontal,vertical|n;bubble.opacity;4;0.8;0.1|c;bubble.stroke;4;#ccc|o;bubble.textStyle;4;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|s;candlestick.fallingColor.fill;40;auto|s;candlestick.fallingColor.stroke;40;auto|n;candlestick.fallingColor.strokeWidth;40;2|b;candlestick.hollowIsRising;40|s;candlestick.risingColor.fill;40;auto|s;candlestick.risingColor.stroke;40;auto|n;candlestick.risingColor.strokeWidth;40;2|c;chartArea.backgroundColor;2047;white|s;chartArea.height;2047|s;chartArea.left;2047|s;chartArea.top;2047|s;chartArea.width;2047|a;colorAxis.colors;4;;cColor|s;colorAxis.legend.numberFormat;4|s;colorAxis.legend.position;4;top;top,bottom,in,none|o;colorAxis.legend.textStyle;4;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|n;colorAxis.maxValue;4|n;colorAxis.minValue;4|a;colorAxis.values;4;;nValue|a;colors;2047;;cColor|b;connectSteps;1024;true|c;crosshair.color;673|o;crosshair.focused;673;;cColor,dOpacity,sOrientation+vertical+horizontal+both|n;crosshair.opacity;673;1.0;0.01|s;crosshair.orientation;673;both;vertical,horizontal,both|o;crosshair.selected;673;;cColor,dOpacity,sOrientation+vertical+horizontal+both|s;crosshair.trigger;673;both;focus,selection,both|s;curveType;672;none;none,function|n;dataOpacity;755;1.0;0.01|b;enableInteractivity;2047;true|s;focusTarget;1275;datum;datum,category|s;fontName;2047;Liberation Sans|n;fontSize;2047|a;hAxes;2;;nBaseline,cBaselineColor,sDirection,sFormat,cGridlines.color,nGridlines.count,nGridlines.interval,nGridlines.minSpacing,nGridlines.multiple,oGridlines.units,0LogScale,nMaxValue,nMinValue,cMinorGridlines.color,nMinorGridlines.count,nMinorGridlines.interval,nMinorGridlines.minSpacing,nMinorGridlines.multiple,oMinorGridlines.units,sScaleType+log+mirrorLog,sTextPosition+out+in+none,oTextStyle,oTicks,sTitle,oTitleTextStyle,nViewWindow.max,nViewWindow.min,sViewWindowMode+pretty+maximized+explicit|b;hAxis.allowContainerBoundaryTextCutoff;1273|n;hAxis.baseline;703|c;hAxis.baselineColor;703;black|s;hAxis.direction;1727;1|s;hAxis.format;703|c;hAxis.gridlines.color;767;#CCC|n;hAxis.gridlines.count;767|n;hAxis.gridlines.interval;249|n;hAxis.gridlines.minSpacing;249|n;hAxis.gridlines.multiple;249;1|o;hAxis.gridlines.units;767;;sYears.format,sMonths.format,sDays.format,sHours.format,sMinutes.format,sSeconds.format,sMiliseconds.format|b;hAxis.logScale;703|n;hAxis.maxAlternation;1273;2|n;hAxis.maxTextLines;1273|n;hAxis.maxValue;703|n;hAxis.minTextSpacing;1273|n;hAxis.minValue;703|c;hAxis.minorGridlines.color;767|n;hAxis.minorGridlines.count;767|n;hAxis.minorGridlines.interval;249|n;hAxis.minorGridlines.minSpacing;249|n;hAxis.minorGridlines.multiple;249;1|o;hAxis.minorGridlines.units;767;;sYears.format,sMonths.format,sDays.format,sHours.format,sMinutes.format,sSeconds.format,sMiliseconds.format|s;hAxis.scaleType;703;;,log,mirrorLog|n;hAxis.showTextEvery;1273|b;hAxis.slantedText;1273|n;hAxis.slantedTextAngle;1273;30|s;hAxis.textPosition;1791;out;out,in,none|o;hAxis.textStyle;1791;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|a;hAxis.ticks;1727;;oV,sF|s;hAxis.title;1791|o;hAxis.titleTextStyle;1791;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|n;hAxis.viewWindow.max;1791|n;hAxis.viewWindow.min;1791|s;hAxis.viewWindowMode;767;;,pretty,maximized,explicit|n;histogram.bucketSize;64|b;histogram.hideBucketItems;64|n;histogram.lastBucketPercentile;64;0|n;histogram.maxValue;64|n;histogram.minValue;64|s;histogram.numBucketsRule;64;sqrt;sqrt,sturges,rice|b;interpolateNulls;225|b;is3D;256|b;isStacked;1139|s;legend.alignment;2047;;,start,center,end|n;legend.maxLines;2029;1|n;legend.pageIndex;767;0|s;legend.position;2047;right;bottom,left,in,none,right,top,labeled|o;legend.textStyle;2047;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|a;lineDashStyle;1185;;nLength|n;lineWidth;673|s;orientation;763;;,horizontal,vertical|n;pieHole;256;0;0.01|c;pieResidueSliceColor;256;#ccc|s;pieResidueSliceLabel;256;Other|c;pieSliceBorderColor;256;white|s;pieSliceText;256;percentage;percentage,value,label,none|o;pieSliceTextStyle;256;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|n;pieStartAngle;256;0|s;pointShape;673;circle;circle,triangle,square,diamond,star,polygon|n;pointSize;673|b;pointsVisible;673;true|b;reverseCategories;1531|s;selectionMode;1709;single;single,multiple|a;series;1791;;oAnnotations,dAreaOpacity,cColor,sLabelInLegend,oLineDashStyle,nLineWidth,sPointShape+circle+triangle+square+diamond+star+polygon,nPointSize,1PointsVisible,nTargetAxisIndex,1VisibleInLegend|s;seriesType;32;line;line,area,bars,candlesticks,steppedArea|n;sizeAxis.maxSize;4;30|n;sizeAxis.maxValue;4|n;sizeAxis.minSize;4;5|n;sizeAxis.minValue;4|n;sliceVisibilityThreshold;256;0.0014;0.0001|a;slices;256;;cColor,dOffset,sTextStyle.FontName,nTextStyle.FontSize,bTextStyle.Bold,bTextStyle.Italic,cTextStyle.Color,cTextStyle.AuraColor,dTextStyle.Opacity|b;sortBubblesBySize;4;true|s;theme;1791;;,maximized|s;titlePosition;1791;out;in,out,none|o;titleTextStyle;2047;;sFontName,nFontSize,1Bold,0Italic,cColor,cAuraColor,dOpacity|b;tooltip.ignoreBounds;1979|b;tooltip.isHtml;2047|b;tooltip.showColorCode;2043|s;tooltip.text;256;both;both,value,percentage|o;tooltip.textStyle;2047;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|s;tooltip.trigger;2047;focus;focus,none,selection|a;trendlines;658;;cColor,nDegree,sLabelInLegend,nLineWidth,dOpacity,nPointSize,1PointsVisible,0ShowR2,sType+linear+exponential+polynomial,0VisibleInLegend|a;vAxes;1273;;nBaseline,cBaselineColor,sDirection,sFormat,cGridlines.color,nGridlines.count,nGridlines.interval,nGridlines.minSpacing,nGridlines.multiple,oGridlines.units,0LogScale,nMaxValue,nMinValue,cMinorGridlines.color,nMinorGridlines.count,nMinorGridlines.interval,nMinorGridlines.minSpacing,nMinorGridlines.multiple,oMinorGridlines.units,sScaleType+log+mirrorLog,sTextPosition+out+in+none,oTextStyle,oTicks,sTitle,oTitleTextStyle,nViewWindow.max,nViewWindow.min,sViewWindowMode+pretty+maximized+explicit|n;vAxis.baseline;1791|c;vAxis.baselineColor;1791;black|s;vAxis.direction;1791;1|s;vAxis.format;1791|c;vAxis.gridlines.color;1791;#CCC|n;vAxis.gridlines.count;1791|n;vAxis.gridlines.interval;249|n;vAxis.gridlines.minSpacing;249|n;vAxis.gridlines.multiple;249;1|o;vAxis.gridlines.units;767;;sYears.format,sMonths.format,sDays.format,sHours.format,sMinutes.format,sSeconds.format,sMiliseconds.format|b;vAxis.logScale;767|n;vAxis.maxValue;1791|n;vAxis.minValue;1791|c;vAxis.minorGridlines.color;1791|n;vAxis.minorGridlines.count;1791|n;vAxis.minorGridlines.interval;1|n;vAxis.minorGridlines.minSpacing;249|n;vAxis.minorGridlines.multiple;249;1|o;vAxis.minorGridlines.units;248;;sYears.format,sMonths.format,sDays.format,sHours.format,sMinutes.format,sSeconds.format,sMiliseconds.format|s;vAxis.scaleType;1791;;,log,mirrorLog|s;vAxis.textPosition;1791;out;out,in,none|o;vAxis.textStyle;1791;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|a;vAxis.ticks;1791;;oV,sF|s;vAxis.title;1791|o;vAxis.titleTextStyle;1791;;sFontName,nFontSize,0Bold,0Italic,cColor,cAuraColor,dOpacity|n;vAxis.viewWindow.max;1791|n;vAxis.viewWindow.min;1791|s;vAxis.viewWindowMode;1791;;,pretty,maximized,explicit";
         var optionsDef2 = optionsDef.split('|'), cgroup = '', cgrouppos = -1, optionsDef3 = [];
         function compGroupBits(start, end) {
             var b = 0;
@@ -140,10 +148,9 @@
             optionsDef3.push(optionsDef2[i]);
         }
         if (cgrouppos != -1) optionsDef3[cgrouppos] += ";" + compGroupBits(cgrouppos+1, optionsDef3.length-1);
-        var winbody = document.getElementById('winbody'), group = '', gelem = null;
-        while (winbody.firstChild) winbody.removeChild(winbody.firstChild);
+        var winbody = clearElement('winbody'), group = '', gelem = null;
         for (var i = 0; i < optionsDef3.length; i++) {
-            var a = optionsDef3[i].split(';'), aid = a[1].replaceAll('.','_');
+            var a = optionsDef3[i].split(';'), aid = a[1].replaceAll('.','_'), ingroup = (group != aid && gelem != null && aid.indexOf(group+'_') == 0);
             var bits = a[2];
             var labeltext = a[1].replaceAll('.',' - ') + (a[0] == 'g' ? '' : ':'), labeltext2 = '';
             for (var j = 0; j < labeltext.length; j++) {
@@ -152,22 +159,33 @@
                 labeltext2 += (j == 0 || labeltext2[labeltext2.length - 1] == ' ') ? labeltext[j].toUpperCase() : labeltext[j];
             }
             var labeltext3 = labeltext2;
+            var setElement = function(elem, id, bits) {
+                elem.id = id;
+                elem.bits = bits;
+                elem.className = "hidden";
+                if (ingroup) { elem.style.display = 'none'; gelem.gm.push(id); }
+            }
+            var insertElementColor = function(elemColor, elemInput, parent) {
+                elemColor.oninput = function(e) { this.previousSibling.value = e.target.value; update(); };
+                elemColor.type = 'color';
+                parent.appendChild(elemColor);
+                elemColor.convertColor = function() { var ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = this.previousSibling.value; this.value = ctx.fillStyle; }
+                elemInput.onchange = function() { this.nextSibling.convertColor(); update(); };
+                elemColor.convertColor();
+            }
             var elem1 = document.createElement('label');
-            elem1.id = "_" + aid;
-            elem1.bits = bits;
+            setElement(elem1, "_" + aid, bits, false);
             elem1.htmlFor = aid;
-            elem1.className = "hidden";
-            if (group != aid && gelem != null && aid.indexOf(group+'_') == 0) { elem1.className = 'hidden pad'; labeltext2 = labeltext2.slice(labeltext2.indexOf(' - ')+3); elem1.style.display = 'none'; gelem.gm.push(elem1.id); }
+            if (ingroup) { elem1.className = 'hidden pad'; labeltext2 = labeltext2.slice(labeltext2.indexOf(' - ')+3); }
             elem1.appendChild(document.createTextNode(labeltext2));
             if (a[0] == 'g') { elem1.className = 'hidden arr pad closed'; group = aid; elem1.onclick = function() {
                 var state = this.className.indexOf('open') < 0;
                 this.className = state ? this.className.replace('closed','open') : this.className.replace('open','closed');
                 for (var j = 0; j < this.gm.length; j++) document.getElementById(this.gm[j]).style.display = state ? '' : 'none';
-                
             }; gelem = elem1; gelem.gm = []; }
             winbody.appendChild(elem1);
 
-            var defaultvalue = a.length >= 4 ? (a[0] == 's' || a[0] == 'c' ? a[3] : JSON.parse("["+a[3]+"]")[0]) : null;
+            var defaultvalue = a.length >= 4 ? (a[0] == 's' || a[0] == 'c' ? a[3] : a[3].length == 0 ? "" : JSON.parse("["+a[3]+"]")[0]) : null;
             var elem2;
             if (a[0] == 'g') {
                 elem2 = document.createElement('div');
@@ -186,37 +204,110 @@
                 }
             } else {
                 elem2 = document.createElement('input');
-                elem2.setAttribute(a[0] == 'b' ? 'onclick' : 'onchange', 'update();');
+                elem2.onchange = update;
                 elem2.type = a[0] == 'b' ? 'checkbox' : a[0] == 'n' ? 'number' : 'text';
                 if (a[0] == 'b') elem2.checked = defaultvalue == true; else elem2.value = defaultvalue;
                 if (a[0] == 'n') elem2.step = (a[4] != null ? a[4] : 1);
-                if (a[0] == 'o') elem2.obj = true;
+                if (a[0] == 'o' || a[0] == 'a') elem2.obj = true;
             }
-            elem2.id = aid;
-            elem2.bits = bits;
-            elem2.className = "hidden";
+            setElement(elem2, aid, bits);
             if (a[0] == 'c') elem2.className += ' colortext';
-            if (group != aid && gelem != null && aid.indexOf(group+'_') == 0) {
-                if (elem1.style.display == 'none') elem2.style.display = 'none';
-                gelem.gm.push(elem2.id);
-            }
+            if (elem2.obj && a.length == 5) elem2.className += ' objtext';
             elem2.dname = labeltext3;
             winbody.appendChild(elem2);
             if (a[0] == 'c') {
                 var elem4 = document.createElement('input');
-                elem4.oninput = function(e) { this.previousSibling.value = e.target.value; update(); };
-                elem4.type = 'color';
-                elem4.id = aid+"_COLOR";
-                elem4.bits = bits;
-                elem4.className = "hidden";
-                if (group != aid && gelem != null && aid.indexOf(group+'_') == 0) {
-                    if (elem1.style.display == 'none') elem4.style.display = 'none';
-                    gelem.gm.push(elem4.id);
-                }
+                setElement(elem4, aid+"_COLOR", bits);
+                insertElementColor(elem4, elem2, winbody);
+            } else if (elem2.obj && a.length == 5) {
+                var elem4 = document.createElement('button');
+                setElement(elem4, aid+"_BUTTON", bits);
+                elem4.className += " objbutton";
+                elem4.appendChild(document.createTextNode("Edit"));
+                elem4.dname = labeltext3;
+                elem4.fields = a[4].split(',');
+                elem4.aid = aid;
+                elem4.isarray = a[0] == 'a';
                 winbody.appendChild(elem4);
-                elem4.convertColor = function() { var ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = this.previousSibling.value; this.value = ctx.fillStyle; }
-                elem2.onchange = function() { this.nextSibling.convertColor(); update(); };
-                elem4.convertColor();
+                elem4.onclick = function() {
+                    var obj = null;
+                    try { obj = JSON.parse(document.getElementById(this.aid).value); } catch {};
+                    var editorbody = clearElement('editorbody');
+                    editorbody.style.display = null;
+                    winbody.style.display = "none" ;
+                    document.getElementById('okbutton').onclick = document.getElementById('closebutton').onclick = function() {
+                        editorbody.aid = null;
+                        editorbody.style.display = "none";
+                        winbody.style.display = null;
+                        document.getElementById('okbutton').onclick = document.getElementById('closebutton').onclick = function() { options(); };
+                        document.getElementById('optionscaption').innerText = "Options";
+                    };
+                    document.getElementById('optionscaption').innerText = "Options - Edit";
+                    editorbody.index = this.isarray ? 1 : null;
+                    editorbody.count = this.isarray ? Math.max(1,obj != null && obj[0] != null ? obj.length : 0) : null;
+                    editorbody.aid = this.aid;
+                    if (this.isarray && obj != null && obj[0] != null) obj = obj[0];
+                    var elem6 = document.createElement('h2');
+                    elem6.appendChild(document.createTextNode(this.dname));
+                    editorbody.appendChild(elem6);
+                    if (this.isarray) {
+                        var elem8 = document.createElement('div');
+                        elem8.id = "editorbtns";
+                        var elem7 = document.createElement('label');
+                        elem7.id = "editorcount";
+                        elem7.style.width = "auto";
+                        elem7.style.margin = "2px 6px";
+                        var bPrev = document.createElement('button'); bPrev.appendChild(document.createTextNode("<")); bPrev.onclick = function() { editorArr(-1); }; elem8.appendChild(bPrev);
+                        var bNext = document.createElement('button'); bNext.appendChild(document.createTextNode(">")); bNext.onclick = function() { editorArr(+1); }; elem8.appendChild(bNext);
+                        var bAdd = document.createElement('button'); bAdd.appendChild(document.createTextNode("Add")); bAdd.onclick = function() { editorArr(0,+1); }; elem8.appendChild(bAdd);
+                        var bRemove = document.createElement('button'); bRemove.appendChild(document.createTextNode("Remove")); bRemove.onclick = function() { editorArr(0,-1); }; elem8.appendChild(bRemove);
+                        elem8.appendChild(elem7);
+                        editorbody.appendChild(elem8);
+                        editorbody.appendChild(document.createElement('hr'));
+                        editorSetBtns();
+                    }
+
+                    for (var k = 0; k < this.fields.length; k++) {
+                        var f0 = this.fields[k][0], f1 = this.fields[k].slice(1).split('+')[0];
+                        var selitems = (f0 == 's' && this.fields[k].indexOf('+') >= 0) ? this.fields[k].slice(1).split('+') : null;
+                        var a = f1.split("."), b = [];
+                        for (var j = 0; j < a.length; j++) b.push(a[j][0].toLowerCase() + a[j].slice(1));
+                        f1 = b.join("_");
+                        var elabel = document.createElement('label');
+                        elabel.id = "EDITOR_LABEL_" + f1;
+                        elabel.htmlFor = "EDITOR_CTRL_" + f1;
+                        var labeltext = f1.replace("_"," - ") + ':', labeltext2 = '';
+                        for (var j = 0; j < labeltext.length; j++) {
+                            if (j > 0 && (labeltext[j].toLowerCase() != labeltext[j] || (labeltext[j] >= '0' && labeltext[j] <= '9')) && labeltext[j - 1] != ' ' && !(labeltext[j-1] >= '0' && labeltext[j-1] <= '9')) labeltext2 += ' ';
+                            labeltext2 += (j == 0 || labeltext2[labeltext2.length - 1] == ' ') ? labeltext[j].toUpperCase() : labeltext[j];
+                        }
+                        elabel.appendChild(document.createTextNode(labeltext2));
+                        editorbody.appendChild(elabel);
+                        var ectrl = selitems != null ? document.createElement('select') : document.createElement('input');
+                        ectrl.id = elabel.htmlFor;
+                        ectrl.onchange = update;
+                        if (selitems == null) ectrl.type = f0 == 'b' || f0 == '0' || f0 == '1'  ? 'checkbox' : f0 == 'n' || f0 == 'd' ? 'number' : 'text';
+                        else for (var j = 0; j < selitems.length; j++) {
+                            var eoption = document.createElement('option'), t = j == 0 ? "(default)" : selitems[j];
+                            eoption.appendChild(document.createTextNode(t[0].toUpperCase() + t.slice(1)));
+                            eoption.value = j == 0 ? "" : t;
+                            eoption.selected = j == 0;
+                            ectrl.appendChild(eoption);
+                        }
+                        if (ectrl.type == 'checkbox') ectrl.default = f0 == '1' ? true : f0 == '0' ? false : null;
+                        if (f0 == 'o') ectrl.obj = true; else if (f0 == 'n') ectrl.step = 1; else if (f0 == 'd') ectrl.step = 0.01;
+                        if (f0 == 'c') ectrl.className += ' colortext';
+                        var vv = obj == null ? null : this.fields.length == 1 ? obj : b.length > 1 && obj[b[0]] != null ? obj[b[0]][b[1]]: obj[f1];
+                        if (ectrl.type == 'checkbox') ectrl.checked = vv == null ? ectrl.default == true : vv == true; else ectrl.value = obj != null && vv != null ? vv : "";
+                        editorbody.appendChild(ectrl);
+                        if (f0 == 'n' || f0 == 'd') setupNumberInput(elabel);
+                        if (f0 == 'c') {
+                            var ecolor = document.createElement('input');
+                            ecolor.id = "EDITOR_COLOR_" + f1;
+                            insertElementColor(ecolor, ectrl, editorbody);
+                        }
+                    }
+                };
             }
         }
         winbody.appendChild(document.createElement('hr'));
@@ -233,18 +324,54 @@
         reset.appendChild(document.createTextNode('RESET ALL'));
         winbody.appendChild(reset);
     }
+    function editorSetBtns() {
+        var editorbody = document.getElementById('editorbody');
+        document.getElementById("editorcount").innerText = "Item "+editorbody.index+" / "+editorbody.count;
+        var a = document.getElementById("editorbtns").children;
+        a[0].disabled = editorbody.index == 1;
+        a[1].disabled = editorbody.index == editorbody.count;
+        a[3].disabled = editorbody.count == 1;
+    }
+    function editorArr(moveIndex, addCount) {
+        var editorbody = document.getElementById('editorbody');
+        var single = document.getElementById(editorbody.aid+"_BUTTON").fields.length == 1;
+        editorbody.index = Math.max(1, Math.min(editorbody.count, editorbody.index + moveIndex));
+        var obj = null;
+        try { obj = JSON.parse(document.getElementById(editorbody.aid).value); } catch {}
+        if (!Array.isArray(obj) || obj == null) obj = single ? [""] : [{}];
+        if (editorbody.count > 1 && obj[editorbody.index-1] != null && addCount == -1) obj.splice(editorbody.index-1,1);
+        if (addCount == 1) { obj.push(single ? "" : {}); editorbody.index = obj.length; }
+        editorbody.count = obj.length;
+        editorbody.index = Math.min(editorbody.count,Math.max(1,editorbody.index));
+        var item = obj[editorbody.index-1];
+        for (var i = 0; i < editorbody.children.length; i++) {
+            var e = editorbody.children[i], eid = e.id.replace("EDITOR_CTRL_",""), val;
+            if (e.id == eid) continue;
+            if (single) val = item
+            else if (eid.indexOf("_") >= 0) {
+                var a = eid.split("_");
+                val = item != null && item[a[0]] != null ? item[a[0]][a[1]] : null;
+            } else val = item != null ? item[eid] : null;
+            if (e.type == 'checkbox') e.checked = val == null ? e.default == true : val; else e.value = val == null ? "" : val;
+            if (e.nextSibling && e.nextSibling.convertColor) e.nextSibling.convertColor();
+        }
+        editorSetBtns();
+        document.getElementById(editorbody.aid).value = JSON.stringify(obj);
+        update();
+    }
+    function setupNumberInput(labelElement) {
+        labelElement.style.cursor = "col-resize";
+        labelElement.onmousedown = function(e) {
+            var md = e, input = document.getElementById(this.htmlFor), old = parseFloat(input.value) || 0;
+            document.onmousemove = function(e) { input.value = old + (e.clientX - md.clientX) * (input.step); input.onchange(e); e.preventDefault(); }
+            document.onmouseup = function() { document.onmousemove = document.onmouseup = null; }
+        }
+    }
     function setupCtrls(parent) {
        var labels = parent.getElementsByTagName('label');
         for (var i = 0; i < labels.length; i++) if (labels[i].htmlFor != null) document.getElementById(labels[i].htmlFor).label = labels[i];
         var inputs = parent.querySelectorAll('input[type="number"]');
-        for (var i = 0; i < inputs.length; i++) {
-            inputs[i].label.style.cursor = "col-resize";
-            inputs[i].label.onmousedown = function(e) {
-                var md = e, input = document.getElementById(this.htmlFor), old = parseFloat(input.value) || 0;
-                document.onmousemove = function(e) { input.value = old + (e.clientX - md.clientX) * (input.step); input.onchange(e); e.preventDefault(); }
-                document.onmouseup = function() { document.onmousemove = document.onmouseup = null; }
-            }
-        }
+        for (var i = 0; i < inputs.length; i++) setupNumberInput(inputs[i].label);
     }
 
     function setup() {
@@ -267,72 +394,107 @@
         optionFieldsFor = chtype;
     }
 
+    function updateEditor() {
+        var editorbody = document.getElementById("editorbody");
+        var single = editorbody.index != null && document.getElementById(editorbody.aid+"_BUTTON").fields.length == 1;
+        var obj = single ? "" : {}, empty = true;
+        for (var i = 0; i < editorbody.children.length; i++) {
+            var e = editorbody.children[i], eid = e.id.replace("EDITOR_CTRL_","");
+            if (e.id == eid) continue;
+            if (e.type != 'checkbox' && (e.value == null || e.value.length == 0)) continue;
+            if (e.type == 'checkbox' && e.checked == e.default) continue;
+            var val = e.type == 'checkbox' ? e.checked : e.type == 'number' ? parseFloat(e.value) : e.value;
+            if (e.obj) { try { val = JSON.parse(val); } catch (err) { val = ""; } }
+            if (single) {
+                obj = val;
+            } else if (eid.indexOf("_") >= 0) {
+                var a = eid.split("_");
+                if (obj[a[0]] == null) obj[a[0]] = {};
+                obj[a[0]][a[1]] = val;
+            } else obj[eid] = val;
+            empty = false;
+        }
+        if (editorbody.index != null) {
+            var obj2 = null;
+            try { obj2 = JSON.parse(document.getElementById(editorbody.aid).value); } catch {}
+            if (obj2 == null || !Array.isArray(obj2)) obj2 = single ? [""] : [{}];
+            if (obj2[editorbody.index-1] == null) document.getElementById(editorbody.aid).value = "";
+            else {
+                obj2[editorbody.index-1] = obj;
+                document.getElementById(editorbody.aid).value = JSON.stringify(obj2);
+            }
+        } else document.getElementById(editorbody.aid).value = empty ? "" : JSON.stringify(obj);
+        if (document.getElementById(editorbody.aid).value == "[\"\"]"
+         || document.getElementById(editorbody.aid).value == "[{}]")
+            document.getElementById(editorbody.aid).value = "";
+    }
     function update() {
       var d = document;
-      var data = d.getElementById("data").value;
+      if (d.getElementById("editorbody").aid != null) updateEditor();
+      var data = d.getElementById("data").value.trim();
+      if (data.trim().length > 0 && data[0] != '[') {
+          var parseValue = function(v) { var v2 = null; try { v2 = JSON.parse(v); } catch { v2 = null; } if (v2 != null) return v2; else return v || ""; }
+          var dels = ",;\t|", sel = 0;
+          for (var j = 1; j < dels.length; j++) if (data.indexOf(dels[j]) > 0 && (data.indexOf(dels[j]) < data.indexOf(dels[sel]) || data.indexOf(dels[sel] < 0))) sel = j;
+          const objPattern = new RegExp(("(\\"+dels[sel]+"|\\r?\\n|\\r|^)(?:\"((?:\\\\.|\"\"|[^\\\\\"])*)\"|([^\\"+dels[sel]+"\"\\r\\n]*))"),"gi");
+          var arrMatches = null, arrData = [[]];
+          while (arrMatches = objPattern.exec(data)) {
+              if (arrMatches[1].length && arrMatches[1] !== dels[sel]) arrData.push([]);
+              arrData[arrData.length - 1].push(parseValue(arrMatches[2] ? arrMatches[2].replace(new RegExp( "[\\\\\"](.)", "g" ), '$1') : arrMatches[3]));
+          }
+          d.getElementById("data").value = data = JSON.stringify(arrData).replaceAll("],[","],\n[");
+      }
       var chtype = d.getElementById("chtype").options[d.getElementById("chtype").selectedIndex].value;
-      var fl = d.getElementById("fl").checked;
       d.getElementById("olink").href = 'https://developers.google.com/chart/interactive/docs/gallery/'+chtype.toLowerCase()+'#configuration-options';
-      var e = d.getElementById("c2");
-      while (e.firstChild) e.removeChild(e.firstChild);
-
-      {
-        var div1 = d.createElement('div'), div2 = d.createElement('div'), div3 = d.createElement('div');
-        div1.className = "ew";
-        div1.appendChild(div2);
-        e.appendChild(div1);
-        var b = d.createElement('a');
-        b.id = "ib";
-        b.href = "#";
-        b.appendChild(d.createTextNode("Insert to Photopea"));
-        div3.setAttribute("style", "position: relative;margin:0 -144px;");
-        div3.appendChild(b);
-        e.appendChild(div3);
-
-        updateOptionFields();
-        var optionsObj = { };
-        var title = d.getElementById("title").value, width = d.getElementById("width").value, height = d.getElementById("height").value;
-        if (title != null && title.length > 0) optionsObj["title"] = title;
-        if (width != null && width.length > 0) optionsObj["width"] = width;
-        if (height != null && height.length > 0) optionsObj["height"] = height;
-        var optionChildren = document.getElementById('winbody').children, optionError = null;
-        for (var i = 0; i < optionChildren.length; i++) {
-            var e = optionChildren[i];
-            if (e.tagName != "SELECT" &&  e.tagName != "INPUT") continue;
-            if (e.type != 'checkbox' && (e.value == null || e.value.length == 0)) continue;
-            if (e.className.indexOf("hidden") >= 0) continue;
-            var val = e.type == 'checkbox' ? e.checked : e.value;
-            if (e.obj) { try { val = JSON.parse(val); } catch (err) { if (optionError == null) optionError = 'Unable to parse option ' + e.dname + ' ' + err.message; continue; } }
-            var a = e.id.split("_");
-            var b = optionsObj;
-            for (var j = 0; j < a.length; j++) {
-                if (a.length == j + 1) b[a[j]] = val;
-                if (a.length >= j + 2 && b[a[j]] == null) b[a[j]] = {};
-                b = b[a[j]];
-            }
-        }
-        var dataObj = null;
-        try { dataObj = JSON.parse(data); }
-        catch (err) { drawError(div1, err.message); }
-        if (dataObj != null) {
-            if (optionError != null) {
-                drawError(div1, optionError);
-            } else {
-                try { drawChart(div1, chtype, dataObj, fl, optionsObj); }
-                catch (err) { drawError(div1, err.message); }
-            }
-        }
-        var svg = div1;
-        while (svg != null && svg.tagName != 'SVG' && svg.tagName != 'svg') svg = svg.firstChild;
-        if (svg != null) {
-            svg.setAttribute("viewBox", "0 0 "+svg.getAttribute("width")+" "+svg.getAttribute("height"));
-            svg.parentNode.parentNode.style = "";
-            document.getElementById("ib").onclick = function() { insertImage(svg); };
-        }
+      var e = clearElement("c2");
+      var div1 = d.createElement('div'), div2 = d.createElement('div'), div3 = d.createElement('div');
+      div1.className = "ew";
+      div1.appendChild(div2);
+      e.appendChild(div1);
+      var ib = d.createElement('a'); ib.id = "ib"; ib.href = "#"; ib.appendChild(d.createTextNode("Insert to Photopea"));
+      div3.setAttribute("style", "position: relative;margin:0 -144px;");
+      div3.appendChild(ib);
+      e.appendChild(div3);
+      updateOptionFields();
+      var optionsObj = {}, addOption = function(id) { var value = d.getElementById(id).value; if (value && value.length > 0) optionsObj[id] = value; };
+      addOption("title"); addOption("width"); addOption("height");
+      var optionChildren = d.getElementById('winbody').children, optionError = null;
+      for (var i = 0; i < optionChildren.length; i++) {
+          var e = optionChildren[i];
+          if (e.tagName != "SELECT" && e.tagName != "INPUT") continue;
+          if (e.type != 'checkbox' && (e.value == null || e.value.length == 0)) continue;
+          if (e.className.indexOf("hidden") >= 0) continue;
+          var val = e.type == 'checkbox' ? e.checked : e.value;
+          if (e.obj) { try { val = JSON.parse(val); } catch (err) { if (optionError == null) optionError = 'Unable to parse option ' + e.dname + ' ' + err.message; continue; } }
+          var a = e.id.split("_"), b = optionsObj;
+          for (var j = 0; j < a.length; j++) {
+              if (a.length == j + 1) b[a[j]] = val;
+              if (a.length >= j + 2 && b[a[j]] == null) b[a[j]] = {};
+              b = b[a[j]];
+          }
+      }
+      var finishChart = function() {
+          var svg = div1;
+          while (svg && svg.tagName.toUpperCase() != 'SVG') svg = svg.firstChild;
+          if (!svg) return;
+          svg.setAttribute("viewBox", "0 0 "+svg.getAttribute("width")+" "+svg.getAttribute("height"));
+          svg.parentNode.parentNode.style = "";
+          ib.onclick = function() { insertImage(svg); };
+      }
+      var dataObj = null;
+      try { dataObj = JSON.parse(data); }
+      catch (err) { drawError(div1, err.message); }
+      if (dataObj != null) {
+          if (optionError != null) {
+              drawError(div1, optionError);
+          } else {
+              try { drawChart(div1, chtype, dataObj, d.getElementById("fl").checked, optionsObj, finishChart); }
+              catch (err) { drawError(div1, err.message); }
+          }
       }
       cont.style.display = "block";
       setsize();
-      window.onresize = function() { setsize(); };
+      window.onresize = setsize;
       savestate();
     }
 
@@ -351,7 +513,7 @@
     var state = null;
     function savestate() {
       try { if (typeof window.sessionStorage !== 'undefined') {
-        var obj = { data:document.getElementById("data").value, 
+        var obj = { data:document.getElementById("data").value,
                     chtype:document.getElementById("chtype").selectedIndex,
                     title:document.getElementById("title").value,
                     width:document.getElementById("width").value,
@@ -360,10 +522,10 @@
         var optionChildren = document.getElementById('winbody').children;
         for (var i = 0; i < optionChildren.length; i++) {
             var e = optionChildren[i];
-            if (e.tagName != "SELECT" &&  e.tagName != "INPUT") continue;
-            obj[e.id] = e.type == 'checkbox' ? e.checked : e.value;;
+            if (e.tagName != "SELECT" && e.tagName != "INPUT") continue;
+            obj[e.id] = e.type == 'checkbox' ? e.checked : e.value;
         }
-        var s = JSON.stringify(obj); 
+        var s = JSON.stringify(obj);
         if (state != s) { state = s; window.sessionStorage.setItem("googlecharts_state", state); }
       } } catch {}
     }
@@ -380,7 +542,7 @@
             var optionChildren = document.getElementById('winbody').children;
             for (var i = 0; i < optionChildren.length; i++) {
                 var e = optionChildren[i];
-                if (e.tagName != "SELECT" &&  e.tagName != "INPUT") continue;
+                if (e.tagName != "SELECT" && e.tagName != "INPUT") continue;
                 if (e.type == 'checkbox') e.checked = s[e.id]; else e.value = s[e.id];
             }
         }
@@ -410,7 +572,7 @@
 
       <div style="position:absolute;bottom:0;"><label for="data">Data:</label></div>
 <div style="position:absolute;bottom:0;right:0;line-height: 23px;">
-<input class="" type="checkbox" id="fl" onclick="update()" checked><label for="fl" style="width:auto;">First row contains labels</label>
+<input class="" type="checkbox" id="fl" onchange="update()" checked><label for="fl" style="width:auto;">First row contains labels</label>
       </div>
 </div>
 
@@ -426,9 +588,10 @@
     <div id="cont"><div id="c2" style="height:150px"></div></div>
 
     <div id="win">
-        <div class="head" ondblclick="optionsHeight();"><span class="label">Options</span><span class="cross" onclick="options();"></span></div>
+        <div class="head" ondblclick="optionsHeight();"><span id="optionscaption" class="label">Options</span><span id="closebutton" class="cross" onclick="options();"></span></div>
         <div class="body" id="winbody"></div>
-        <div style="margin:0 12px;"><button onclick="options();" style="width:100%">OK</button></div>
+        <div class="body" id="editorbody" style="display:none;"></div>
+        <div style="margin:0 12px;"><button id="okbutton" onclick="options();" style="width:100%">OK</button></div>
     </div>
 
     <script>setup();</script>
