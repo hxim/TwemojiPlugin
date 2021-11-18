@@ -299,14 +299,16 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             document.getElementById("settingsbutton").className = _settings ? "button on" : "button off";
             document.getElementById("cont").style.visibility = _settings ? "hidden" : "visible";
             document.getElementById("settings").style.visibility = !_settings ? "hidden" : "visible";
+            savestate();
         }
         function load() {
+            document.getElementById("labels").checked = _labels;
             for (var i = 0; i < def.length; i++) {
                 checkbox1 = document.createElement('input');
                 checkbox1.id = def[i];
                 checkbox1.type = 'checkbox';
                 checkbox1.onchange = function() {  _hidden[this.id]=!_hidden[this.id]; update(); };
-                checkbox1.checked = true;
+                checkbox1.checked = !_hidden[def[i]];
                 document.getElementById("settings").appendChild(checkbox1);
                 label1 = document.createElement('label');
                 label1.id = def[i]+"_Label";
@@ -335,11 +337,39 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 pp.postMessage(script, "*");
             }
             sendScript('app.echoToOE("rgb("+app.foregroundColor.rgb.red+","+app.foregroundColor.rgb.green+","+app.foregroundColor.rgb.blue+")");',
-                function (color) { if (color != _ppcolor) { _ppcolor = color; updateWithColor(color, _lock); } });
+                function (color) { if (color.indexOf("rgb(") == 0 && color != _ppcolor) { _ppcolor = color; updateWithColor(color, _lock); } });
         }
+
+    var state = null;
+    function savestate() {
+      try { if (typeof window.sessionStorage !== 'undefined') {
+        var obj = { color:_color,
+                    selcolor:_selcolor,
+                    history:_history,
+                    labels:_labels,
+                    lock:_lock,
+                    hidden:_hidden }
+        var s = JSON.stringify(obj);
+        if (state != s) { state = s; window.sessionStorage.setItem("adapal_state", state); }
+      } } catch {}
+    }
+    function loadstate() {
+      try { if (typeof window.sessionStorage !== 'undefined') {
+        if (state = window.sessionStorage.getItem("adapal_state")) {
+            var s = JSON.parse(state);
+            _color = s.color;
+            _selcolor = s.selcolor;
+            _history = s.history;
+            _labels = s.labels;
+            _lock = s.lock;
+            _hidden = s.hidden;
+        }
+      } } catch {}
+    }
+
     </script>
   </head>
-  <body onload="load();">
+  <body onload="loadstate();load();">
     <div id="bar">
         <input type="button" id="lockbutton" onclick="_lock=!_lock;update();" class="button lock off"></input>
         <input type="button" id="settingsbutton" value="Settings..." onclick="_settings=!_settings;update(true);" class="button"></input>
