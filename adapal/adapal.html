@@ -242,7 +242,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             }
         }
         var def = ["Brightness","HueShift","Intensity","Tints","Tones","Saturation","Reds","Greens","Blues","Previous","History"];
-        var _color = {r:228,g:55,b:98}, _selcolor = _color, _history = [{r:228,g:221,b:49},{r:42,g:234,b:89},{r:0,g:0,b:0},{r:142,g:34,b:100}], _labels = true, _lock = false, _settings = false, _hidden = {};
+        var _color = {r:0,g:0,b:0}, _selcolor = _color, _history = [{r:0,g:0,b:0},{r:255,g:255,b:255}], _labels = true, _lock = false, _settings = false, _hidden = {};
         var pp = window.parent;
         function colclick(elem) {
             updateWithColor(elem.style.backgroundColor, _lock);
@@ -257,6 +257,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             }
         }
         function update(lock) {
+            if (lock == null) lock = _lock;
             if (!lock && _selcolor != _color) _color = _selcolor;
             if (!lock && (_history[0].r != _selcolor.r || _history[0].g != _selcolor.g || _history[0].b != _selcolor.b)) _history.unshift(_selcolor);
             var mincol = 10;
@@ -374,7 +375,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
         <input type="button" id="lockbutton" onclick="_lock=!_lock;update();" class="button lock off"></input>
         <input type="button" id="settingsbutton" value="Settings..." onclick="_settings=!_settings;update(true);" class="button"></input>
         <input type="button" value="HEX" onclick="document.getElementById('colinput').click();" class="button" id="hex" style="float:right;margin-right:2px;"></input>
-        <input type="color" value="#000000" id="colinput" style="display:none;" onchange="updateWithColor(event.target.value);"></input>
+        <input type="color" value="#000000" id="colinput" style="display:none;" onchange="updateWithColor(event.target.value, false);"></input>
     </div>
     <div id="cont"></div>
     <div id="settings">
