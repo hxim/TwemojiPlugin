@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+		<style>
+            * { border-style: solid; border-width: 0; }
+			body {  background-color:#474747; overflow: hidden; margin: 0; padding: 0; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45); }
+            body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
+			label { line-height:21px; display: inline-block; margin-top: 2px; }
+            input { background-color: #252525; border-radius: 3px; padding: 3px; box-sizing: border-box; width: 80px; margin: 1px 0 0 0; line-height: 17.5px; }
+            input[type="color"] { margin: 1px; width: 44px; padding: revert; }
+            input[type="checkbox"] { vertical-align: baseline; width: 14px; margin: 5px 3px 4px 8px; }
+            select { background-color: #606060; margin: 0 3px; border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); }
+            select { padding: 2px 15px 3px 5px;  overflow: hidden;
+            background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%); background-position: calc(100% - 9px) calc(10px), calc(100% - 4px) calc(10px);
+            background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; -webkit-appearance: none; line-height: 1.5em; }
+            select, a { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
+			.ew {  background-color: #ffffff; display: inline-block; position: relative; width: 100%; height: 100%; }
+            .ew > div { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
+            .ew svg { width: 100%; height: 100%; }
+		    select:hover, a:hover { background-color: #6a6a6a; }
+            a { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 20.5px; height: 20.5px; width: 140px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; margin: 10px auto; position: absolute; left: 0; right: 0; }
+            #bar { height: 23px; white-space: nowrap; z-index: 10000;}
+            #data { margin-bottom: 10px; }
+            #cont, #settings { position: absolute; top: 23px; left: 0; right: 0; bottom: 0; }
+        .button:not(:disabled):hover { background-color: rgba(0,0,0,0.25); }
+        .button:disabled { opacity: 0.5; pointer-events: none; }
+        .button.small { width: auto; float: right; padding: 3px 5px; min-width: 18px; }
+.line { line-height: 0; }
+.line > div { display: inline-block; }
+            .line { box-shadow:  0px 0px 4px black; position:relative; }
+            .line > .label { position: absolute; left: 0; top: 0; overflow:hidden; user-select: none; }
+
+.line > .label { pointer-events: none; }
+.line > .label > div { position: relative; transition: transform 0.2s; background-color: black;   text-shadow: none; font-weight: bold; border-radius: 0 0 5px 0; padding: 2px 4px 4px 2px; z-index: 500; }
+.line:hover > .label > div { transform: translate(0, -110%); }
+.button { text-shadow: none; font-size: 11px; font-weight: bold; background-color: #474747;; height: 19px;margin: 1px 0; padding: 0 3px; width:auto; }
+#cont .mark:after { content:""; position: absolute; top: 34%; left: 34%; bottom: 34%; right: 34%; width: 0;  height: 0; padding-right: 32%; padding-bottom: 32%; border-radius: 50%; }
+#cont.dark .mark:after { background-color: rgba(255,255,255,0.3); }
+#cont.light .mark:after {  background-color: rgba(0,0,0,0.3);}
+.mark {position:relative;}
+
+.button.lock {
+background-image:   url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAgMAAAAhHED1AAAAAXNSR0IB2cksfwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAxQTFRFAAAAwMDAwMDAwMDAdBR3tQAAAAR0Uk5TADjM/9OmpX0AAAMsSURBVHic7ZsxdhMxEIZ3855xkdpQbLFHyBHYI6TANDkChY9gH4GCI0DBUvgI6yNQcIAtQkHqFMQPIp5NdqSVRjMayyTOY6ZLlPms+eeX/HalFAUVk7ftuv08J/+Gitna7ONTc1j+y848xI+DCBPIP4xQLowTH+WAKzff3F9K8190I4C5kwIWxosPwgn4+eauyZuAMe/zJiBU4QoBSKZQdhjgOh1QYfnmvkkGIBKKapjg+eky4hUIaohUkFwD3oNd3KYBprH81BqiFSTWEK8g0UvYOhgiqZGxJiaLQEiQJgIhQZIIZ1R+ighxF+xF4AE1CTANCyA1NOYrl0/ZaBesir6GN+34Z1bFsYbbeVPM37m/YVUc+XC7/0YsR4SGAVy4n/bwjTr6oua8uMQEc9dXT+e7Tdja2TpFMLuS2wSnY84UmDY4TRgtXavCbxpwjk7AnQKzJdQRuR1taICdqldrhYODsF30TG9r6ElAF/sgWwO5nMq4VlAcaQRrg6DdVXTEDWuDYKIgAmkEa4NAaxCBXNAwT8QuIEI4ZAN8hBQK8BUBgN0AkRr0oZwEPurDMegQtTEviU8BFRE4BNitIeiEFcGIaKsGgQgrAgB1W8UDQKef2OiUGvQAaJmDmQkvQ6t7bLQUANBWSwArdLgjWvQ3YDE26PAyGRDZuhckfhc15SPrJB4QkanOBVTJgIjXBolWhwKmLIBZb88J0OPDZ8cCbHIB8W35sQCbJwes/h1g2DEiKvGA7liADQ2It1EBClCAAhSgAAUcFTD7YtLi5g2a7x7OMYEfnKEnO5H4juRzL1PHU2hCAPVKPQzk0ZZ5HexF+HQuqgCrgTpVwCJ4xSGTABHhgs8ZRfBcthQC/EdLoYahiiWf4oUHkDYhaAN9roGFt6bP+Qwv+jGgFgNuTw0gNWJgxacHvH58wC8FKEABClCAAhSgAAUoQAEKUIACFKAABShAAQpQgAIUoID/D3Byx0TZgFoMOLnTvuwTz+wz1+xT3+xz5+yT7+yzd3EfgyvN2fcPsm9AZN/ByL4FUrwSAb6FgOybMNl3cYrJOjl/i/8b/azlU/fROveR/gBSaxqT130MAwAAAABJRU5ErkJggg==');
+    background-size: 14px 14px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent;
+    width:20px;
+}
+.button:hover { background-color: rgba(0,0,0,0.25); }
+.button.on, .button.on:hover { background-color: #252525; }
+#settings { overflow: auto; }
+        </style> 
+    <script>
+        function rgbToHsl(c) {
+          var r = c.r / 255, g = c.g / 255, b = c.b / 255;
+          var max = Math.max(r, g, b), min = Math.min(r, g, b);
+          var h, s, l = (max + min) / 2;
+          if (max == min) h = s = 0; else {
+            var d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+              case g: h = (b - r) / d + 2; break;
+              case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+          }
+          return {h:h, s:s, l:l};
+        }
+        function hslToRgb(c) {
+          var h=c.h, s=c.s, l=c.l;
+          if (s == 0) return {r:l*255,g:l*255,b:l*255}; else {
+            function hue2rgb(p, q, t) {
+              if (t < 0) t += 1;
+              if (t > 1) t -= 1;
+              if (t < 1/6) return p + (q - p) * 6 * t;
+              if (t < 1/2) return q;
+              if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+              return p;
+            }
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+            return {r:255*hue2rgb(p, q, h + 1/3),g:255*hue2rgb(p, q, h),b:255*hue2rgb(p, q, h - 1/3)};
+          }
+        }
+        function rgbToHsv(c) {
+          var r = c.r / 255, g = c.g / 255, b = c.b / 255;
+          var max = Math.max(r, g, b), min = Math.min(r, g, b);
+          var h, s, v = max;
+          var d = max - min;
+          s = max == 0 ? 0 : d / max;
+          if (max == min) h = 0; else {
+            switch (max) {
+              case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+              case g: h = (b - r) / d + 2; break;
+              case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+          }
+          return {h:h, s:s, v:v};
+        }
+        function hsvToRgb(c) {
+          var h=c.h, s=c.s, v=c.v;
+          var i = Math.floor(h * 6), f = h * 6 - i, p = v * (1 - s);
+          var q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+          switch (i % 6) {
+            case 0: return {r:v*255, g:t*255, b:p*255}; 
+            case 1: return {r:q*255, g:v*255, b:p*255};
+            case 2: return {r:p*255, g:v*255, b:t*255};
+            case 3: return {r:p*255, g:q*255, b:v*255};
+            case 4: return {r:t*255, g:p*255, b:v*255};
+            case 5: return {r:v*255, g:p*255, b:q*255};
+            default: return null;
+          }
+        }
+        function rgbString(c) {
+            return "rgb("+Math.round(c.r)+","+Math.round(c.g)+","+Math.round(c.b)+")";
+        }
+
+const deg = Math.PI / 180;
+function rotateRGBHue(r, g, b, hue) {
+  const cosA = Math.cos(hue * deg);
+  const sinA = Math.sin(hue * deg);
+  const neo = [
+    cosA + (1 - cosA) / 3,
+    (1 - cosA) / 3 - Math.sqrt(1 / 3) * sinA,
+    (1 - cosA) / 3 + Math.sqrt(1 / 3) * sinA,
+  ];
+  const result = [
+    r * neo[0] + g * neo[1] + b * neo[2],
+    r * neo[2] + g * neo[0] + b * neo[1],
+    r * neo[1] + g * neo[2] + b * neo[0],
+  ];
+  return result.map(x => uint8(x));
+}
+function uint8(value) {
+  return 0 > value ? 0 : (255 < value ? 255 : Math.round(value));
+}
+function hexToRgb(hex) {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+}
+function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g << 8) | (color.b << 0))).toString(16).slice(1); }
+
+        function transformColor(name, pos, steps, c1, c2) {
+            var c;
+            if (name == "Reds" || name == "Greens" || name == "Blues") {
+                c =  {r:c1.r,g:c1.g,b:c1.b};
+                c[name[0].toLowerCase()] = uint8(pos/(steps-1) * 255);
+                return rgbString(c);
+            } else
+            if (name == "History") {
+                c = pos <= 0 ? c1 : c2.length > pos ? c2[pos] : {r:0,g:0,b:0};
+                return rgbString(c);
+            } else
+            if (name == "Previous") {
+                c = rgbToHsv(c1);
+                d = rgbToHsv(c2[1]);
+                var k = ((pos+1)/(steps+1));
+                if (d.h-c.h > 0.5) c.h+=1;
+                if (c.h-d.h > 0.5) d.h+=1;
+                c.h = d.h * k + c.h * (1-k);
+                c.s = d.s * k + c.s * (1-k);
+                c.v = d.v * k + c.v * (1-k);
+                return rgbString(hsvToRgb(c));
+            } else
+            if (name == "Tones") {
+                c = rgbToHsl(c1);
+                cq = rgbToHsv(c1);
+                var o = c.l, n = (pos+steps/4)/(steps*1.5);
+                var k = n < o ? n / o : (n - o) / (1 - o);
+                c.l = n < o ? k * c.l : (1 - k) * c.l + k * (1);
+                cq.v =  cq.v *((pos+1)/(steps+1));
+                var cx= hslToRgb(c);
+                var cy= hsvToRgb(cq);
+                var k = 1;//o > c.l ? 1 : 1-(c.l-o)/(c.l/o);
+                cc = {r:cx.r*k+cy.r*(1-k),g:cx.g*k+cy.g*(1-k),b:cx.b*k+cy.b*(1-k)};
+                return rgbString(cc);
+            } else
+            if (name == "Brightness"|| name == "Tints" || name == "Saturation") {
+                c = rgbToHsv(c1);
+                if (name == "Brightness") {
+                    c.v = pos/(steps-1);
+                } else if (name == "Tints") {
+                    c.h = c.h + 1 - ((pos - ((steps/2)>>0))/steps)/3;
+                    c.h = c.h - Math.floor(c.h);
+                } else if (name == "Saturation") {
+                    c.s = pos/(steps-1);
+                }
+                return rgbString(hsvToRgb(c));
+            } else if (name == "Intensity" || name == "HueShift" ) {
+                c = rgbToHsl(c1);
+                if (name == "Intensity") {
+                    c.l = pos/(steps-1);
+                } else if (name == "HueShift") {
+                    c.h = c.h + 1 - ((pos - ((steps/2)>>0))/steps);
+                    c.h = c.h - Math.floor(c.h);
+                } 
+                return rgbString(hslToRgb(c));
+            } else {
+                return "#000000";
+            }
+        }
+        function curPos(name, steps, c1) {
+            var c;
+            if (name == "Reds" || name == "Greens" || name == "Blues") {
+                c =  {r:c1.r,g:c1.g,b:c1.b};
+                return c[name[0].toLowerCase()] / 255 * (steps-1);
+            } else
+            if (name == "History" || name == "Previous") {
+                return 0;
+            } else
+            if (name == "Tones") {
+                c = rgbToHsl(c1);
+                return c.l * (steps*1.5) - steps / 4;
+            } else
+            if (name == "Brightness"|| name == "Tints" || name == "Saturation") {
+                c = rgbToHsv(c1);
+                if (name == "Brightness") {
+                    return c.v * (steps - 1);
+                } else if (name == "Tints") {
+                    return ((steps/2)>>0);
+                } else if (name == "Saturation") {
+                    return c.s * (steps - 1);
+                }
+                return rgbString(hsvToRgb(c));
+            } else if (name == "Intensity" || name == "HueShift" ) {
+                c = rgbToHsl(c1);
+                if (name == "Intensity") {
+                    return c.l * (steps - 1);
+                } else if (name == "HueShift") {
+                    return ((steps/2)>>0);
+                } 
+            } else {
+                return null;
+            }
+        }
+        var def = ["Brightness","HueShift","Intensity","Tints","Tones","Saturation","Reds","Greens","Blues","Previous","History"];
+        var _color = {r:228,g:55,b:98}, _selcolor = _color, _history = [{r:228,g:221,b:49},{r:42,g:234,b:89},{r:0,g:0,b:0},{r:142,g:34,b:100}], _labels = true, _lock = false, _settings = false, _hidden = {};
+        var pp = window.parent;
+        function colclick(elem) {
+            updateWithColor(elem.style.backgroundColor, _lock);
+        }
+        function updateWithColor(c1, lock) {
+            var ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = c1;
+            var c2 = hexToRgb(ctx.fillStyle);
+            _selcolor = c2;
+            update(lock);
+            if (_ppcolor != rgbString(_selcolor)) {
+                pp.postMessage("var c=app.foregroundColor;c.rgb.red="+_selcolor.r+";c.rgb.green="+_selcolor.g+";c.rgb.blue="+_selcolor.b+";app.foregroundColor=c;", "*");
+            }
+        }
+        function update(lock) {
+            if (!lock && _selcolor != _color) _color = _selcolor;
+            if (!lock && (_history[0].r != _selcolor.r || _history[0].g != _selcolor.g || _history[0].b != _selcolor.b)) _history.unshift(_selcolor);
+            var mincol = 10;
+            var width = Math.max(23,document.getElementById("cont").getBoundingClientRect().width);
+            var height = Math.max(23,document.getElementById("cont").getBoundingClientRect().height);
+            var linecount = 0;
+            for (var i = 0; i < def.length; i++) if (!_hidden[def[i]]) linecount++;
+            var y = Math.max(1, height /  Math.max(1, linecount));
+            var colcount = Math.round(width / y);
+            var x = Math.max(1, Math.floor(width / colcount * 10) / 10);
+            if (colcount < mincol) {
+                colcount = mincol;
+                y = x = Math.max(1, Math.floor(width / colcount * 10) / 10);
+            } 
+            var lines = "", i = 0, si = [colcount, x, y];
+            var isLight = (.2126 * _selcolor.r + .7152 * _selcolor.g + .0722 * _selcolor.b) > 128;
+            var genLine = function(si, name, index, h) {
+                if (_hidden[name]) return "";
+                var s = "<div class='line' style='height:"+si[2]+"px;z-index:"+(100-index)+"'>";
+                var mark = Math.max(0,Math.min(si[0]-1,Math.round(curPos(name, si[0], _selcolor)))), marked = false;
+                for (var i = 0; i < si[0]; i++) {
+                    var rgbstring = transformColor(name, i, si[0], _color, h);
+                    var markitem = !_lock && mark==i || _lock && rgbString(_selcolor)==rgbstring && !marked;
+                    s += "<div style='background-color:"+rgbstring+";width:"+si[1]+"px;height:"+si[2]+"px;'"+(markitem ?" class='mark'":"")+" onmousedown='colclick(this);'></div>"
+                    if (markitem) marked = true;
+                }
+                if (_labels) s += "<div class='label' style='font-size:"+(si[2]/2.2)+"px;line-height:"+(si[2]/2.2)+"px'><div>"+name+"</div></div>"
+                s += "</div>";
+                return s;
+            }
+            for (var i = 0; i < def.length; i++) lines += genLine(si, def[i], i, _history);
+            document.getElementById("cont").innerHTML = lines;
+            document.getElementById("cont").className = isLight ? "light" : "dark";
+            var hexstr = rgbToHex(_selcolor);
+            document.getElementById("hex").value = "HEX " + hexstr;
+            document.getElementById("hex").style.backgroundColor = hexstr;
+            document.getElementById("hex").style.color = isLight ? "black" : "white";
+            document.getElementById("colinput").value = hexstr;
+            document.getElementById("lockbutton").className = _lock ? "button lock on" : "button lock off";
+            document.getElementById("settingsbutton").className = _settings ? "button on" : "button off";
+            document.getElementById("cont").style.visibility = _settings ? "hidden" : "visible";
+            document.getElementById("settings").style.visibility = !_settings ? "hidden" : "visible";
+        }
+        function load() {
+            for (var i = 0; i < def.length; i++) {
+                checkbox1 = document.createElement('input');
+                checkbox1.id = def[i];
+                checkbox1.type = 'checkbox';
+                checkbox1.onchange = function() {  _hidden[this.id]=!_hidden[this.id]; update(); };
+                checkbox1.checked = true;
+                document.getElementById("settings").appendChild(checkbox1);
+                label1 = document.createElement('label');
+                label1.id = def[i]+"_Label";
+                label1.htmlFor = def[i];
+                label1.innerText = def[i];
+                document.getElementById("settings").appendChild(label1);
+                document.getElementById("settings").appendChild(document.createElement('br'));
+            }
+            update();
+            window.onresize = update;
+            window.setInterval(updateColorFromPhotopea, 200);
+        }
+        var _ppcolor = "";
+        function updateColorFromPhotopea() {
+            function sendScript(script, func) {
+                var data = [];
+                var onMessage = function(e) {
+                    if (e.source != pp) return;
+                    data.push(e.data);
+                    if (e.data == "done") {
+                        window.removeEventListener("message", onMessage);
+                        if (func) func(data[0]);
+                    }
+                };
+                window.addEventListener("message", onMessage);
+                pp.postMessage(script, "*");
+            }
+            sendScript('app.echoToOE("rgb("+app.foregroundColor.rgb.red+","+app.foregroundColor.rgb.green+","+app.foregroundColor.rgb.blue+")");',
+                function (color) { if (color != _ppcolor) { _ppcolor = color; updateWithColor(color, _lock); } });
+        }
+    </script>
+  </head>
+  <body onload="load();">
+    <div id="bar">
+        <input type="button" id="lockbutton" onclick="_lock=!_lock;update();" class="button lock off"></input>
+        <input type="button" id="settingsbutton" value="Settings..." onclick="_settings=!_settings;update(true);" class="button"></input>
+        <input type="button" value="HEX" onclick="document.getElementById('colinput').click();" class="button" id="hex" style="float:right;margin-right:2px;"></input>
+        <input type="color" value="#000000" id="colinput" style="display:none;" onchange="updateWithColor(event.target.value);"></input>
+    </div>
+    <div id="cont"></div>
+    <div id="settings">
+        <input type="checkbox" id="labels" onclick="_labels=this.checked;update();" checked><label for="labels">Show labels</label>
+        <hr/>
+    </div>
+  </body>
+</html>
