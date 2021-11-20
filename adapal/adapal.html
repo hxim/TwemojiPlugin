@@ -148,7 +148,7 @@ function hexToRgb(hex) {
 }
 function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g << 8) | (color.b << 0))).toString(16).slice(1); }
 
-        function transformColor(name, pos, steps, c1, c2) {
+        function transformColor(name, pos, steps, c1, c1b, c2) {
             var c;
             if (name == "Reds" || name == "Greens" || name == "Blues") {
                 c =  {r:c1.r,g:c1.g,b:c1.b};
@@ -159,9 +159,9 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 c = pos <= 0 ? c1 : c2.length > pos ? c2[pos] : {r:0,g:0,b:0};
                 return rgbString(c);
             } else
-            if (name == "Previous") {
+            if (name == "Previous" || name == "FG to BG") {
                 c = rgbToHsv(c1);
-                d = rgbToHsv(c2[1]);
+                d = name == "Previous" ? rgbToHsv(c2[1]) : rgbToHsv(c1b);
                 var k = ((pos+1)/(steps+1));
                 if (d.h-c.h > 0.5) c.h+=1;
                 if (c.h-d.h > 0.5) d.h+=1;
@@ -213,7 +213,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 c =  {r:c1.r,g:c1.g,b:c1.b};
                 return c[name[0].toLowerCase()] / 255 * (steps-1);
             } else
-            if (name == "History" || name == "Previous") {
+            if (name == "History" || name == "Previous" || name == "FG to BG") {
                 return 0;
             } else
             if (name == "Tones") {
@@ -241,25 +241,29 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 return null;
             }
         }
-        var def = ["Brightness","HueShift","Intensity","Tints","Tones","Saturation","Reds","Greens","Blues","Previous","History"];
-        var _color = {r:0,g:0,b:0}, _selcolor = _color, _history = [{r:0,g:0,b:0},{r:255,g:255,b:255}], _labels = true, _lock = false, _settings = false, _hidden = {};
+        var def = ["Brightness","HueShift","Intensity","Tints","Tones","Saturation","Reds","Greens","Blues","FG to BG","Previous","History"];
+        var _color = {r:255,g:0,b:0}, _selcolor = _color, _bgcolor = {r:0,g:0,b:0}, _selbgcolor = _bgcolor, _history = [{r:255,g:255,b:255},{r:0,g:0,b:0}], _labels = true, _lock = false, _settings = false, _hidden = {};
         var pp = window.parent;
-        function colclick(elem) {
-            updateWithColor(elem.style.backgroundColor, _lock);
+        function colclick(e, elem) {
+            updateWithColor(elem.style.backgroundColor, _lock, (e.which === 3 || e.button === 2));
         }
-        function updateWithColor(c1, lock) {
+        function updateWithColor(c1, lock, bg) {
             var ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = c1;
             var c2 = hexToRgb(ctx.fillStyle);
-            _selcolor = c2;
+            if (bg) _selbgcolor = c2; else _selcolor = c2;
             update(lock);
-            if (_ppcolor != rgbString(_selcolor)) {
-                pp.postMessage("var c=app.foregroundColor;c.rgb.red="+_selcolor.r+";c.rgb.green="+_selcolor.g+";c.rgb.blue="+_selcolor.b+";app.foregroundColor=c;", "*");
+            if (!bg && _ppcolor[0] != rgbString(c2) || bg && _ppcolor[1] != rgbString(c2)) {
+                pp.postMessage("var c=app."+(bg?"background":"foreground")+"Color;c.rgb.red="+c2.r+";c.rgb.green="+c2.g+";c.rgb.blue="+c2.b+";app."+(bg?"background":"foreground")+"Color=c;", "*");
             }
         }
         function update(lock) {
             if (lock == null) lock = _lock;
             if (!lock && _selcolor != _color) _color = _selcolor;
-            if (!lock && (_history[0].r != _selcolor.r || _history[0].g != _selcolor.g || _history[0].b != _selcolor.b)) _history.unshift(_selcolor);
+            if (!lock && _selbgcolor != _bgcolor) _bgcolor = _selbgcolor;
+            if (!lock && (_history[0].r != _selcolor.r || _history[0].g != _selcolor.g || _history[0].b != _selcolor.b)) {
+                _history.unshift(_selcolor);
+                while (_history.length > 128) _history.pop();
+            }
             var mincol = 10;
             var width = Math.max(23,document.getElementById("cont").getBoundingClientRect().width);
             var height = Math.max(23,document.getElementById("cont").getBoundingClientRect().height);
@@ -279,9 +283,9 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 var s = "<div class='line' style='height:"+si[2]+"px;z-index:"+(100-index)+"'>";
                 var mark = Math.max(0,Math.min(si[0]-1,Math.round(curPos(name, si[0], _selcolor)))), marked = false;
                 for (var i = 0; i < si[0]; i++) {
-                    var rgbstring = transformColor(name, i, si[0], _color, h);
+                    var rgbstring = transformColor(name, i, si[0], _color, _bgcolor, h);
                     var markitem = !_lock && mark==i || _lock && rgbString(_selcolor)==rgbstring && !marked;
-                    s += "<div style='background-color:"+rgbstring+";width:"+si[1]+"px;height:"+si[2]+"px;'"+(markitem ?" class='mark'":"")+" onmousedown='colclick(this);'></div>"
+                    s += "<div style='background-color:"+rgbstring+";width:"+si[1]+"px;height:"+si[2]+"px;'"+(markitem ?" class='mark'":"")+" onmousedown='colclick(event,this);' oncontextmenu='return false;'></div>"
                     if (markitem) marked = true;
                 }
                 if (_labels) s += "<div class='label' style='font-size:"+(si[2]/2.2)+"px;line-height:"+(si[2]/2.2)+"px'><div>"+name+"</div></div>"
@@ -322,7 +326,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             window.onresize = update;
             window.setInterval(updateColorFromPhotopea, 200);
         }
-        var _ppcolor = "";
+        var _ppcolor = ["",""];
         function updateColorFromPhotopea() {
             function sendScript(script, func) {
                 var data = [];
@@ -337,8 +341,14 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 window.addEventListener("message", onMessage);
                 pp.postMessage(script, "*");
             }
-            sendScript('app.echoToOE("rgb("+app.foregroundColor.rgb.red+","+app.foregroundColor.rgb.green+","+app.foregroundColor.rgb.blue+")");',
-                function (color) { if (color.indexOf("rgb(") == 0 && color != _ppcolor) { _ppcolor = color; updateWithColor(color, _lock); } });
+            sendScript('app.echoToOE("rgb("+app.foregroundColor.rgb.red+","+app.foregroundColor.rgb.green+","+app.foregroundColor.rgb.blue+");rgb("+app.backgroundColor.rgb.red+","+app.backgroundColor.rgb.green+","+app.backgroundColor.rgb.blue+")");',
+                function (color) {
+                    if (color.indexOf("rgb(") == 0) {
+                        var cols = color.split(";");
+                        if (cols.length > 0 && cols[0] != _ppcolor[0]) { _ppcolor[0] = cols[0]; updateWithColor(cols[0], _lock, false); }
+                        if (cols.length > 1 && cols[1] != _ppcolor[1]) { _ppcolor[1] = cols[1]; updateWithColor(cols[1], _lock, true); }
+                    }
+                });
         }
 
     var state = null;
@@ -346,6 +356,8 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
       try { if (typeof window.sessionStorage !== 'undefined') {
         var obj = { color:_color,
                     selcolor:_selcolor,
+                    bgcolor:_bgcolor,
+                    selbgcolor:_selbgcolor,
                     history:_history,
                     labels:_labels,
                     lock:_lock,
@@ -360,6 +372,8 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             var s = JSON.parse(state);
             _color = s.color;
             _selcolor = s.selcolor;
+            _bgcolor = s.bgcolor;
+            _selbgcolor = s.selbgcolor;
             _history = s.history;
             _labels = s.labels;
             _lock = s.lock;
@@ -375,7 +389,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
         <input type="button" id="lockbutton" onclick="_lock=!_lock;update();" class="button lock off"></input>
         <input type="button" id="settingsbutton" value="Settings..." onclick="_settings=!_settings;update(true);" class="button"></input>
         <input type="button" value="HEX" onclick="document.getElementById('colinput').click();" class="button" id="hex" style="float:right;margin-right:2px;"></input>
-        <input type="color" value="#000000" id="colinput" style="display:none;" onchange="updateWithColor(event.target.value, false);"></input>
+        <input type="color" value="#000000" id="colinput" style="display:none;" onchange="updateWithColor(event.target.value, false, false);"></input>
     </div>
     <div id="cont"></div>
     <div id="settings">
