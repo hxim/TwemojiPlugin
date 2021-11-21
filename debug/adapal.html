@@ -359,6 +359,8 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             window.setInterval(updateColorFromPhotopea, 200);
             window.setInterval(updateFromImageFromPhotopea, 8000);
             window.addEventListener("message", messageFromPhotopea);
+            updateColorFromPhotopea();
+            updateFromImageFromPhotopea();
         }
         var _ppcolor = ["",""];
         function messageFromPhotopea(e) {
