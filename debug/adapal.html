@@ -325,7 +325,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                     return;
                 }
                 var m = [];
-                m.push({r:dcolor[0],g:dcolor[0],b:dcolor[0]});
+                m.push({r:dcolor[0],g:dcolor[1],b:dcolor[2]});
                 for (var i = 0; i < palette.length; i++) m.push({r:palette[i][0],g:palette[i][1],b:palette[i][2]});
                 if (!_lock) {
                     _fromimage = m;
