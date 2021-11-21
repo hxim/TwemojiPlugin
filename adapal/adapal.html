@@ -53,7 +53,10 @@ background-image:   url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAA
 .button.on, .button.on:hover { background-color: #252525; }
 #settings { overflow: auto; }
         </style> 
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
     <script>
+        const colorThief = new ColorThief();
         function rgbToHsl(c) {
           var r = c.r / 255, g = c.g / 255, b = c.b / 255;
           var max = Math.max(r, g, b), min = Math.min(r, g, b);
@@ -150,6 +153,11 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
 
         function transformColor(name, pos, steps, c1, c1b, c2) {
             var c;
+            if (name == "From image") {
+                c = pos < _fromimage.length ? _fromimage[pos] : {r:0,g:0,b:0};
+                return rgbString(c);
+                
+            } else
             if (name == "Reds" || name == "Greens" || name == "Blues") {
                 c =  {r:c1.r,g:c1.g,b:c1.b};
                 c[name[0].toLowerCase()] = uint8(pos/(steps-1) * 255);
@@ -241,8 +249,8 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 return null;
             }
         }
-        var def = ["Brightness","HueShift","Intensity","Tints","Tones","Saturation","Reds","Greens","Blues","FG to BG","Previous","History"];
-        var _color = {r:255,g:0,b:0}, _selcolor = _color, _bgcolor = {r:0,g:0,b:0}, _selbgcolor = _bgcolor, _history = [{r:255,g:255,b:255},{r:0,g:0,b:0}], _labels = true, _lock = false, _settings = false, _hidden = {};
+        var def = ["Brightness","HueShift","Intensity","Tints","Tones","Saturation","Reds","Greens","Blues","FG to BG","Previous","History","From image"];
+        var _color = {r:255,g:0,b:0}, _selcolor = _color, _bgcolor = {r:0,g:0,b:0}, _selbgcolor = _bgcolor, _history = [{r:255,g:255,b:255},{r:0,g:0,b:0}], _labels = true, _lock = false, _settings = false, _hidden = {}, _fromimage = [], _curcolcount = 10;
         var pp = window.parent;
         function colclick(e, elem) {
             updateWithColor(elem.style.backgroundColor, _lock, (e.which === 3 || e.button === 2));
@@ -276,15 +284,17 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 colcount = mincol;
                 y = x = Math.max(1, Math.floor(width / colcount * 10) / 10);
             } 
+            _curcolcount = colcount;
             var lines = "", i = 0, si = [colcount, x, y];
             var isLight = (.2126 * _selcolor.r + .7152 * _selcolor.g + .0722 * _selcolor.b) > 128;
             var genLine = function(si, name, index, h) {
                 if (_hidden[name]) return "";
                 var s = "<div class='line' style='height:"+si[2]+"px;z-index:"+(100-index)+"'>";
-                var mark = Math.max(0,Math.min(si[0]-1,Math.round(curPos(name, si[0], _selcolor)))), marked = false;
+                var cp = curPos(name, si[0], _selcolor);
+                var mark = cp == null ? -1 : Math.max(0,Math.min(si[0]-1,Math.round(cp))), marked = false;
                 for (var i = 0; i < si[0]; i++) {
                     var rgbstring = transformColor(name, i, si[0], _color, _bgcolor, h);
-                    var markitem = !_lock && mark==i || _lock && rgbString(_selcolor)==rgbstring && !marked;
+                    var markitem = (!_lock && mark==i || rgbString(_selcolor)==rgbstring) && !marked;
                     s += "<div style='background-color:"+rgbstring+";width:"+si[1]+"px;height:"+si[2]+"px;'"+(markitem ?" class='mark'":"")+" onmousedown='colclick(event,this);' oncontextmenu='return false;'></div>"
                     if (markitem) marked = true;
                 }
@@ -306,6 +316,28 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             document.getElementById("settings").style.visibility = !_settings ? "hidden" : "visible";
             savestate();
         }
+       function getColorThiefColors(arrayBuffer) {
+            function getColors(elem) {
+                try {
+                    var dcolor = colorThief.getColor(elem);
+                    var palette = colorThief.getPalette(elem, _curcolcount - 1);
+                } catch {
+                    return;
+                }
+                var m = [];
+                m.push({r:dcolor[0],g:dcolor[1],b:dcolor[2]});
+                for (var i = 0; i < palette.length; i++) m.push({r:palette[i][0],g:palette[i][1],b:palette[i][2]});
+                if (!_lock) {
+                    _fromimage = m;
+                    update();
+                }
+            }
+            var img = document.createElement('img');
+            img.style.display = 'none';
+            img.setAttribute('src', "data:image/jpeg;base64," + btoa([].reduce.call(new Uint8Array(arrayBuffer),function(p,c){return p+String.fromCharCode(c)},'')));
+            document.body.appendChild(img);
+            if (img.complete) getColors(img); else img.addEventListener('load', function() { getColors(img) });
+        }
         function load() {
             document.getElementById("labels").checked = _labels;
             for (var i = 0; i < def.length; i++) {
@@ -325,31 +357,32 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             update();
             window.onresize = update;
             window.setInterval(updateColorFromPhotopea, 200);
+            window.setInterval(updateFromImageFromPhotopea, 8000);
+            window.addEventListener("message", messageFromPhotopea);
+            updateColorFromPhotopea();
+            updateFromImageFromPhotopea();
         }
         var _ppcolor = ["",""];
-        function updateColorFromPhotopea() {
-            function sendScript(script, func) {
-                var data = [];
-                var onMessage = function(e) {
-                    if (e.source != pp) return;
-                    data.push(e.data);
-                    if (e.data == "done") {
-                        window.removeEventListener("message", onMessage);
-                        if (func) func(data[0]);
-                    }
-                };
-                window.addEventListener("message", onMessage);
-                pp.postMessage(script, "*");
+        function messageFromPhotopea(e) {
+            if (e.source != pp) return;
+            if (typeof e.data === 'string' && e.data.indexOf("rgb(") == 0) {
+                var cols = e.data.split(";");
+                if (cols.length != 2) return;
+                if (cols[0] != _ppcolor[0]) { _ppcolor[0] = cols[0]; updateWithColor(cols[0], _lock, false); }
+                if (cols[1] != _ppcolor[1]) { _ppcolor[1] = cols[1]; updateWithColor(cols[1], _lock, true); }
+            } else if (e.data && e.data instanceof ArrayBuffer && e.data.byteLength !== undefined) {
+                getColorThiefColors(e.data);
             }
-            sendScript('app.echoToOE("rgb("+app.foregroundColor.rgb.red+","+app.foregroundColor.rgb.green+","+app.foregroundColor.rgb.blue+");rgb("+app.backgroundColor.rgb.red+","+app.backgroundColor.rgb.green+","+app.backgroundColor.rgb.blue+")");',
-                function (color) {
-                    if (color.indexOf("rgb(") == 0) {
-                        var cols = color.split(";");
-                        if (cols.length > 0 && cols[0] != _ppcolor[0]) { _ppcolor[0] = cols[0]; updateWithColor(cols[0], _lock, false); }
-                        if (cols.length > 1 && cols[1] != _ppcolor[1]) { _ppcolor[1] = cols[1]; updateWithColor(cols[1], _lock, true); }
-                    }
-                });
+
         }
+        function updateColorFromPhotopea() {
+            pp.postMessage('app.echoToOE("rgb("+app.foregroundColor.rgb.red+","+app.foregroundColor.rgb.green+","+app.foregroundColor.rgb.blue+");rgb("+app.backgroundColor.rgb.red+","+app.backgroundColor.rgb.green+","+app.backgroundColor.rgb.blue+")");', "*");
+        }
+        function updateFromImageFromPhotopea() {
+            if (_lock || _hidden["From image"]) return;
+            pp.postMessage('app.activeDocument.saveToOE("jpg");', "*");
+        }
+
 
     var state = null;
     function savestate() {
@@ -358,6 +391,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                     selcolor:_selcolor,
                     bgcolor:_bgcolor,
                     selbgcolor:_selbgcolor,
+                    fromimage:_fromimage,
                     history:_history,
                     labels:_labels,
                     lock:_lock,
@@ -374,6 +408,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             _selcolor = s.selcolor;
             _bgcolor = s.bgcolor;
             _selbgcolor = s.selbgcolor;
+            _fromimage = s.fromimage;
             _history = s.history;
             _labels = s.labels;
             _lock = s.lock;
