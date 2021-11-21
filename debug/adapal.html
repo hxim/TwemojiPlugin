@@ -362,16 +362,21 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 });
         }
         function updateFromImageFromPhotopea() {
+            console.log("updateFromImageFromPhotopea 1");
             if (_lock) return;
             function getColorThiefColors(arrayBuffer) {
+                console.log("updateFromImageFromPhotopea 5");
                 function getColors(elem) {
+                    console.log("updateFromImageFromPhotopea 7");
                     var dcolor = colorThief.getColor(elem);
                     var palette = colorThief.getPalette(elem, _curcolcount - 1);
                     var m = [];
                     m.push({r:dcolor[0],g:dcolor[0],b:dcolor[0]});
                     for (var i = 0; i < palette.length; i++) m.push({r:palette[i][0],g:palette[i][0],b:palette[i][0]});
                     if (!_lock) {
+                        console.log("updateFromImageFromPhotopea 8");
                         _fromimage = m;
+                        console.log(m);
                         update();
                     }
                 }
@@ -379,11 +384,15 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 img.style.display = 'none';
                 img.setAttribute('src', "data:image/jpeg;base64," + btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer))));
                 document.body.appendChild(img);
+                console.log("updateFromImageFromPhotopea 6");
                 if (img.complete) getColors(img); else img.addEventListener('load', function() { getColors(img) });
             }
+            console.log("updateFromImageFromPhotopea 2");
             sendScript('app.activeDocument.saveToOE("jpg");',
                 function(arrayBuffer) {
+                    console.log("updateFromImageFromPhotopea 3");
                     if (!(arrayBuffer && arrayBuffer instanceof ArrayBuffer && arrayBuffer.byteLength !== undefined)) return;
+                    console.log("updateFromImageFromPhotopea 4");
                     getColorThiefColors(arrayBuffer);
                 });
 
