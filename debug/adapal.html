@@ -316,6 +316,24 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             document.getElementById("settings").style.visibility = !_settings ? "hidden" : "visible";
             savestate();
         }
+       function getColorThiefColors(arrayBuffer) {
+            function getColors(elem) {
+                var dcolor = colorThief.getColor(elem);
+                var palette = colorThief.getPalette(elem, _curcolcount - 1);
+                var m = [];
+                m.push({r:dcolor[0],g:dcolor[0],b:dcolor[0]});
+                for (var i = 0; i < palette.length; i++) m.push({r:palette[i][0],g:palette[i][0],b:palette[i][0]});
+                if (!_lock) {
+                    _fromimage = m;
+                    update();
+                }
+            }
+            var img = document.createElement('img');
+            img.style.display = 'none';
+            img.setAttribute('src', "data:image/jpeg;base64," + btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer))));
+            document.body.appendChild(img);
+            if (img.complete) getColors(img); else img.addEventListener('load', function() { getColors(img) });
+        }
         function load() {
             document.getElementById("labels").checked = _labels;
             for (var i = 0; i < def.length; i++) {
@@ -336,67 +354,29 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             window.onresize = update;
             window.setInterval(updateColorFromPhotopea, 200);
             window.setInterval(updateFromImageFromPhotopea, 8000);
-        }
-        function sendScript(script, func) {
-            var data = [];
-            var onMessage = function(e) {
-                if (e.source != pp) return;
-                data.push(e.data);
-                if (e.data == "done") {
-                    window.removeEventListener("message", onMessage);
-                    if (func) func(data[0]);
-                }
-            };
-            window.addEventListener("message", onMessage);
-            pp.postMessage(script, "*");
+            window.addEventListener("message", messageFromPhotopea);
         }
         var _ppcolor = ["",""];
-        function updateColorFromPhotopea() {
-            sendScript('app.echoToOE("rgb("+app.foregroundColor.rgb.red+","+app.foregroundColor.rgb.green+","+app.foregroundColor.rgb.blue+");rgb("+app.backgroundColor.rgb.red+","+app.backgroundColor.rgb.green+","+app.backgroundColor.rgb.blue+")");',
-                function (color) {
-                    if (color.indexOf("rgb(") == 0) {
-                        var cols = color.split(";");
-                        if (cols.length > 0 && cols[0] != _ppcolor[0]) { _ppcolor[0] = cols[0]; updateWithColor(cols[0], _lock, false); }
-                        if (cols.length > 1 && cols[1] != _ppcolor[1]) { _ppcolor[1] = cols[1]; updateWithColor(cols[1], _lock, true); }
-                    }
-                });
-        }
-        function updateFromImageFromPhotopea() {
-            console.log("updateFromImageFromPhotopea 1");
-            if (_lock) return;
-            function getColorThiefColors(arrayBuffer) {
-                console.log("updateFromImageFromPhotopea 5");
-                function getColors(elem) {
-                    console.log("updateFromImageFromPhotopea 7");
-                    var dcolor = colorThief.getColor(elem);
-                    var palette = colorThief.getPalette(elem, _curcolcount - 1);
-                    var m = [];
-                    m.push({r:dcolor[0],g:dcolor[0],b:dcolor[0]});
-                    for (var i = 0; i < palette.length; i++) m.push({r:palette[i][0],g:palette[i][0],b:palette[i][0]});
-                    if (!_lock) {
-                        console.log("updateFromImageFromPhotopea 8");
-                        _fromimage = m;
-                        console.log(m);
-                        update();
-                    }
-                }
-                var img = document.createElement('img');
-                img.style.display = 'none';
-                img.setAttribute('src', "data:image/jpeg;base64," + btoa(String.fromCharCode.apply(null, new Uint8Array(arrayBuffer))));
-                document.body.appendChild(img);
-                console.log("updateFromImageFromPhotopea 6");
-                if (img.complete) getColors(img); else img.addEventListener('load', function() { getColors(img) });
+        function messageFromPhotopea(e) {
+            if (e.source != pp) return;
+            if (typeof e.data === 'string' && e.data.indexOf("rgb(") == 0) {
+                var cols = e.data.split(";");
+                if (cols.length != 2) return;
+                if (cols[0] != _ppcolor[0]) { _ppcolor[0] = cols[0]; updateWithColor(cols[0], _lock, false); }
+                if (cols[1] != _ppcolor[1]) { _ppcolor[1] = cols[1]; updateWithColor(cols[1], _lock, true); }
+            } else if (e.data && e.data instanceof ArrayBuffer && e.data.byteLength !== undefined) {
+                getColorThiefColors(e.data);
             }
-            console.log("updateFromImageFromPhotopea 2");
-            sendScript('app.activeDocument.saveToOE("jpg");',
-                function(arrayBuffer) {
-                    console.log("updateFromImageFromPhotopea 3");
-                    if (!(arrayBuffer && arrayBuffer instanceof ArrayBuffer && arrayBuffer.byteLength !== undefined)) return;
-                    console.log("updateFromImageFromPhotopea 4");
-                    getColorThiefColors(arrayBuffer);
-                });
 
         }
+        function updateColorFromPhotopea() {
+            pp.postMessage('app.echoToOE("rgb("+app.foregroundColor.rgb.red+","+app.foregroundColor.rgb.green+","+app.foregroundColor.rgb.blue+");rgb("+app.backgroundColor.rgb.red+","+app.backgroundColor.rgb.green+","+app.backgroundColor.rgb.blue+")");', "*");
+        }
+        function updateFromImageFromPhotopea() {
+            if (_lock || _hidden["From image"]) return;
+            pp.postMessage('app.activeDocument.saveToOE("jpg");', "*");
+        }
+
 
     var state = null;
     function savestate() {
