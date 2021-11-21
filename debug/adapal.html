@@ -318,11 +318,15 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
         }
        function getColorThiefColors(arrayBuffer) {
             function getColors(elem) {
-                var dcolor = colorThief.getColor(elem);
-                var palette = colorThief.getPalette(elem, _curcolcount - 1);
+                try {
+                    var dcolor = colorThief.getColor(elem);
+                    var palette = colorThief.getPalette(elem, _curcolcount - 1);
+                } catch {
+                    return;
+                }
                 var m = [];
                 m.push({r:dcolor[0],g:dcolor[0],b:dcolor[0]});
-                for (var i = 0; i < palette.length; i++) m.push({r:palette[i][0],g:palette[i][0],b:palette[i][0]});
+                for (var i = 0; i < palette.length; i++) m.push({r:palette[i][0],g:palette[i][1],b:palette[i][2]});
                 if (!_lock) {
                     _fromimage = m;
                     update();
