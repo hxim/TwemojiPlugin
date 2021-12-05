@@ -66,15 +66,17 @@
         img1.alt = text;
         img1.onclick = function() { insertImage(this.original); };
         img1.oncontextmenu = function(e) {
-            var mw = 180, mh = 31*(3)+8;
+            var mw = 180, mh = 31*(4)+8;
             document.getElementById("menu").style.left=Math.max(0,e.clientX+mw>window.innerWidth?e.clientX-mw:e.clientX)+"px";
             document.getElementById("menu").style.top=Math.max(0,e.clientY+mh>window.innerHeight?e.clientY-mh:e.clientY)+"px";
             document.getElementById("menu").style.width=mw+"px";
             document.getElementById("menu").style.display="block";
-            var html = "<div onclick=\"insertImage('"+this.original+"');\">Insert to Photopea</div>";
+            var html = "";
+            html += "<div onclick=\"window.open('https://en.wikipedia.org/wiki/File:"+encodeURIComponent(this.pageimage).replace("'","%27")+"#Licensing','_blank');\">License information</div>";
+            html += "<div onclick=\"window.open('https://en.wikipedia.org/wiki/File:"+encodeURIComponent(this.pageimage).replace("'","%27")+"','_blank');\">Image details</div>";
+            html += "<div onclick=\"window.open('https://en.wikipedia.org/wiki/"+ encodeURIComponent(this.alt).replace("'","%27")+"','_blank');\">Open Wikipedia page</div>";
+            html += "<hr/><div onclick=\"insertImage('"+this.original+"');\">Insert to Photopea</div>";
             html += "<div onclick=\"window.open('"+this.original+"','_blank');\">Open in new window</div>";
-            html += "<hr/><div onclick=\"window.open('https://en.wikipedia.org/wiki/File:"+this.pageimage+"','_blank');\">Image information</div>";
-            html += "<div onclick=\"window.open('https://en.wikipedia.org/wiki/"+ this.alt+"','_blank');\">Open Wikipedia page</div>";
             document.getElementById("menu").innerHTML = html;
             return false;
           };
@@ -132,7 +134,8 @@
             enwikiApiCall("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="+encodeURIComponent(key)+"&srlimit=20&format=json&callback=searchCallback");
         }
         var setsize = function() {
-            document.getElementById("cont").setAttribute("style","height:"+(window.innerHeight-40)+"px;");
+            var lh = document.getElementById("lic").getBoundingClientRect().height;
+            document.getElementById("cont").setAttribute("style","height:"+(window.innerHeight-40-lh)+"px;");
             document.getElementById("search").setAttribute("style","width:"+Math.max(110,window.innerWidth-190)+"px;");
         }
         setsize();
@@ -168,6 +171,13 @@
       <label>License:</label><select id="license" onchange="update()"><option value="free" selected>Free</option><option value="any">Any</option></select>
     </div>
     <div id="cont"></div>
+    <div id="lic" style="position:relative;">
+<div style="position:absolute;top:50%;width:21px;height:21px;transform:  translateY(-50%);">
+<svg version="1.2" baseProfile="tiny-ps" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="21" height="21"><path d="M11.88 17.65C11.8 17.73 11.72 17.77 11.62 17.77L9.38 17.77C9.28 17.77 9.2 17.73 9.12 17.65C9.05 17.57 9.01 17.47 9.01 17.35L9.01 14.95C9.01 14.84 9.05 14.74 9.12 14.66C9.2 14.58 9.28 14.54 9.38 14.54L11.62 14.54C11.72 14.54 11.8 14.58 11.88 14.66C11.95 14.74 11.99 14.84 11.99 14.95L11.99 17.35C11.99 17.47 11.95 17.57 11.88 17.65ZM11.84 12.84C11.77 12.9 11.68 12.92 11.57 12.92L9.42 12.92C9.31 12.92 9.22 12.9 9.14 12.84C9.06 12.79 9.02 12.72 9.02 12.63L8.83 6.87C8.83 6.75 8.86 6.66 8.94 6.6C9.04 6.51 9.14 6.46 9.22 6.46L11.78 6.46C11.86 6.46 11.96 6.51 12.06 6.6C12.13 6.66 12.17 6.74 12.17 6.84L11.96 12.63C11.96 12.72 11.92 12.79 11.84 12.84ZM11.26 0.23C11.02 0.08 10.77 0 10.5 0C10.23 0 9.98 0.08 9.74 0.23C9.51 0.38 9.33 0.58 9.2 0.85L0.27 18.61C0 19.14 0.01 19.67 0.29 20.2C0.43 20.45 0.61 20.64 0.83 20.79C1.06 20.93 1.31 21 1.57 21L19.43 21C19.69 21 19.94 20.93 20.17 20.79C20.39 20.64 20.57 20.45 20.71 20.2C20.99 19.67 21 19.14 20.73 18.61L11.8 0.85C11.67 0.58 11.49 0.38 11.26 0.23Z" /></svg>
+</div>
+<div style="padding-left:25px;font-size:11px;text-align: justify;">
+Images may be subject to copyright. To check license terms right click or long press on image and select "License information" from menu.</div>
+</div>
     <div id="menu"></div>
   </body>
 </html>
