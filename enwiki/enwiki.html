@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+		<style>
+            * { border-style: solid; border-width: 0; }
+			body {  background-color:#474747; overflow: hidden; margin: 3px 8px 0 8px; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45); }
+            body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
+            svg { filter: invert( 0.78 ) drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.45)); }
+			label { line-height:21px; display: inline-block; margin-top: 2px; }
+            input { background-color: #252525; border-radius: 3px; padding: 3px; box-sizing: border-box; width: 110px; margin: 1px 2px 0 2px; line-height: 17.5px; }
+
+            select { background-color: #606060; padding: 2px 15px 3px 5px; width: 70px; margin: 0 0 0 2px; overflow: hidden;
+                     background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
+                     background-position: calc(100% - 9px) calc(10px), calc(100% - 4px) calc(10px); background-size: 5px 5px, 5px 5px;
+                     background-repeat: no-repeat; -webkit-appearance: none; line-height: 1.5em;
+            }
+            select, .loadmore { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
+			div.ew {  cursor:pointer; background-color: #606060; display: inline-block; margin: 0 6px 6px 0; height: 58px; position: relative; }
+            div.ew.text > div { position: absolute; top: 50%; transform:  translateY(-50%); text-align: center; width: 100%; }
+            div.ew img { padding: 4px; max-height: 50px; max-width: 50px; }
+            div.ew img:not(:first-child){ padding-left: 6px; }
+            div.et { font-size: 13px; max-height: 40px; overflow: hidden; line-height: normal; display: none; }
+			div.ew.text { width: 120px; height: 98px; }
+            div.ew.text div.et { display: block; }
+            div.ew:hover, select:hover, .loadmore:hover { background-color: #6a6a6a; }
+            .loadmore { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 35px; height: 35px; width: 76px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; }
+            #bar { height: 26px; white-space: nowrap; }
+            #bar a { display: inline-block; line-height: 0; border-radius: 3px; padding: 1px; }
+            #bar a:hover { background-color: rgba(0,0,0,0.25); }
+			#cont { margin-top:6px; font-size: 0px; overflow-y: scroll; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin; }
+			#cont::-webkit-scrollbar, #info > div.body::-webkit-scrollbar { width: 10px; background: rgba(0,0,0,0.2); }
+			#cont::-webkit-scrollbar-thumb,  #info > div.body::-webkit-scrollbar-thumb { background: #222222; margin: 2px; }
+			#menu { position: absolute; background-color: #ffffff; }
+			#menu > div { padding: 0.5em 1em 0.5em 0.7em; font-size: 13px; color: black; text-shadow: none; user-select: none; border-left: 15px solid transparent; position: relative; }
+			#menu > div:hover { background-color: rgba(190,230,255,1); }
+			#menu > hr { border: 0; height: 1px; margin: 0.25em 0; background: #bebebe; }
+			#menu > div > img { cursor: default; background-color: transparent; width: 28px; height: 28px; position: absolute; right: 15px; top: 1px; margin: 0; }
+			#menu > div > img:hover { background-color: transparent; }
+			#menu > div.disabled { color: #bbbbbb; pointer-events: none; }
+			#menu > div.disabled img { display: none; }
+
+        </style>
+    <script>
+    function insertImage(url) {
+      if (window.parent == window.self) window.open(url,'_blank');
+      else window.parent.postMessage("app.open(\""+url+"\",null,true);", "*");
+      document.getElementById("menu").style.display="none";
+    }
+    function fimclick(elem,e) { if (e.target.tagName =='IMG') return; elem.getElementsByTagName('img')[0].onclick(e); }
+    function fimcontextmenu(elem,e) { if (e.target.tagName =='IMG') return; elem.getElementsByTagName('img')[0].oncontextmenu(e); }
+    function generateItemHtml(url_thumbnail, url_original, text, tooltip, pageimage) {
+        var div1 = document.createElement('div');
+        div1.className = "ew text";
+        div1.onclick = function(event) { fimclick(this,event); };
+        div1.oncontextmenu = function(event) { fimcontextmenu(this,event); return false; };
+        div1.title = tooltip;
+        var div2 = document.createElement('div');
+        var img1 = document.createElement('img');
+        img1.draggable = false;
+        img1.src = url_thumbnail;
+        img1.original = url_original;
+        img1.pageimage = pageimage;
+        img1.title = tooltip;
+        img1.alt = text;
+        img1.onclick = function() { insertImage(this.original); };
+        img1.oncontextmenu = function(e) {
+            var mw = 180, mh = 31*(3)+8;
+            document.getElementById("menu").style.left=Math.max(0,e.clientX+mw>window.innerWidth?e.clientX-mw:e.clientX)+"px";
+            document.getElementById("menu").style.top=Math.max(0,e.clientY+mh>window.innerHeight?e.clientY-mh:e.clientY)+"px";
+            document.getElementById("menu").style.width=mw+"px";
+            document.getElementById("menu").style.display="block";
+            var html = "<div onclick=\"insertImage('"+this.original+"');\">Insert to Photopea</div>";
+            html += "<div onclick=\"window.open('"+this.original+"','_blank');\">Open in new window</div>";
+            html += "<hr/><div onclick=\"window.open('https://en.wikipedia.org/wiki/File:"+this.pageimage+"','_blank');\">Image information</div>";
+            html += "<div onclick=\"window.open('https://en.wikipedia.org/wiki/"+ this.alt+"','_blank');\">Open Wikipedia page</div>";
+            document.getElementById("menu").innerHTML = html;
+            return false;
+          };
+
+        var div3 = document.createElement('div');
+        div3.className = "et";
+        div3.appendChild(document.createTextNode(text));
+        div2.appendChild(img1);
+        div2.appendChild(div3);
+        div1.appendChild(div2);
+        return div1;
+    }
+    function clearApiCallScripts() {
+        while (document.body.lastElementChild.tagName.toLowerCase() == "script") document.body.removeChild(document.body.lastElementChild);
+    }
+    function enwikiApiCall(url) {
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = url;
+        document.body.appendChild(script);
+    }
+    var _titles = null;
+    function imagesCallback(res) {
+        if (res == null || res.query == null || res.query.pages == null) return;
+        var a = res.query.pages, b = [];
+        var target = document.getElementById("cont");
+        while (target.firstChild) target.removeChild(target.firstChild);
+        if (_titles != null && _titles.length > 0) {
+            for (var j = 0; j < _titles.length; j++) {
+                for (var i = 0; i < a.length; i++) if (a[i] != null && _titles[j] == encodeURIComponent(a[i].title)) { b.push(a[i]); a[i] = null; }
+            }
+            for (var i = 0; i < a.length; i++) if (a[i] != null) b.push(a[i]);
+        } else b = a;
+        for (var i = 0; i < b.length; i++) {
+            if (b[i].thumbnail == null || b[i].original == null || b[i].title == null) continue;
+            target.appendChild(generateItemHtml(b[i].thumbnail.source,b[i].original.source,b[i].title,b[i].title + " (" +  b[i].original.width + " x " +  b[i].original.height + ")", b[i].pageimage));
+        }
+    }
+    function searchCallback(res) {
+        if (res == null || res.query == null || res.query.search == null) return;
+        var licsel = document.getElementById("license"), lickey = licsel.options[licsel.selectedIndex].value;
+        var a = res.query.search;
+        var titles = [];
+        for (var i = 0; i < a.length; i++) titles.push(encodeURIComponent(a[i].title));
+        _titles = titles;
+        enwikiApiCall("https://en.wikipedia.org/w/api.php?action=query&format=json&formatversion=2&prop=pageimages|pageterms&piprop=original|thumbnail|name&pilicense="+lickey+"&titles="+titles.join("|")+"&callback=imagesCallback");
+    }
+    function update() {
+        var key = document.getElementById("search").value.toLowerCase();
+        clearApiCallScripts();
+        if (key.length == 0) {
+            var target = document.getElementById("cont");
+            while (target.firstChild) target.removeChild(target.firstChild);
+        } else {
+            enwikiApiCall("https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch="+encodeURIComponent(key)+"&srlimit=20&format=json&callback=searchCallback");
+        }
+        var setsize = function() {
+            document.getElementById("cont").setAttribute("style","height:"+(window.innerHeight-40)+"px;");
+            document.getElementById("search").setAttribute("style","width:"+Math.max(110,window.innerWidth-190)+"px;");
+        }
+        setsize();
+        window.onresize = setsize;
+        cont.scrollTo(0, 0);
+        cont.style.display = "block";
+        cont.onscroll = function(e) { document.getElementById("menu").style.display="none"; };
+        savestate();
+    }
+    document.onmousedown = document.onmouseup = function(e) {
+        e = e || window.event; e = e.target || e.srcElement;
+        while (e != null && e.id != "menu") e = e.parentElement;
+        if (e == null) document.getElementById("menu").style.display="none";
+    };
+    document.onmouseout = function(e) { var e = e.toElement || e.relatedTarget; if (e != null && e.tagName!='HTML') return; document.getElementById("menu").style.display="none"; };
+    var state = null;
+    function savestate() {
+      try { if (typeof window.sessionStorage !== 'undefined') {
+        var s = JSON.stringify({search:document.getElementById("search").value, license:document.getElementById("license").selectedIndex }); 
+        if (state != s) { state = s; window.sessionStorage.setItem("enwiki_state", state); }
+      } } catch {}
+    }
+    function loadstate() {
+      try { if (typeof window.sessionStorage !== 'undefined') {
+        if (state = window.sessionStorage.getItem("enwiki_state")) { var s = JSON.parse(state); document.getElementById("search").value = s.search; document.getElementById("license").selectedIndex = s.license; }
+      } } catch {}
+    }
+    </script>
+  </head>
+  <body onload="loadstate();update();">
+    <div id="bar">
+      <label>Search:</label><input type="text" id="search" onchange="update()"></input>
+      <label>License:</label><select id="license" onchange="update()"><option value="free" selected>Free</option><option value="any">Any</option></select>
+    </div>
+    <div id="cont"></div>
+    <div id="menu"></div>
+  </body>
+</html>
