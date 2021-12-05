@@ -66,7 +66,7 @@
         img1.alt = text;
         img1.onclick = function() { insertImage(this.original); };
         img1.oncontextmenu = function(e) {
-            var mw = 180, mh = 31*(4)+8;
+            var mw = 180, mh = 31*(5)+8;
             document.getElementById("menu").style.left=Math.max(0,e.clientX+mw>window.innerWidth?e.clientX-mw:e.clientX)+"px";
             document.getElementById("menu").style.top=Math.max(0,e.clientY+mh>window.innerHeight?e.clientY-mh:e.clientY)+"px";
             document.getElementById("menu").style.width=mw+"px";
