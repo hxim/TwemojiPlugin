@@ -7,18 +7,16 @@
             * { border-style: solid; border-width: 0; }
 			body {  background-color:#474747; overflow: hidden; margin: 3px 8px 0 8px; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.45); }
             body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
-			label { line-height:21px; display: inline-block; margin-top: 2px; }
-            input { background-color: #252525; border-radius: 3px; padding: 3px; box-sizing: border-box; width: 80px; margin: 1px 0 0 0; line-height: 17.5px; }
-            select { background-color: #606060; padding: 2px 15px 3px 5px; width: 80px; margin: 0 0 2px 2px; overflow: hidden;
-                     background-image: linear-gradient(45deg, transparent 50%, #d5d5d5 50%), linear-gradient(135deg, #d5d5d5 50%, transparent 50%);
-                     background-position: calc(100% - 9px) calc(10px), calc(100% - 4px) calc(10px); background-size: 5px 5px, 5px 5px;
-                     background-repeat: no-repeat; -webkit-appearance: none; line-height: 1.5em;
-            }
-            select, a { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
+            label { line-height:21px; display: inline-block; margin-top: 2px; }
+            input { padding: 3px; box-sizing: border-box; width: 73px; margin: 0 2px 0 2px; }
+            select { padding: 3px 15px 3px 5px; width: 107px; margin: 0 0 0 2px; overflow: hidden; margin: 0 2px; height: 26px; }
+            select, input { background-color: #252525; border: 1px solid #252525; border-radius: 3px; transition: border 0.5s; }
+            input:hover, select:hover, input:focus, select:focus { border: 1px solid #3482f6; outline: none !important; }
+            a { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
 			.ew {  background-color: #ffffff; display: inline-block; position: relative; width: 100%; height: 100%; }
             .ew > div { position: absolute; top: 0; left: 0; bottom: 0; right: 0; }
             .ew svg { width: 100%; height: 100%; }
-		    select:hover, a:hover { background-color: #6a6a6a; }
+		    a:hover { background-color: #6a6a6a; }
             a { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 20.5px; height: 20.5px; width: 140px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; margin: 10px auto; position: absolute; left: 0; right: 0; }
             #margin { width: 50px; }
             #bar { height: 117px; white-space: nowrap; }
