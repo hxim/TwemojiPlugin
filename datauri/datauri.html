@@ -58,13 +58,18 @@
         window.addEventListener("message", onMessage);
         var running = false, svgo = [true,false,false,false,false], func = null;
         function onMessage(e) {
-            if (running && func == "update" && e.data instanceof ArrayBuffer || e.data instanceof Uint8Array) readImage(e.data);
-            else if (e.data == "done") { if (func == "checkpp") update(); document.getElementById("output").placeholder = "";  running = false; func = null; }
+            if (running && e.data instanceof ArrayBuffer || e.data instanceof Uint8Array) readImage(e.data);
+            else if (e.data == "done") {
+                var callback = func;
+                running = false; func = null;
+                document.getElementById("output").placeholder = "";
+                if (callback != null) callback();
+            }
         }
         function checkpp() {
             if (window.parent == window.self) return;
             document.getElementById("output").placeholder = "Photopea not available.";
-            running = true; func = "checkpp";
+            running = true; func = update;
             window.parent.postMessage("app.echoToOE('datauri plugin init');", "*");
         }
         function getQuality() {
@@ -89,7 +94,7 @@
             document.getElementById("output").value = "";
             document.getElementById("output").placeholder = "Please wait...";
             footer();
-            running = true; func = "update";
+            running = true;
             window.parent.postMessage("if (app.documents.length > 0) app.activeDocument.saveToOE('"+format+options+"'); else alert('Open a document first.')", "*");
         }
         function readImage(data) {
@@ -111,7 +116,7 @@
         function openPhotopea() {
             var data = document.getElementById("output").value;
             if (running || window.parent == window.self || data.indexOf("data:") != 0) return;
-            running = true; func = "openPhotopea";
+            running = true;
             window.parent.postMessage("app.open('"+data+"');", "*");
         }
         function previewBrowser() {
