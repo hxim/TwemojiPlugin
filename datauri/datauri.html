@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+		<style>
+            * { border-style: solid; border-width: 0; }
+			body {  background-color:#474747; overflow: hidden; margin: 3px 8px 0 8px; }
+            body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
+            svg { filter: invert( 0.78 ) drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.45)); }
+			label { line-height:21px; display: inline-block; margin: 2px 6px 0 0; }
+            input { padding: 3px; box-sizing: border-box; width: 54px; margin: 0 2px 0 2px; }
+            input[type=checkbox] { width: unset; height: 26px; line-height: 26px; vertical-align: middle; }
+            select { padding: 2px 2px 3px 2px; width: 63px; margin: 0 0 0 2px; overflow: hidden; margin: 0 6px 0 2px; height: 26px; }
+            select, input { background-color: #252525; border: 1px solid #252525; border-radius: 3px; transition: border 0.5s; }
+            input:hover, select:hover, input:focus, select:focus { border: 1px solid #3482f6; outline: none !important; }
+            .loadmore { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px; border-bottom-color: rgba(0, 0, 0, 0.6); }
+			div.ew {  cursor:pointer; background-color: #606060; display: inline-block; margin: 0 4px 4px 0; height: 40px; position: relative; }
+            div.ew.text > div { position: absolute; top: 50%; transform:  translateY(-50%); text-align: center; width: 100%; }
+            div.ew img { padding: 2px; height: 36px; width: 36px; }
+            div.ew img:not(:first-child){ padding-left: 6px; }
+            div.et { font-size: 13px; max-height: 36px; overflow: hidden; line-height: normal; display: none; }
+			div.ew.text { width: 84px; height: 76px; }
+            div.ew.text div.et { display: block; }
+            div.ew:hover, .loadmore:hover { background-color: #6a6a6a; }
+            .loadmore { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 35px; height: 35px; width: 76px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; }
+            .bar { height: 26px; white-space: nowrap; font-size: 0; }
+            .bar a { display: inline-block; line-height: 0; border-radius: 3px; padding: 1px; margin: 0; vertical-align: top; position: relative; }
+            .bar a:hover { background-color: rgba(0,0,0,0.25); }
+            .bar > div { display: inline-block; vertical-align: top; }
+			#menu { position: absolute; background-color: #ffffff; }
+			#menu > div { padding: 0.5em 1em 0.5em 0.7em; font-size: 13px; color: black; user-select: none; border-left: 15px solid transparent; position: relative; }
+			#menu > div:hover { background-color: rgba(190,230,255,1); }
+			#menu > hr { border: 0; height: 1px; margin: 0.25em 0; background: #bebebe; }
+			#menu > div > img { cursor: default; background-color: transparent; width: 28px; height: 28px; position: absolute; right: 15px; top: 1px; margin: 0; }
+			#menu > div > img:hover { background-color: transparent; }
+			#menu > div.disabled { color: #bbbbbb; pointer-events: none; }
+			#menu > div.disabled img { display: none; }
+			#info { position: absolute; z-index: 10; background-color: #474747; width: 272px; height: 398px; top: 32px; left: 8px; box-shadow: 0px 4px 30px rgba(0,0,0,0.25); display: none; border-radius: 6px; }
+			#info > div.head { border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); height: 30px; font-size: 1.15em;
+                               background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.25) 100%); border-top-left-radius: 6px; border-top-right-radius: 6px; }
+			#info > div.head span.label { display: inline-block; padding: 0.3em 0.5em; font-weight: bold; }
+			#info > div.head span.cross { cursor: pointer; display: inline-block; background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI1NiAyNTYiIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2Ij48cGF0aCAgZD0ibTMyIDBsMjI0IDIyNC0zMiAzMi0yMjQtMjI0em0yMjQgMzJsLTIyNCAyMjQtMzItMzIgMjI0LTIyNHoiLz48L3N2Zz4=);
+                                          background-size: 10px 10px; background-repeat: no-repeat; background-position: center; width: 30px; height: 30px; font-size: 1.3em; position: absolute; right: 0; filter: invert(0.78); }
+			#info > div.body { padding: 11px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin;  height: 227px; }
+			#info a { color: #d5d5d5; }
+			#info p { margin: 0 0 1em 0; padding: 0; text-align: justify; text-justify: inter-word; }
+			#info .name { font-weight: bold; }
+			#info hr { height: 1px; background-color: #d5d5d5; }
+            #output { background-color: #252525; border-radius: 3px; width: 100%; height: 100%; box-sizing: border-box; resize:none; padding: 4px; white-space: pre-wrap; word-break: break-all; }
+			#cont { margin:4px; overflow: none; font-size: 0px; position: absolute; top: 28px; bottom: 28px; left: 4px; right: 4px; }
+            .footer { height: 26px; white-space: nowrap; font-size: 0; position: absolute; bottom: 3px; left: 8px; right:8px; }
+            .footer #preview { padding:0;border:0;outline:0;background-color:#474747;position:absolute;top:0;bottom: 0; margin: auto; left: 0; right: 0;}
+            .footer img { transform: scale(1); transform-origin: bottom right; transition: transform 0.2s; }
+            .footer img.zoom { transform: scale(6.25); transform-origin: bottom right; }
+        </style>
+    <script>
+        window.addEventListener("message", onMessage);
+        var running = false, ready = false, svgo = [true,false,false,false,false];
+        function onMessage(e) {
+            if (running && e.data instanceof ArrayBuffer || e.data instanceof Uint8Array) readImage(e.data);
+            else if (e.data == "done") { ready = true; running = false; document.getElementById("output").placeholder = ""; }
+        }
+        function getQuality() {
+            var q = document.getElementById("quality").value.replace("%","");
+            var value = null;
+            try { value = parseInt(q); } catch {}
+            value = value || 80;
+            if (value < 1) value = 1;
+            if (value > 100) value = 100;
+            return value;
+        }
+        function update() {
+            var formatSelect = document.getElementById("format");
+            var format = formatSelect.options[formatSelect.selectedIndex].value;
+            document.getElementById("divQuality").style.display = format == "jpg" || format == "webp" ?"inline-block" : "none";
+            document.getElementById("divSvgOptions").style.display = format == "svg" ?"inline-block" : "none";
+            document.getElementById("quality").value = getQuality()+"%";
+
+            if (!ready || window.parent == window.self) { footer(); return; }
+            var options = format == "jpg" || format == "webp" ? ":" + (getQuality()/100) :
+                          format == "svg" ? ":" + svgo : "";
+            document.getElementById("output").value = "";
+            document.getElementById("output").placeholder = "Please wait...";
+            footer();
+            running = true;
+            window.parent.postMessage("if (app.documents.length > 0) app.activeDocument.saveToOE('"+format+options+"'); else alert('Open a document first.')", "*");
+        }
+        function readImage(data) {
+            var formatSelect = document.getElementById("format");
+            var format = formatSelect.options[formatSelect.selectedIndex].value;
+            var types = {'jpg':'image/jpeg','png':'image/png','svg':'image/svg+xml','webp':'image/webp'};
+            var t = types[format] || 'application/octet-stream';
+            var handleResult = function(result) {
+                document.getElementById("output").value = result;
+                document.getElementById("output").placeholder = "";
+                document.getElementById("output").scrollTop = 0;
+                footer();
+            };
+            var reader = new FileReader();
+            reader.onload = function() { handleResult('data:' + t + ';base64,' + reader.result.split(",", 2)[1]); };
+            reader.onerror = function() { handleResult(reader.error); };
+            reader.readAsDataURL(new Blob([data]));
+        }
+        function openPhotopea() {
+            var data = document.getElementById("output").value;
+            if (!ready || window.parent == window.self || data.indexOf("data:") != 0) return;
+            running = true;
+            window.parent.postMessage("app.open('"+data+"');", "*");
+        }
+        function previewBrowser() {
+            var data = document.getElementById("output").value;
+            if (data.indexOf("data:") != 0) return;
+            var image = new Image();
+            image.src = data;
+            var win = window.open("");
+            win.document.write(image.outerHTML);
+            win.document.close();
+        }
+        function copy() {
+            var success = false;
+            var element = document.getElementById("output");
+            var success = function(result) {
+                document.getElementById("copied").innerText = result ? "Copied " + element.value.length + " bytes" : "Copy failed";
+                document.getElementById("copied").style.opacity = 1;
+                window.setTimeout(function() { document.getElementById("copied").style.opacity = 0; }, 1000);
+                window.setTimeout(function() {
+                    element.blur();
+                    element.scrollTop = 0;
+                },1);
+            }
+            if (!navigator.clipboard) {
+                try {
+                    element.focus();
+                    element.select();
+                    element.setSelectionRange(0, 99999);
+                    success(document.execCommand('copy'));
+                } catch (err) {
+                    sucess(false);
+                }
+            } else {
+                navigator.clipboard.writeText(element.value).then(function() {
+                    success(true);
+                }, function(err) {
+                    success(false);
+                });
+            }
+        }
+        function setsvgo(index) {
+            var button = document.getElementById("svgo" + index);
+            svgo[index] = !svgo[index];
+            button.style=svgo[index]?'background-color:#252525':'';
+            update();
+        }
+        function footer() {
+            var data = document.getElementById("output").value;
+            document.getElementById("footerlabel").innerText = "";
+            document.getElementById("preview").src = data;
+            var ext = data.indexOf("data:image/") == 0 ? data.split(";",2)[0].split("/",2)[1].split("+",2)[0].toUpperCase() : "";
+            document.getElementById("preview").onload = function() {
+                document.getElementById("footerlabel").innerText = ext + " - " + this.naturalWidth + " x " + this.naturalHeight + " - " + data.length + " bytes";
+                this.width = this.naturalWidth >= this.naturalHeight ? 24 : 24 * this.naturalWidth / this.naturalHeight;
+                this.height = this.naturalWidth >= this.naturalHeight ? 24 * this.naturalHeight / this.naturalWidth : 24;
+            }
+            document.getElementById("preview").onerror = function() {
+                this.width = 24;
+                this.height = 24;
+            }
+        }
+        function preview() {
+            var p = document.getElementById("preview");
+            if (p.className != "zoom") {
+                p.className = "zoom";
+                p.onmouseout = function() { this.className = ""; this.onmouseout = null; };
+            } else {
+                p.className = "";
+                p.onmouseout = null;
+            }
+        }
+        
+    </script>
+  </head>
+  <body onload="update();">
+    <div class="bar">
+      <a href="javascript:update();" title="Refresh">
+      <img style="filter:invert(0.78);padding: 4px 5px 5px 4px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPjxzdHlsZT48L3N0eWxlPjxwYXRoICBkPSJtMTQuOCA5LjFxMCAwLTAuMSAwLTAuNiAyLjYtMi42IDQuMy0yIDEuNi00LjYgMS42LTEuNSAwLTIuOC0wLjUtMS4zLTAuNi0yLjQtMS42bC0xLjIgMS4zcS0wLjIgMC4yLTAuNSAwLjItMC4yIDAtMC40LTAuMi0wLjItMC4yLTAuMi0wLjR2LTQuNHEwLTAuMyAwLjItMC41IDAuMi0wLjEgMC40LTAuMWg0LjRxMC4zIDAgMC40IDAuMSAwLjIgMC4yIDAuMiAwLjUgMCAwLjItMC4yIDAuNGwtMS4zIDEuNHEwLjcgMC42IDEuNiAwLjkgMC45IDAuNCAxLjggMC40IDEuMyAwIDIuNC0wLjYgMS4yLTAuNyAxLjktMS44IDAuMS0wLjEgMC41LTEuMSAwLjEtMC4yIDAuMy0wLjJoMS44cTAuMiAwIDAuMyAwIDAuMSAwLjEgMC4xIDAuM3ptMC04LjNxLTAuMi0wLjItMC40LTAuMi0wLjMgMC0wLjUgMC4ybC0xLjIgMS4zcS0xLjEtMS0yLjQtMS42LTEuNC0wLjUtMi44LTAuNS0yLjcgMC00LjcgMS42LTIgMS43LTIuNiA0LjMgMCAwLjIgMC4xIDAuMyAwLjEgMC4xIDAuMiAwaDEuOXEwLjIgMC4xIDAuMy0wLjIgMC40LTEgMC41LTEuMSAwLjctMS4xIDEuOS0xLjggMS4xLTAuNiAyLjQtMC42IDIgMCAzLjQgMS4zbC0xLjMgMS40cS0wLjIgMC4yLTAuMiAwLjQgMCAwLjMgMC4yIDAuNSAwLjEgMC4yIDAuNCAwLjFoNC40cTAuMiAwLjEgMC40LTAuMSAwLjItMC4yIDAuMi0wLjV2LTQuM3EwLTAuMy0wLjItMC41eiIvPjwvc3ZnPg=="/>
+      </a>
+      <a href="javascript:copy();" title="Copy to Clipboard">
+      <img style="filter:invert(0.78);padding: 4px 5px 5px 4px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPjxzdHlsZT48L3N0eWxlPjxwYXRoICBkPSJtNi40IDQuM2gzLjJ2My41cTAgMC4zIDAuMyAwLjUgMC4yIDAuMyAwLjUgMC4zaDMuNXY1LjNoLTcuNXptMi4xLTIuMnEtMC4xIDAuMS0wLjIgMC4xaC01LjlxLTAuMSAwLTAuMi0wLjEtMC4xLTAuMS0wLjEtMC4ydi0wLjVxMC0wLjEgMC4xLTAuMiAwLjEtMC4xIDAuMi0wLjFoNS45cTAuMSAwIDAuMiAwLjEgMC4xIDAuMSAwLjEgMC4ydjAuNXEwIDAuMS0wLjEgMC4yem0yLjIgMi45bDIuNSAyLjVoLTIuNXptNC4xIDIuOXEtMC4xLTAuNC0wLjQtMC43bC0zLjQtMy40cS0wLjEtMC4xLTAuMy0wLjJ2LTIuOHEwLTAuMy0wLjItMC41LTAuMy0wLjMtMC42LTAuM2gtOS4xcS0wLjMgMC0wLjYgMC4zLTAuMiAwLjItMC4yIDAuNXYxMS4zcTAgMC4zIDAuMiAwLjYgMC4zIDAuMiAwLjYgMC4yaDQuNnYxLjNxMCAwLjQgMC4yIDAuNiAwLjIgMC4yIDAuNiAwLjJoOHEwLjMgMCAwLjYtMC4yIDAuMi0wLjIgMC4yLTAuNnYtNS42cTAtMC4zLTAuMi0wLjd6Ii8+PC9zdmc+"/>
+      <span id="copied" style="display:inline-block;opacity:0;transition:opacity 0.2s;position:absolute;background-color:white;color:black;border-radius:3px;font-size: 13px;height: 24px;line-height: 24px;z-index: 1;padding: 0 6px;pointer-events:none;"></span>
+      </a>
+      <a href="javascript:openPhotopea();" title="Open in Photopea">
+      <img style="filter:invert(0.78);padding: 4px 5px 5px 4px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPjxzdHlsZT48L3N0eWxlPjxwYXRoICBkPSJtMi40IDBoMTAuMWMxLjQgMCAyLjUgMS4xIDIuNSAyLjR2MTAuMWMwIDEuNC0xLjEgMi41LTIuNSAyLjVoLTguNXYtNi41cTAgMCAwIDBjMC0yLjUgMS45LTQuNCA0LjMtNC40IDEuNCAwIDIuNiAxLjEgMi42IDIuNiAwIDEuNS0xLjIgMi43LTIuNiAyLjctMC41IDAtMC45LTAuNC0wLjktMC45IDAtMC41IDAuNC0wLjkgMC45LTAuOSAwLjUgMCAwLjktMC40IDAuOS0wLjkgMC0wLjUtMC40LTAuOS0wLjktMC45LTEuNCAwLTIuNiAxLjItMi42IDIuNyAwIDEuNCAxLjIgMi42IDIuNiAyLjYgMi40IDAgNC4zLTEuOSA0LjMtNC40IDAtMi40LTEuOS00LjQtNC4zLTQuNC0zLjQgMC02LjEgMi44LTYuMSA2LjJxMCAwIDAgMHY2LjVjLTEuMi0wLjEtMi4yLTEuMi0yLjItMi41di0xMC4xYzAtMS4zIDEuMS0yLjQgMi40LTIuNHoiLz48L3N2Zz4="/>
+      </a>
+      <a href="javascript:previewBrowser();" title="Preview in Browser">
+      <img style="filter:invert(0.78);padding: 4px 5px 5px 4px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPjxzdHlsZT48L3N0eWxlPjxwYXRoICBkPSJtMTEuOCA5LjF2My4xcTAgMS4xLTAuNyAyLTAuNyAwLjgtMS43IDAuOGgtN3EtMSAwLTEuNy0wLjgtMC43LTAuOS0wLjctMnYtOC4xcTAtMS4yIDAuNy0yIDAuNy0wLjggMS43LTAuOWg1LjlxMC4xIDAgMC4yIDAuMSAwLjEgMC4xIDAuMSAwLjN2MC42cTAgMC4xLTAuMSAwLjItMC4xIDAuMS0wLjIgMC4xaC01LjlxLTAuNSAwLTAuOSAwLjUtMC40IDAuNC0wLjQgMS4xdjguMXEwIDAuNiAwLjQgMS4xIDAuNCAwLjUgMC45IDAuNGg3cTAuNSAwLjEgMC45LTAuNCAwLjQtMC41IDAuNC0xLjF2LTMuMXEwLTAuMiAwLjEtMC4zIDAuMS0wLjEgMC4yLTAuMWgwLjVxMC4xIDAgMC4yIDAuMSAwLjEgMC4xIDAuMSAwLjN6bTMtOC45cS0wLjEtMC4yLTAuMy0wLjJoLTQuM3EtMC4yIDAtMC40IDAuMi0wLjIgMC4yLTAuMiAwLjQgMCAwLjMgMC4yIDAuNWwxLjUgMS43LTUuNSA2LjRxLTAuMSAwLTAuMSAwLjIgMCAwLjEgMC4xIDAuMmwxIDEuMXEwLjEgMC4xIDAuMiAwLjEgMC4xIDAgMC4yLTAuMWw1LjQtNi40IDEuNSAxLjhxMC4xIDAuMiAwLjQgMC4xIDAuMiAwLjEgMC4zLTAuMSAwLjItMC4yIDAuMi0wLjV2LTVxMC0wLjItMC4yLTAuNHoiLz48L3N2Zz4="/>
+      </a>
+      <select id="format" onchange="update()" title="Format"><option value="png" selected>PNG</option><option value="jpg">JPG</option><option value="svg">SVG</option><option value="webp">WEBP</option></select>
+      <div style="display:none;" id="divQuality"><label>Quality:</label><input id="quality" type="text" value="80%" onchange="update()"/></div>
+      <div style="display:none;" id="divSvgOptions">
+      <a href="javascript:setsvgo(0);" title="add raster graphics" id="svgo0" style="background-color:#252525;">
+      <img style="filter:invert(0.78);padding: 4px 3px 5px 2px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPgoJPHRpdGxlPk5vdsO9IHByb2pla3QoMik8L3RpdGxlPgoJPHN0eWxlPgoJCS5zMCB7IGZpbGw6ICMwMDAwMDAgfSAKCTwvc3R5bGU+Cgk8cGF0aCBpZD0iUkciIGNsYXNzPSJzMCIgYXJpYS1sYWJlbD0iUkciICBkPSJtMC4yIDIuN2gyLjdxMS4yIDAgMi4xIDAuMyAwLjggMC4zIDEuMiAwLjkgMC40IDAuNyAwLjQgMS42IDAgMC42LTAuMyAxLjEtMC4yIDAuNS0wLjYgMC44LTAuNCAwLjMtMC44IDAuNmwyLjcgNGgtMi4ybC0yLjItMy42aC0xLjF2My42aC0xLjl6bTIuNSAxLjZoLTAuNnYyLjVoMC43cTAuOSAwIDEuNC0wLjMgMC40LTAuMyAwLjQtMSAwLTAuNi0wLjUtMC45LTAuNC0wLjMtMS40LTAuM3ptOSA0LjF2LTEuNmgzLjd2NC44cS0wLjcgMC4yLTEuNSAwLjQtMC44IDAuMS0xLjggMC4xLTEuNCAwLTIuMy0wLjUtMS0wLjYtMS41LTEuNy0wLjUtMS0wLjUtMi42IDAtMS40IDAuNi0yLjUgMC41LTEuMSAxLjYtMS42IDEuMS0wLjYgMi43LTAuNiAwLjcgMCAxLjQgMC4xIDAuNyAwLjIgMS4zIDAuNGwtMC42IDEuNnEtMC41LTAuMi0xLTAuMy0wLjYtMC4yLTEuMi0wLjItMC44IDAtMS41IDAuNC0wLjYgMC40LTAuOSAxLjEtMC40IDAuNy0wLjQgMS43IDAgMC45IDAuMyAxLjYgMC4yIDAuNyAwLjggMS4xIDAuNSAwLjQgMS4zIDAuNCAwLjUgMCAwLjgtMC4xIDAuMiAwIDAuNS0wLjF2LTEuOXoiLz4KPC9zdmc+"/>
+      </a>
+      <a href="javascript:setsvgo(1);" title="add hidden layers" id="svgo1">
+      <img style="filter:invert(0.78);padding: 4px 3px 5px 2px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPgoJPHRpdGxlPk5vdsO9IHByb2pla3QoMik8L3RpdGxlPgoJPHN0eWxlPgoJCS5zMCB7IGZpbGw6ICMwMDAwMDAgfSAKCTwvc3R5bGU+Cgk8cGF0aCBpZD0iSEwiIGNsYXNzPSJzMCIgYXJpYS1sYWJlbD0iSEwiICBkPSJtNy44IDIuN3Y5LjNoLTJ2LTRoLTMuN3Y0aC0xLjl2LTkuM2gxLjl2My43aDMuN3YtMy43em03LjYgOS4zaC01Ljh2LTkuM2gydjcuN2gzLjh6Ii8+Cjwvc3ZnPg=="/>
+      </a>
+      <a href="javascript:setsvgo(2);" title="vectorize text" id="svgo2">
+      <img style="filter:invert(0.78);padding: 4px 3px 5px 2px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPgoJPHRpdGxlPk5vdsO9IHByb2pla3QoMik8L3RpdGxlPgoJPHN0eWxlPgoJCS5zMCB7IGZpbGw6ICMwMDAwMDAgfSAKCTwvc3R5bGU+Cgk8cGF0aCBpZD0iUlQiIGNsYXNzPSJzMCIgYXJpYS1sYWJlbD0iVlQiICBkPSJtNS41IDIuN2gxLjlsLTMuMSA5LjNoLTIuMmwtMy4xLTkuM2gybDEuNyA1LjVxMC4xIDAuMiAwLjIgMC42IDAuMSAwLjMgMC4yIDAuOCAwLjEgMC40IDAuMSAwLjcgMC4xLTAuMyAwLjItMC43IDAuMS0wLjQgMC4yLTAuOCAwLjEtMC40IDAuMS0wLjZ6bTYuMiAxLjd2Ny42aC0ydi03LjZoLTIuNXYtMS43aDd2MS43eiIvPgo8L3N2Zz4="/>
+      </a>
+      <a href="javascript:setsvgo(3);" title="rasterize text" id="svgo3">
+      <img style="filter:invert(0.78);padding: 4px 3px 5px 2px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPgoJPHRpdGxlPk5vdsO9IHByb2pla3QoMik8L3RpdGxlPgoJPHN0eWxlPgoJCS5zMCB7IGZpbGw6ICMwMDAwMDAgfSAKCTwvc3R5bGU+Cgk8cGF0aCBpZD0iUlQiIGNsYXNzPSJzMCIgYXJpYS1sYWJlbD0iUlQiICBkPSJtMC4yIDIuN2gyLjdxMS4yIDAgMi4xIDAuMyAwLjggMC4zIDEuMiAwLjkgMC40IDAuNyAwLjQgMS42IDAgMC42LTAuMyAxLjEtMC4yIDAuNS0wLjYgMC44LTAuNCAwLjMtMC44IDAuNmwyLjcgNGgtMi4ybC0yLjItMy42aC0xLjF2My42aC0xLjl6bTIuNSAxLjZoLTAuNnYyLjVoMC43cTAuOSAwIDEuNC0wLjMgMC40LTAuMyAwLjQtMSAwLTAuNi0wLjUtMC45LTAuNC0wLjMtMS40LTAuM3ptOS4xIDB2Ny43aC0ydi03LjdoLTIuNXYtMS42aDd2MS42eiIvPgo8L3N2Zz4="/>
+      </a>
+      <a href="javascript:setsvgo(4);" title="minify" id="svgo4">
+      <img style="filter:invert(0.78);padding: 4px 3px 5px 2px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPgoJPHRpdGxlPk5vdsO9IHByb2pla3QoMik8L3RpdGxlPgoJPHN0eWxlPgoJCS5zMCB7IGZpbGw6ICMwMDAwMDAgfSAKCTwvc3R5bGU+Cgk8cGF0aCBpZD0iTSIgY2xhc3M9InMwIiBhcmlhLWxhYmVsPSJNIiAgZD0ibTcuOSAxMmgtMS44bC0yLjItNy4zaC0wLjFxMCAwLjMgMCAwLjggMC4xIDAuNSAwLjEgMS4xIDAgMC42IDAgMS4xdjQuM2gtMS43di05LjNoMi42bDIuMiA3LjFoMC4xbDIuMy03LjFoMi43djkuM2gtMS44di00LjRxMC0wLjQgMC0xIDAtMC42IDAtMS4xIDAtMC41IDAuMS0wLjhoLTAuMXoiLz4KPC9zdmc+"/>
+      </a>
+      </div>
+    </div>
+    <div id="cont"><textarea id="output" onchange="footer();"></textarea></div>
+    <div class="footer">
+      <label id="footerlabel"></label>
+      <a href="javascript:preview();" title="Preview" style="float:right;position:relative;width:24px;height:24px;background-color:#474747;"><img width="24" height="24" id="preview"></img></a>
+    </div>
+  </body>
+</html>
