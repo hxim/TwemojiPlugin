@@ -56,15 +56,16 @@
         </style>
     <script>
         window.addEventListener("message", onMessage);
-        var running = false, svgo = [true,false,false,false,false];
+        var running = false, svgo = [true,false,false,false,false], func = null;
         function onMessage(e) {
-            if (running && e.data instanceof ArrayBuffer || e.data instanceof Uint8Array) readImage(e.data);
-            else if (e.data == "done") { running = false; document.getElementById("output").placeholder = ""; }
+            if (running && func == "update" && e.data instanceof ArrayBuffer || e.data instanceof Uint8Array) readImage(e.data);
+            else if (e.data == "done") { if (func == "checkpp") update(); document.getElementById("output").placeholder = "";  running = false; func = null; }
+            else if (e.data == "PPREADY") {  }
         }
         function checkpp() {
             if (window.parent == window.self) return;
             document.getElementById("output").placeholder = "Photopea not available.";
-            running = true;
+            running = true; func = "checkpp";
             window.parent.postMessage("app.echoToOE('PPREADY');", "*");
         }
         function getQuality() {
@@ -89,7 +90,7 @@
             document.getElementById("output").value = "";
             document.getElementById("output").placeholder = "Please wait...";
             footer();
-            running = true;
+            running = true; func = "update";
             window.parent.postMessage("if (app.documents.length > 0) app.activeDocument.saveToOE('"+format+options+"'); else alert('Open a document first.')", "*");
         }
         function readImage(data) {
@@ -111,7 +112,7 @@
         function openPhotopea() {
             var data = document.getElementById("output").value;
             if (running || window.parent == window.self || data.indexOf("data:") != 0) return;
-            running = true;
+            running = true; func = "openPhotopea";
             window.parent.postMessage("app.open('"+data+"');", "*");
         }
         function previewBrowser() {
@@ -132,15 +133,16 @@
                 document.getElementById("copied").style.opacity = 1;
                 window.setTimeout(function() { document.getElementById("copied").style.opacity = 0; }, 1000);
                 window.setTimeout(function() {
+                    element.setSelectionRange(0, 0);
                     element.blur();
                     element.scrollTop = 0;
                 },1);
             }
-            element.focus();
-            element.select();
-            element.setSelectionRange(0, 99999);
             var oldCopy = function(message) {
                 try {
+                    element.focus();
+                    element.select();
+                    element.setSelectionRange(0, 9999999);
                     success(document.execCommand('copy'), "execCommand returned false");
                 } catch (err) {
                     sucess(false, message + " " + err.message);
@@ -150,7 +152,7 @@
                 navigator.clipboard.writeText(element.value).then(function() {
                     success(true);
                 }, function(err) {
-                   oldCopy(err.message);
+                    oldCopy(err.message);
                 });
             }
         }
@@ -188,7 +190,7 @@
         
     </script>
   </head>
-  <body onload="checkpp();update();">
+  <body onload="checkpp();">
     <div class="bar">
       <a href="javascript:update();" title="Refresh">
       <img style="filter:invert(0.78);padding: 4px 5px 5px 4px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPjxzdHlsZT48L3N0eWxlPjxwYXRoICBkPSJtMTQuOCA5LjFxMCAwLTAuMSAwLTAuNiAyLjYtMi42IDQuMy0yIDEuNi00LjYgMS42LTEuNSAwLTIuOC0wLjUtMS4zLTAuNi0yLjQtMS42bC0xLjIgMS4zcS0wLjIgMC4yLTAuNSAwLjItMC4yIDAtMC40LTAuMi0wLjItMC4yLTAuMi0wLjR2LTQuNHEwLTAuMyAwLjItMC41IDAuMi0wLjEgMC40LTAuMWg0LjRxMC4zIDAgMC40IDAuMSAwLjIgMC4yIDAuMiAwLjUgMCAwLjItMC4yIDAuNGwtMS4zIDEuNHEwLjcgMC42IDEuNiAwLjkgMC45IDAuNCAxLjggMC40IDEuMyAwIDIuNC0wLjYgMS4yLTAuNyAxLjktMS44IDAuMS0wLjEgMC41LTEuMSAwLjEtMC4yIDAuMy0wLjJoMS44cTAuMiAwIDAuMyAwIDAuMSAwLjEgMC4xIDAuM3ptMC04LjNxLTAuMi0wLjItMC40LTAuMi0wLjMgMC0wLjUgMC4ybC0xLjIgMS4zcS0xLjEtMS0yLjQtMS42LTEuNC0wLjUtMi44LTAuNS0yLjcgMC00LjcgMS42LTIgMS43LTIuNiA0LjMgMCAwLjIgMC4xIDAuMyAwLjEgMC4xIDAuMiAwaDEuOXEwLjIgMC4xIDAuMy0wLjIgMC40LTEgMC41LTEuMSAwLjctMS4xIDEuOS0xLjggMS4xLTAuNiAyLjQtMC42IDIgMCAzLjQgMS4zbC0xLjMgMS40cS0wLjIgMC4yLTAuMiAwLjQgMCAwLjMgMC4yIDAuNSAwLjEgMC4yIDAuNCAwLjFoNC40cTAuMiAwLjEgMC40LTAuMSAwLjItMC4yIDAuMi0wLjV2LTQuM3EwLTAuMy0wLjItMC41eiIvPjwvc3ZnPg=="/>
