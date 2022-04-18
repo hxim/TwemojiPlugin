@@ -56,10 +56,16 @@
         </style>
     <script>
         window.addEventListener("message", onMessage);
-        var running = false, ready = false, svgo = [true,false,false,false,false];
+        var running = false, svgo = [true,false,false,false,false];
         function onMessage(e) {
             if (running && e.data instanceof ArrayBuffer || e.data instanceof Uint8Array) readImage(e.data);
-            else if (e.data == "done") { ready = true; running = false; document.getElementById("output").placeholder = ""; }
+            else if (e.data == "done") { running = false; document.getElementById("output").placeholder = ""; }
+        }
+        function checkpp() {
+            if (window.parent == window.self) return;
+            document.getElementById("output").placeholder = "Photopea not available.";
+            running = true;
+            window.parent.postMessage("app.echoToOE('PPREADY');", "*");
         }
         function getQuality() {
             var q = document.getElementById("quality").value.replace("%","");
@@ -77,7 +83,7 @@
             document.getElementById("divSvgOptions").style.display = format == "svg" ?"inline-block" : "none";
             document.getElementById("quality").value = getQuality()+"%";
 
-            if (!ready || window.parent == window.self) { footer(); return; }
+            if (running || window.parent == window.self) { footer(); return; }
             var options = format == "jpg" || format == "webp" ? ":" + (getQuality()/100) :
                           format == "svg" ? ":" + svgo : "";
             document.getElementById("output").value = "";
@@ -104,7 +110,7 @@
         }
         function openPhotopea() {
             var data = document.getElementById("output").value;
-            if (!ready || window.parent == window.self || data.indexOf("data:") != 0) return;
+            if (running || window.parent == window.self || data.indexOf("data:") != 0) return;
             running = true;
             window.parent.postMessage("app.open('"+data+"');", "*");
         }
@@ -120,7 +126,8 @@
         function copy() {
             var success = false;
             var element = document.getElementById("output");
-            var success = function(result) {
+            var success = function(result, message) {
+                if (result == false) console.log(message);
                 document.getElementById("copied").innerText = result ? "Copied " + element.value.length + " bytes" : "Copy failed";
                 document.getElementById("copied").style.opacity = 1;
                 window.setTimeout(function() { document.getElementById("copied").style.opacity = 0; }, 1000);
@@ -129,20 +136,21 @@
                     element.scrollTop = 0;
                 },1);
             }
-            if (!navigator.clipboard) {
+            element.focus();
+            element.select();
+            element.setSelectionRange(0, 99999);
+            var oldCopy = function(message) {
                 try {
-                    element.focus();
-                    element.select();
-                    element.setSelectionRange(0, 99999);
-                    success(document.execCommand('copy'));
+                    success(document.execCommand('copy'), "execCommand returned false");
                 } catch (err) {
-                    sucess(false);
+                    sucess(false, message + " " + err.message);
                 }
-            } else {
+            }
+            if (!navigator.clipboard) oldCopy("navigator.clipboard not found"); else {
                 navigator.clipboard.writeText(element.value).then(function() {
                     success(true);
                 }, function(err) {
-                    success(false);
+                   oldCopy(err.message);
                 });
             }
         }
@@ -180,7 +188,7 @@
         
     </script>
   </head>
-  <body onload="update();">
+  <body onload="checkpp();update();">
     <div class="bar">
       <a href="javascript:update();" title="Refresh">
       <img style="filter:invert(0.78);padding: 4px 5px 5px 4px;" width="15" height="15" src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPjxzdHlsZT48L3N0eWxlPjxwYXRoICBkPSJtMTQuOCA5LjFxMCAwLTAuMSAwLTAuNiAyLjYtMi42IDQuMy0yIDEuNi00LjYgMS42LTEuNSAwLTIuOC0wLjUtMS4zLTAuNi0yLjQtMS42bC0xLjIgMS4zcS0wLjIgMC4yLTAuNSAwLjItMC4yIDAtMC40LTAuMi0wLjItMC4yLTAuMi0wLjR2LTQuNHEwLTAuMyAwLjItMC41IDAuMi0wLjEgMC40LTAuMWg0LjRxMC4zIDAgMC40IDAuMSAwLjIgMC4yIDAuMiAwLjUgMCAwLjItMC4yIDAuNGwtMS4zIDEuNHEwLjcgMC42IDEuNiAwLjkgMC45IDAuNCAxLjggMC40IDEuMyAwIDIuNC0wLjYgMS4yLTAuNyAxLjktMS44IDAuMS0wLjEgMC41LTEuMSAwLjEtMC4yIDAuMy0wLjJoMS44cTAuMiAwIDAuMyAwIDAuMSAwLjEgMC4xIDAuM3ptMC04LjNxLTAuMi0wLjItMC40LTAuMi0wLjMgMC0wLjUgMC4ybC0xLjIgMS4zcS0xLjEtMS0yLjQtMS42LTEuNC0wLjUtMi44LTAuNS0yLjcgMC00LjcgMS42LTIgMS43LTIuNiA0LjMgMCAwLjIgMC4xIDAuMyAwLjEgMC4xIDAuMiAwaDEuOXEwLjIgMC4xIDAuMy0wLjIgMC40LTEgMC41LTEuMSAwLjctMS4xIDEuOS0xLjggMS4xLTAuNiAyLjQtMC42IDIgMCAzLjQgMS4zbC0xLjMgMS40cS0wLjIgMC4yLTAuMiAwLjQgMCAwLjMgMC4yIDAuNSAwLjEgMC4yIDAuNCAwLjFoNC40cTAuMiAwLjEgMC40LTAuMSAwLjItMC4yIDAuMi0wLjV2LTQuM3EwLTAuMy0wLjItMC41eiIvPjwvc3ZnPg=="/>
@@ -215,7 +223,7 @@
       </a>
       </div>
     </div>
-    <div id="cont"><textarea id="output" onchange="footer();"></textarea></div>
+    <div id="cont"><textarea id="output" onchange="footer();" spellcheck="false"></textarea></div>
     <div class="footer">
       <label id="footerlabel"></label>
       <a href="javascript:preview();" title="Preview" style="float:right;position:relative;width:24px;height:24px;background-color:#474747;"><img width="24" height="24" id="preview"></img></a>
