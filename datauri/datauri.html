@@ -60,13 +60,12 @@
         function onMessage(e) {
             if (running && func == "update" && e.data instanceof ArrayBuffer || e.data instanceof Uint8Array) readImage(e.data);
             else if (e.data == "done") { if (func == "checkpp") update(); document.getElementById("output").placeholder = "";  running = false; func = null; }
-            else if (e.data == "PPREADY") {  }
         }
         function checkpp() {
             if (window.parent == window.self) return;
             document.getElementById("output").placeholder = "Photopea not available.";
             running = true; func = "checkpp";
-            window.parent.postMessage("app.echoToOE('PPREADY');", "*");
+            window.parent.postMessage("app.echoToOE('datauri plugin init');", "*");
         }
         function getQuality() {
             var q = document.getElementById("quality").value.replace("%","");
