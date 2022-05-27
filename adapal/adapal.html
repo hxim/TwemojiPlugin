@@ -250,10 +250,14 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             }
         }
         var def = ["Brightness","HueShift","Intensity","Tints","Tones","Saturation","Reds","Greens","Blues","FG to BG","Previous","History","From image"];
-        var _color = {r:255,g:0,b:0}, _selcolor = _color, _bgcolor = {r:0,g:0,b:0}, _selbgcolor = _bgcolor, _history = [{r:255,g:255,b:255},{r:0,g:0,b:0}], _labels = true, _lock = false, _settings = false, _hidden = {}, _fromimage = [], _curcolcount = 10;
+        var _color = {r:255,g:0,b:0}, _selcolor = _color, _bgcolor = {r:0,g:0,b:0}, _selbgcolor = _bgcolor, _history = [{r:255,g:255,b:255},{r:0,g:0,b:0}], _labels = true, _lock = false, _settings = false, _export = false, _hidden = {}, _fromimage = [], _curcolcount = 10;
         var pp = window.parent;
-        function colclick(e, elem) {
-            updateWithColor(elem.style.backgroundColor, _lock, (e.which === 3 || e.button === 2));
+        function colclick(e, elem, name) {
+            if (_export) {
+                doExport(elem, name);
+                _export = false;
+                update(_lock);
+            } else updateWithColor(elem.style.backgroundColor, _lock, (e.which === 3 || e.button === 2));
         }
         function updateWithColor(c1, lock, bg) {
             var ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = c1;
@@ -295,7 +299,7 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
                 for (var i = 0; i < si[0]; i++) {
                     var rgbstring = transformColor(name, i, si[0], _color, _bgcolor, h);
                     var markitem = (!_lock && mark==i || rgbString(_selcolor)==rgbstring) && !marked;
-                    s += "<div style='background-color:"+rgbstring+";width:"+si[1]+"px;height:"+si[2]+"px;'"+(markitem ?" class='mark'":"")+" onmousedown='colclick(event,this);' oncontextmenu='return false;'></div>"
+                    s += "<div style='background-color:"+rgbstring+";width:"+si[1]+"px;height:"+si[2]+"px;'"+(markitem ?" class='mark'":"")+" onmousedown='colclick(event,this,\"" + name + "\");' oncontextmenu='return false;'></div>"
                     if (markitem) marked = true;
                 }
                 if (_labels) s += "<div class='label' style='font-size:"+(si[2]/2.2)+"px;line-height:"+(si[2]/2.2)+"px'><div>"+name+"</div></div>"
@@ -314,9 +318,36 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
             document.getElementById("settingsbutton").className = _settings ? "button on" : "button off";
             document.getElementById("cont").style.visibility = _settings ? "hidden" : "visible";
             document.getElementById("settings").style.visibility = !_settings ? "hidden" : "visible";
+            document.getElementById("exportbutton").className = _export ? "button on" : "button off";
             savestate();
         }
-       function getColorThiefColors(arrayBuffer) {
+        function doExport(elem, name) {
+            var list = elem.parentNode.children, cols = [];
+            for (var i = 0; i < list.length; i++) {
+                if (list[i].className != "label") {
+                    var ctx = document.createElement('canvas').getContext('2d'); ctx.fillStyle = list[i].style.backgroundColor;
+                    var c2 = hexToRgb(ctx.fillStyle);
+                    cols.push(c2);
+                }
+            }
+            var bytes = [0,2,0,cols.length];
+            for (var i = 0; i < cols.length; i++) {
+                var c = cols[i], s = "Color " + rgbToHex(c) + "\0";
+                bytes.push(0,0,c.r,c.r,c.g,c.g,c.b,c.b,0,0,0,0,0,s.length);
+                for (var j = 0; j < s.length; j++) bytes.push(0,s.charCodeAt(j));
+            }
+            var s = '';
+            for(var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+            var d = "data:application/octet-stream;base64," + btoa(s);
+            var a = document.createElement('a');
+            a.setAttribute('href', d);
+            a.setAttribute('download', name + '.aco');
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+        function getColorThiefColors(arrayBuffer) {
             function getColors(elem) {
                 try {
                     var dcolor = colorThief.getColor(elem);
@@ -421,8 +452,9 @@ function rgbToHex(color) { return '#' + (0x1000000 + ((color.r << 16) | (color.g
   </head>
   <body onload="loadstate();load();">
     <div id="bar">
-        <input type="button" id="lockbutton" onclick="_lock=!_lock;update();" class="button lock off"></input>
-        <input type="button" id="settingsbutton" value="Settings..." onclick="_settings=!_settings;update(true);" class="button"></input>
+        <input type="button" id="lockbutton" title="Lock" onclick="_lock=!_lock;update();" class="button lock off"></input>
+        <input type="button" id="exportbutton" value="Ex" title="Export as ACO..." onclick="_export=!_export;update();" class="button off" style="width:20px;"></input>
+        <input type="button" id="settingsbutton" value="Settings..." title="Settings..." onclick="_settings=!_settings;update(true);" class="button"></input>
         <input type="button" value="HEX" onclick="document.getElementById('colinput').click();" class="button" id="hex" style="float:right;margin-right:2px;"></input>
         <input type="color" value="#000000" id="colinput" style="display:none;" onchange="updateWithColor(event.target.value, false, false);"></input>
     </div>
