@@ -1,9 +1,1 @@
-<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18">
-	<title>icon</title>
-	<defs>
-		<image  width="18" height="18" id="img1" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASAQMAAABsABwUAAAAAXNSR0IB2cksfwAAAAZQTFRF////R0dHd5dFygAAAEVJREFUeJxjYACCuvgGBqcJDQxRYkAcBmRfaGCou9/AwODAwFD9koEhGshk+AsUu8jA4FTFwBB1BqhuEZC9DKh3KcgEBgC+zBLztMbhYAAAAABJRU5ErkJggg=="/>
-	</defs>
-	<style>
-	</style>
-	<use id="Background" href="#img1" x="0" y="0"/>
-</svg>
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="18" height="18"><style>.a{fill:#fff}</style><path  d="m0 0h18v18h-18v-9z"/><path fill-rule="evenodd" class="a" d="m1 1h6v6h-6zm8 0h1v1h-1v1h-1v-1h1zm2 0h6v6h-6zm-2 3h1v4h1v1h-2v1h5v1h-2v1h1v1h1v-1h1v-2h2v1h-1v1h-1v1h-1v1h1v2h1v1h-1v-1h-1v1h-1v-2h1v-1h-2v-1h-2v1h1v3h-1v-3h-1v3h-1v-4h1v-1h-1v-2h-2v-2h3v-1h-1v-2h1zm-8 4h4v2h-2v-1h-1v1h-1zm11 0h1v1h-1zm3 0h1v1h-1zm-14 3h6v6h-6zm15 2h1v1h-1z"/><path  d="m2 2h4v4h-4v-2zm10 0h4v4h-4v-2zm-2 9h1v1h-1v-0.5zm-8 1h4v4h-4v-2z"/><path class="a" d="m3 3h2v2h-2v-1zm10 0h2v2h-2v-1zm-10 10h2v2h-2v-1z"/></svg>
