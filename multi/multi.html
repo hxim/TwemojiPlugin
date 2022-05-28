@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+		<style>
+            * { border-style: solid; border-width: 0; }
+			body {  background-color:#474747; overflow: hidden; margin: 3px 6px 0 6px; }
+            body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
+            svg { filter: invert( 0.78 ) drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.45)); }
+			label { line-height:21px; display: inline-block; margin: 2px 6px 0 0; }
+            input { padding: 3px; box-sizing: border-box; width: 63px; margin: 0 2px; }
+            input[type=checkbox] { width: unset; height: 26px; line-height: 26px; padding-right: 6px; }
+            select { padding: 2px 2px 3px 2px; width: 63px; margin: 0 0 0 2px; overflow: hidden; margin: 0 2px; height: 26px; }
+            select, input { background-color: #252525; border: 1px solid #252525; border-radius: 3px; transition: border 0.5s; }
+            input:not(:disabled):not(.button):hover, select:hover, input:not(:disabled):not(.button):focus, select:focus { border: 1px solid #3482f6; outline: none !important; }
+            input[type=number]:disabled { -moz-appearance: textfield; color: #6d6d6d; user-select: none; }
+            textarea { margin: 0 0 4px 0; background-color: #252525; border-radius: 3px; width: 100%; box-sizing: border-box; padding: 4px; resize: both; }
+			div.ew {  cursor:pointer; background-color: #606060; display: inline-block; margin: 0 4px 4px 0; height: 40px; position: relative; }
+            div.ew.text > div { position: absolute; top: 50%; transform:  translateY(-50%); text-align: center; width: 100%; }
+            div.ew img { padding: 2px; height: 36px; width: 36px; }
+            div.ew img:not(:first-child){ padding-left: 6px; }
+            div.et { font-size: 13px; max-height: 36px; overflow: hidden; line-height: normal; display: none; }
+			div.ew.text { width: 84px; height: 76px; }
+            div.ew.text div.et { display: block; }
+            div.ew:hover, .loadmore:hover { background-color: #6a6a6a; }
+            .loadmore { font-size: 13px; color: #d5d5d5; background-color: #606060; display: inline-block; line-height: 35px; height: 35px; width: 76px; vertical-align: top; text-decoration: none; padding: 2px; text-align: center; }
+            #bar { height: 78px; white-space: nowrap; font-size: 0; }
+            #bar a { display: inline-block; border-radius: 3px; padding: 1px; margin: 0; vertical-align: top; }
+            #bar a:hover { background-color: rgba(0,0,0,0.25); }
+			.win { position: absolute; z-index: 10; background-color: #474747;   top: 50%; left: 50%;  user-select: none;
+                    transform: translate(-50%, -50%); box-shadow: 0px 4px 30px rgba(0,0,0,0.25); display: none; border-radius: 6px; }
+			.win > div.head { border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); height: 30px; font-size: 1.15em;
+                               background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.25) 100%); border-top-left-radius: 6px; border-top-right-radius: 6px; }
+			.win > div.head span.label { display: inline-block; padding: 0.3em 0.5em; font-weight: bold; }
+			.win > div.head span.cross { cursor: pointer; display: inline-block; background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI1NiAyNTYiIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2Ij48cGF0aCAgZD0ibTMyIDBsMjI0IDIyNC0zMiAzMi0yMjQtMjI0em0yMjQgMzJsLTIyNCAyMjQtMzItMzIgMjI0LTIyNHoiLz48L3N2Zz4=);
+                                          background-size: 10px 10px; background-repeat: no-repeat; background-position: center; width: 30px; height: 30px; font-size: 1.3em; position: absolute; right: 0; filter: invert(0.78); }
+			.win > div.body { line-height: 30px; padding: 11px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin;  min-width: 216px; }
+            .win > div.body > input.button { margin-top: 7px; }
+			.win a { color: #d5d5d5; }
+			.win p { margin: 0 0 1em 0; padding: 0; text-align: justify; text-justify: inter-word; }
+			.win .name { font-weight: bold; }
+			.win hr { height: 1px; background-color: #d5d5d5; }
+            #output { background-color: #252525; border-radius: 3px; width: 100%; height: 100%; box-sizing: border-box; resize:none; padding: 4px; white-space: pre-wrap; word-break: break-all;}
+			#cont { margin:4px; overflow: none; position: absolute; top: 84px; bottom: 5px; left: 3px; right: 3px; border: solid 4px #252525; border-radius: 7px;  user-select: none; overflow: auto; }
+            #cont > div { height: 27px; border-bottom: solid 1px #252525; line-height: 27px; position: relative; overflow: hidden; white-space: nowrap; }
+            #cont > div:first-child { background-color: #252525; }
+            #cont > div.sel:not(:first-child) { background-color: #5d5d5d; }
+            #cont > div:not(:first-child):hover { background-color: #353535; cursor: pointer; }
+            #cont > div > span { display: inline-block; height: 27px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+            #cont > div > span:nth-child(1) { width: 3px; }
+            #cont > div > span:nth-child(2) { width: 11px; height: 11px; margin: 6px 3px; border: 2px solid transparent; }
+            #cont > div > span:nth-child(3) { width: calc(100% - 133px); padding-left: 6px; min-width: 70px; }
+            #cont > div > span:nth-child(4) { width: 80px; }
+            #cont > div > span:nth-child(5) { width: 23px; }
+            #cont > div:not(:first-child):not(.sel) > span:nth-child(2) { width: 11px; height: 11px; margin: 6px 3px; border: 2px solid rgba(199,199,199,0.12); } 
+            #cont > div:not(:first-child).sel > span:nth-child(2) { width: 15px; height: 15px; margin: 6px 3px; border: 0; background: url('data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPjxzdHlsZT4uYXtmaWxsOiNjN2M3Yzd9PC9zdHlsZT48cGF0aCBjbGFzcz0iYSIgZD0ibTE0LjcgMy41cTAuMyAwLjMgMC4zIDAuNiAwIDAuNC0wLjMgMC43bC03IDYuNy0xLjMgMS4ycS0wLjMgMC4zLTAuNyAwLjMtMC4zIDAtMC42LTAuM2wtMS4zLTEuMi0zLjUtMy40cS0wLjMtMC4yLTAuMy0wLjYgMC0wLjQgMC4zLTAuNmwxLjMtMS4zcTAuMy0wLjIgMC42LTAuMiAwLjQgMCAwLjcgMC4ybDIuOCAyLjcgNi40LTZxMC4zLTAuMyAwLjctMC4zIDAuMyAwIDAuNiAwLjNsMS4zIDEuMnoiLz48L3N2Zz4=') no-repeat; } 
+            #bar > div { display: inline-block; vertical-align: top; position: relative; width: 25%; margin: 0; }
+            .button { background-color: #606060; margin: 2px 0 0 1.5px; border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); 
+                    border-left: 0px; border-right: 0px; padding: 2px 5px 3px 5px; font-size: 13px; width: calc(100% - 3px); overflow: hidden; text-overflow: ellipsis; }
+            .button:not(:disabled):hover { background-color: #6a6a6a;}
+            .button:disabled { opacity: 0.5; pointer-events: none; }
+            
+        </style>
+    <script>
+var scripts = {
+
+// Resize
+func_resize: function(p) {
+    var d = app.activeDocument, w = d.width, h = d.height, o = w >= h, r = w / h;
+    if (p.rmode == "Set one or both sides") {
+        if (p.ar) {
+            w = p.rw || (p.rh * r) || w;
+            h = p.rh || (p.rw / r) || h;
+        } else {
+            w = p.rw || w;
+            h = p.rh || h;
+        }
+        if (p.ar & p.rw !== null && p.rh !== null) {
+            if (!p.rmin && w > p.rh * r || p.rmin && w < p.rh * r) w = p.rh * r;
+            if (!p.rmin && h > p.rw / r || p.rmin && h < p.rw / r) h = p.rw / r;
+        }
+    } else if (p.rmode == "Set long side") {
+        if (o) w = p.rvalue; else h = p.rvalue;
+        if (p.ar) {
+            if (o) h = w / r; else w = h * r;    
+        }
+    } else if (p.rmode == "Set short side") {
+        if (o) h = p.rvalue; else w = p.rvalue;
+        if (p.ar) {
+            if (o) w = h * r;  else h = w / r;   
+        }
+    } else if (p.rmode == "Set image size") {
+        var ratio = Math.sqrt(((p.rvalue * 1000000) || (w * h)) / (w * h));
+        w = w * ratio;
+        h = h * ratio;
+    } else if (p.rmode == "Percentage of original") {
+        if (p.rw !== null) w = w * p.rw / 100;
+        if (p.rh !== null) h = h * p.rh / 100;
+        if (p.ar) {
+            if (p.rw === null) w =  w * p.rh / 100;
+            if (p.rh === null) h =  h * p.rw / 100;
+        }   
+    }
+    if (!(w >= d.width && h >= d.height && p.rnes ||
+          w <= d.width && h <= d.height && p.rnsb ||
+          w == d.width && h == d.height)) d.resizeImage(w, h);
+},
+
+
+// Crop
+func_crop: function(p) {
+    var d = app.activeDocument, b;
+    if (p.cmode == "Left Top") {
+        b = [p.cx,p.cy,p.cx+p.cw,p.cy+p.ch];
+    } else if (p.cmode == "Right Top") {
+        b = [d.width-p.cx,p.cy,d.width-p.cx-p.cw,p.cy+p.ch];
+    } else if (p.cmode == "Center") {
+        b = [p.cx+(d.width-p.cw)>>1,p.cy+(d.height-p.ch)>>1,p.cx+p.cw+(d.width-p.cw)>>1,p.cy+p.ch+(d.height-p.ch)>>1];
+    } else if (p.cmode == "Left Bottom") {
+        b = [p.cx,d.height-p.cy,p.cx+p.cw,d.height-p.cy-p.ch];
+    } else if (p.cmode == "Right Bottom") {
+        b = [d.width-p.cx,d.height-p.cy,d.width-p.cx-p.cw,d.height-p.cy-p.ch];
+    }    
+    d.crop(b);
+},
+
+
+// Rename
+func_rename: function(p) {
+    var d = app.activeDocument, n = d.name, w = d.width, h = d.height;
+    index = (index || 0) + 1;
+    if (n.substring(n.length - 4) == ".psd") n = n.substring(0, n.length - 4);
+    n = p.rpat.replaceAll("$#","$\0").replaceAll("$w",w).replaceAll("$h",h).replaceAll("$n",n);
+    var t = "";
+    for (var i = 0, cnt = 0; i < n.length; i++) {
+        if (n[i] == "#") {
+            cnt++;
+            if (i == n.length-1 || n[i+1] != "#") {
+                var s = "" + index;
+                for (var j = s.length; j < cnt; j++) s = "0" + s;
+                t += s;
+            }
+         } else {
+            t += n[i];
+            cnt = 0;
+        }
+    }
+    n = t.replaceAll("$\0","#").replaceAll(p.find, p.replace);
+    if (p.rspace) n = n.replaceAll(" ","");
+    if (p.rbeg !== null && p.rbeg > 0) n = n.substring(p.rbeg);
+    if (p.rend !== null && p.rend > 0 && n.length - p.rend >= 0) n = n.substring(0, n.length - p.rend);
+    d.name = n;
+},
+
+// Save As
+func_saveas: function(p) {
+    var name = app.activeDocument.name;
+    if (name.substring(name.length - 4) == ".psd") name = name.substring(0, name.length - 4);
+    name += "." + p.format.toLowerCase();
+    if (p.format == "PSD") {
+        app.activeDocument.saveAs(new File(name), new PhotoshopSaveOptions(), true);
+    }
+    else {
+        var options = new ExportOptionsSaveForWeb();
+        options.quality = p.quality;
+        if (p.format == "PNG") options.format = SaveDocumentType.PNG; else
+        if (p.format == "JPG") options.format = SaveDocumentType.JPEG; else
+        if (p.format == "GIF") options.format = SaveDocumentType.COMPUSERVEGIF;
+        app.activeDocument.exportDocument(new File(name), ExportType.SAVEFORWEB, options);
+    }
+},
+
+// Border
+func_border: function(p) {
+    var d = app.activeDocument;
+    d.activeLayer = d.layers[0];
+    var nl = d.layers.add();
+    nl.move(d.layers[0], ElementPlacement.PLACEBEFORE);
+    for (var i = 0; i < app.activeDocument.layers.length; i++) d.layers[i].move(nl, ElementPlacement.PLACEBEFORE);
+    d.activeLayer = d.layers[d.layers.length - 1];
+    nl.name='Border';
+    var c = new SolidColor();
+    c.rgb.red = p.bcolor[0];
+    c.rgb.green = p.bcolor[1];
+    c.rgb.blue = p.bcolor[2];
+    d.selection.selectAll();
+    d.resizeCanvas(d.width + p.bsize * 2, d.height + p.bsize * 2, AnchorPosition.MIDDLECENTER);
+    d.selection.invert();
+    d.selection.fill(c);
+    d.selection.deselect();
+},
+
+
+// Add Text
+func_addtext: function(p) {
+    var d = app.activeDocument;
+    d.activeLayer = d.layers[0];
+    var nl = d.layers.add();
+    nl.move(d.layers[0], ElementPlacement.PLACEBEFORE);
+    nl.kind = LayerKind.TEXT;
+    nl.name = p.text;
+    var ti = nl.textItem;
+    ti.size = p.tsize;
+    var c = new SolidColor();
+    c.rgb.red = p.tcolor[0];
+    c.rgb.green = p.tcolor[1];
+    c.rgb.blue = p.tcolor[2];
+    ti.color = c;
+    ti.font = p.tfont;
+    ti.justification = p.tjust;
+    var x = p.tx, y = p.ty;
+    if (p.tstart.indexOf("Right") >= 0) x = d.width - x;
+    if (p.tstart.indexOf("Bottom") >= 0) y = d.height - y;
+    if (p.tstart.indexOf("Center") >= 0) { x = d.width / 2 + x; y = d.height / 2 + y; }
+    ti.contents = p.text;
+    ti.position = [x, y];
+    d.activeLayer = nl;
+}
+}
+
+        window.addEventListener("message", onMessage);
+        var running = false, ready = false, last_script = '';
+        var update_script = "function lc(doc){var c=0;for(var m=0;m<doc.layers.length;m++){if (doc.layers[m].typename==='ArtLayer') c++; else c+=lc(doc.layers[m]);}return c;} var s = 'MDC_INFO:'; for (var i = 0; i < app.documents.length; i++) { s += app.documents[i].source+'\\n'+app.documents[i].name+'\\n'+app.documents[i].width+'\\n'+app.documents[i].height+'\\n'+(app.documents[i]==app.activeDocument)+'\\n'+lc(app.documents[i])+'\\n'; } app.echoToOE(s);";
+        function onMessage(e) {
+            if (running && e.data.indexOf("MDC_INFO:") == 0) update_mdc(e.data.substring("MDC_INFO:".length));
+            else if (e.data == "done") { ready = true; running = false; }
+        }
+        function update() {
+            if (!ready || window.parent == window.self) return;
+            running = true;
+            window.parent.postMessage(update_script, "*");
+        }
+        function update_mdc(message) {
+            if (typeof lastMessage !== 'undefined' && message == lastMessage) return;
+            lastMessage = message;
+            var cont = document.getElementById("cont");
+            var oldsel = [];
+            for (var i = 0; i < cont.children.length; i++) {
+                var source = cont.children[i].getAttribute("data-source");
+                var sel = cont.children[i].className == "sel";
+                oldsel[source] = sel;
+            }
+            for (var i = cont.children.length-1; i >= 1; i--) cont.removeChild(cont.children[i]);
+            var a = message.split("\n"), c = 6;
+            for (var ic = 0; ic + c <= a.length; ic += c) {
+                var i = ic, source = a[i++], name = a[i++], width = a[i++], height = a[i++], active = a[i++] == "true", lc = a[i++];
+                var span0 = document.createElement("span");
+                if (active) span0.style = "background-color: #3482f6;";
+                var span1 = document.createElement("span");
+                var span2 = document.createElement("span");
+                span2.appendChild(document.createTextNode(name));
+                var span3 = document.createElement("span");
+                span3.appendChild(document.createTextNode(width + " x " + height));
+                var span4 = document.createElement("span");
+                span4.appendChild(document.createTextNode(lc));
+                var item = document.createElement("div");
+                item.setAttribute("onclick","dclick(event,this);");
+                item.setAttribute("ondblclick","dclick(event,this,true);");
+                item.setAttribute("data-source", source);
+                if (oldsel[source]) item.className = "sel";
+                item.appendChild(span0);
+                item.appendChild(span1);
+                item.appendChild(span2);
+                item.appendChild(span3);
+                item.appendChild(span4);
+                item.title = "Name: " + name + "\nSize: " + width + " x " + height + "\nLayers: " + lc;
+                cont.appendChild(item);
+            }
+            setselectall();
+        }
+        function setselectall() {
+            var list = document.getElementById("cont").children;
+            var all = true;
+            for (var i = 1; i < list.length; i++) if (list[i].className != "sel") all = false;
+            document.getElementById("selectall").value = list.length > 1 && all ? "Deselect" : "Select All";
+        }
+        function selectall() {
+            var cl = document.getElementById("selectall").value == "Select All" ? "sel" : "";
+            var list = document.getElementById("cont").children;
+            for (var i = 1; i < list.length; i++) list[i].className = cl;
+            setselectall();
+        }
+        function dclick(event, elem, dblclick) {
+            var list = document.getElementById("cont").children;
+            if (dblclick) {
+                var selsource = elem.getAttribute("data-source");
+                var script = "for(var _doc_index=app.documents.length-1;_doc_index>=0;_doc_index--)if(app.documents[_doc_index].source=='"+selsource+"')app.activeDocument=app.documents[_doc_index];";
+                running = true;
+                window.parent.postMessage(script + update_script, "*");
+            }
+            if (!event.ctrlKey && !event.shiftKey) for (var i = 1; i < list.length; i++) list[i].className = "";
+            elem.className = "sel";
+            if (event.shiftKey) {
+                var min = list.length, max = 0;
+                for (var i = 1; i < list.length; i++) if (list[i].className == "sel") { min = i < min ? i : min; max = i > max ? i : max; }
+                for (var i = min; i <= max; i++) list[i].className = "sel";
+            }
+            setselectall();
+        }
+        function run_custom_script(script1, params, reverse) {
+            var list = document.getElementById("cont").children, sellist = [];
+            for (var i = 1; i < list.length; i++) if (list[i].className == "sel") sellist.push(cont.children[i].getAttribute("data-source"));
+            var forcycle = (reverse||false) ? "for(var _doc_index=app.documents.length-1;_doc_index>=0;_doc_index--)" : "for(var _doc_index=0;_doc_index<app.documents.length;_doc_index++)";
+            var script = "_ad=app.activeDocument;_selected=" + JSON.stringify(sellist) + ";" + forcycle + "if(_selected.indexOf(app.documents[_doc_index].source)>=0){app.activeDocument=app.documents[_doc_index];{"+script1+"}}" + forcycle + "if(app.documents[_doc_index]==_ad)app.activeDocument=_ad;";
+            var par_script = "";
+            if (params != null) {
+                for (var key in params) if (params.hasOwnProperty(key)) par_script += (par_script.length == 0 ? "" : ", ") + key + ": " + params[key];
+                par_script = "var p = { " + par_script + " };"
+            }
+            last_script = par_script + (par_script.length > 0 ? "\n" : "") + script1;
+            running = true;
+            window.parent.postMessage(par_script + script + update_script, "*");
+        }
+        function hexToRgb(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? [parseInt(result[1], 16),parseInt(result[2], 16),parseInt(result[3], 16)] : [0,0,0];
+        }
+        function val(v, dv) {
+            if (v == null || v == "") return dv;
+            return v;
+        }
+        function dragElement(elmnt) {
+          var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+          elmnt.children[0].onmousedown = dragMouseDown;
+          function dragMouseDown(e) {
+            e = e || window.event; e.preventDefault();
+            pos3 = e.clientX; pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+          }
+          function elementDrag(e) {
+            e = e || window.event; e.preventDefault();
+            pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
+            pos3 = e.clientX; pos4 = e.clientY;
+            var h = document.getElementById("bar").offsetHeight + document.getElementById("cont").offsetHeight + 14;
+            var w = document.getElementById("cont").offsetWidth + 12;
+            elmnt.style.top = Math.max(elmnt.offsetHeight/2, Math.min(h-elmnt.offsetHeight/2, elmnt.offsetTop - pos2)) + "px";
+            elmnt.style.left = Math.max(elmnt.offsetWidth/2, Math.min(w-elmnt.offsetWidth/2, elmnt.offsetLeft - pos1)) + "px";
+          }
+          function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
+        }
+        function close_win(elem) {
+            elem.parentNode.parentNode.style.display = 'none';
+        }
+        function open_win(id) {
+            var elem = document.getElementById("win_" + id);
+            var visible = elem.style.display != "none";
+            var list = document.body.children;
+            for (var i = 0; i < list.length; i++) if (list[i].id.indexOf("win_") == 0) list[i].style.display = "none";
+            if (!visible) elem.style.display = "block";
+            if (elem.onmousedown == null) dragElement(elem);
+        }
+        function script_string(f) {
+            var s = (""+f).trim();
+            if (s.indexOf("function(p)") == 0) s = s.substr("function(p)".length).trim();
+            if (s.indexOf("{") == 0) s = s.substr(1).trim();
+            if (s.lastIndexOf("}") == s.length-1) s = s.slice(0,-1).trim();
+            return s.replace(/^[^\S\r\n]+|[^\S\r\n]+$/gm, "");
+        }
+        function exe_resize() {
+            var p = { rmode: "'"+document.getElementById("par_rmode").options[document.getElementById("par_rmode").selectedIndex].value+"'",
+                      rw: val(document.getElementById("par_rw").value, "null"),
+                      rh: val(document.getElementById("par_rh").value, "null"),
+                      rvalue: val(document.getElementById("par_rvalue").value, "null"),
+                      ar: document.getElementById("par_ar").checked,
+                      rmin: document.getElementById("par_rmin").checked,
+                      rnes: document.getElementById("par_rnes").checked,
+                      rnsb: document.getElementById("par_rnsb").checked };
+            run_custom_script(script_string(scripts.func_resize), p);
+        }
+        function exe_crop() {
+            var p = { cx: val(document.getElementById("par_cx").value, 0),
+                      cy: val(document.getElementById("par_cy").value, 0),
+                      cw: val(document.getElementById("par_cw").value, 100),
+                      ch: val(document.getElementById("par_ch").value, 100),
+                      cmode: "'"+document.getElementById("par_cmode").options[document.getElementById("par_cmode").selectedIndex].value+"'" };
+            run_custom_script(script_string(scripts.func_crop), p);
+        }
+        function exe_rename() {
+            var p = { rpat: "'"+document.getElementById("par_rpat").value.replaceAll("'","")+"'",
+                      find: "'"+document.getElementById("par_find").value.replaceAll("'","")+"'",
+                      replace: "'"+document.getElementById("par_replace").value.replaceAll("'","")+"'",
+                      rspace: document.getElementById("par_rspace").checked,
+                      rbeg: val(document.getElementById("par_rbeg").value, 0),
+                      rend: val(document.getElementById("par_rend").value, 0) }
+            run_custom_script(script_string(scripts.func_rename), p);
+        }
+        function exe_saveas() {
+            var p = { format: "'"+document.getElementById("par_format").options[document.getElementById("par_format").selectedIndex].value+"'",
+                      quality: val(document.getElementById("par_quality").value, 100) };
+            run_custom_script(script_string(scripts.func_saveas), p);
+        }
+        function exe_border() {
+            var p = { bsize: val(document.getElementById("par_bsize").value, 10),
+                      bcolor: "["+hexToRgb(document.getElementById("par_bcolor").value)+"]" };
+            run_custom_script(script_string(scripts.func_border), p);
+        }
+        function exe_addtext() {
+            var p = { text: "'"+document.getElementById("par_text").value.replaceAll("'","")+"'",
+                      tsize: val(document.getElementById("par_tsize").value, 24),
+                      tcolor: "["+hexToRgb(document.getElementById("par_tcolor").value)+"]",
+                      tfont: "'"+document.getElementById("par_tfont").value.replaceAll("'","")+"'",
+                      tjust: document.getElementById("par_tjust").options[document.getElementById("par_tjust").selectedIndex].value,
+                      tx: val(document.getElementById("par_tx").value, 0),
+                      ty: val(document.getElementById("par_ty").value, 0),
+                      tstart: "'"+document.getElementById("par_tstart").options[document.getElementById("par_tstart").selectedIndex].value+"'" };
+            run_custom_script(script_string(scripts.func_addtext), p);
+        }
+        function exe_script() {
+            var script = document.getElementById("par_script").value;
+            run_custom_script(script, null, document.getElementById("par_reverse").checked ? true : null);
+        }
+        function rmode_change() {
+            var elem = document.getElementById("par_rmode");
+            var value = elem.options[elem.selectedIndex].value;
+            var wh = (value == "Set one or both sides" || value == "Percentage of original");
+            document.getElementById("resize_wh").style.display = wh ? "unset" : "none";
+            document.getElementById("resize_val").style.display = wh ? "none" : "unset";
+            if (!wh) document.getElementById("resize_lblval").innerText = value == "Set image size" ? "Mpx:" : "Side:";
+            if (wh) {
+                document.getElementById("par_rw").value = value == "Percentage of original" ? 100 : 1024;
+                document.getElementById("par_rh").value = value == "Percentage of original" ? 100 : 768;
+            } else {
+                document.getElementById("par_rvalue").value = value == "Set image size" ? 5 : 800;
+            }
+        }
+        function rwrh_change(id1, id2) {
+            var elem = document.getElementById("par_rmode");
+            if (elem.options[elem.selectedIndex].value == "Percentage of original" && document.getElementById("par_ar").checked) {
+                document.getElementById(id2).value = document.getElementById(id1).value;
+            }
+        }
+        function format_change(elem) {
+            var value = elem.options[elem.selectedIndex].value;
+            document.getElementById("label_quality").disabled = value == "PSD";
+            document.getElementById("par_quality").disabled = value == "PSD";
+            if (value == "PSD") document.getElementById("par_quality").value = 100;
+        }
+        function demo_change(elem) {
+            var value = elem.options[elem.selectedIndex].value;
+            if (value == "!") value = last_script; else value = (value.length > 0 ? "var d = app.activeDocument;\n" : "") + value;
+            document.getElementById("par_script").value = value;
+            elem.selectedIndex = 0;
+        }
+    </script>
+  </head>
+  <body onload="window.setInterval(update,3000);">
+    <div id="bar">
+        <div><input type="button" value="Resize" onclick="open_win('resize');" class="button"/></div>
+        <div><input type="button" value="Crop" onclick="open_win('crop');" class="button"/></div>
+        <div><input type="button" value="Rename" onclick="open_win('rename');" class="button"/></div>
+        <div><input type="button" value="Save As" onclick="open_win('saveas');" class="button"/></div>
+        <br/>
+        <div><input type="button" value="Border" onclick="open_win('border');" class="button"/></div>
+        <div><input type="button" value="Add Text" onclick="open_win('addtext');" class="button"/></div>
+        <div><input type="button" value="Flatten" onclick="run_custom_script('app.activeDocument.flatten();');" class="button"/></div>
+        <div><input type="button" value="Close" onclick="if (confirm('Selected documents will be closed without saving. Continue?')) run_custom_script('app.activeDocument.close();', null, true);" class="button"/></div>
+        <br/>
+        <div><input type="button" value="Select All" onclick="selectall();" class="button" id="selectall"/></div>
+        <div><input type="button" value="↪ Rotate" onclick="run_custom_script('app.activeDocument.rotateCanvas(-90);');" class="button"/></div>
+        <div><input type="button" value="↩ Rotate" onclick="run_custom_script('app.activeDocument.rotateCanvas(+90);');" class="button"/></div>
+        <div><input type="button" value="Script" onclick="open_win('script');" class="button"/></div>
+    </div>
+    <div id="cont">
+        <div><span></span><span></span><span>Name</span><span>Size</span><span title="Layers">L</span></div>
+    </div>
+    <div id="win_resize" class="win" style="display:none;">
+        <div class="head"><span class="label">Resize</span><span class="cross" onclick="close_win(this);"></span></div>
+        <div class="body">
+            <div><label for="par_rmode" style="width:35px;">Mode:</label><select id="par_rmode" style="width:171px;" onchange="rmode_change();"><option value="Set one or both sides" selected>Set one or both sides</option><option value="Set long side">Set long side</option><option value="Set short side">Set short side</option><option value="Set image size">Set image size</option><option value="Percentage of original">Percentage of original</option></select></div>
+            <div id="resize_wh"><label for="par_rw" style="width:35px;">Width:</label><input type="number" step="1" id="par_rw" value="1024" onchange="rwrh_change('par_rw','par_rh')"></input><label for="par_rh" style="width:35px;">Height:</label><input type="number" step="1" id="par_rh" value="768" onchange="rwrh_change('par_rh','par_rw')"></input></div>
+            <div id="resize_val" style="display:none;"><label for="par_rvalue" style="width:35px;" id="resize_lblval">Side:</label><input type="number" step="1" id="par_rvalue" value=""></input></div>
+            <div><input type="checkbox" id="par_ar" checked onchange="rwrh_change('par_rw','par_rh')"><label for="par_ar" style="padding-left:4px;">Preserve aspect ratio</label></div>
+            <div><input type="checkbox" id="par_rmin"><label for="par_rmin" style="padding-left:4px;"> Minimal size</label></div>
+            <div><input type="checkbox" id="par_rnes"><label for="par_rnes" style="padding-left:4px;"> Don't enlarge smaller</label></div>
+            <div><input type="checkbox" id="par_rnsb"><label for="par_rnsb" style="padding-left:4px;"> Don't shrink bigger</label></div>
+            <input type="button" value="OK" onclick="close_win(this);exe_resize();" class="button"/>
+        </div>
+    </div>
+    <div id="win_crop" class="win" style="display:none;">
+        <div class="head"><span class="label">Crop</span><span class="cross" onclick="close_win(this);"></span></div>
+        <div class="body">
+            <div><label for="par_cx" style="width:35px;">Pos&nbsp;X:</label><input type="number" step="1" id="par_cx" value="0"></input><label for="par_cy" style="width:35px;">Pos&nbsp;Y:</label><input type="number" step="1" id="par_cy" value="0"></input></div>
+            <div><label for="par_cw" style="width:35px;">Width:</label><input type="number" step="1" id="par_cw" value="100"></input><label for="par_ch" style="width:35px;">Height:</label><input type="number" step="1" id="par_ch" value="100"></input></div>
+            <div><label for="par_cmode" style="width:80px;">Start Corner:</label><select id="par_cmode" style="width:126px;"><option value="Left Top" selected>Left Top</option><option value="Right Top">Right Top</option><option value="Center">Center</option><option value="Left Bottom">Left Bottom</option><option value="Right Bottom">Right Bottom</option></select></div>
+            <input type="button" value="OK" onclick="close_win(this);exe_crop();" class="button"/>
+        </div>
+    </div>
+    <div id="win_rename" class="win" style="display:none;">
+        <div class="head"><span class="label">Rename</span><span class="cross" onclick="close_win(this);"></span></div>
+        <div class="body">
+            <div><label for="par_rpat" style="width:45px;">Pattern:</label><input type="text" id="par_rpat" style="width:161px;" value="$n"></input></div><div style="padding-bottom:8px;line-height:11px;font-size:11px;">$n=name, $w=width, $h=height, ##=index</div>
+            <div><label for="par_find" style="width:45px;">Find:</label><input type="text" id="par_find" style="width:161px;"></input></div>
+            <div><label for="par_replace" style="width:45px;">Replace:</label><input type="text" id="par_replace" style="width:161px;"></input></div>
+            <div><input type="checkbox" id="par_rspace"><label for="par_rspace" style="padding-left:4px;">Remove spaces</label></div>
+            <div><label for="par_rbeg" style="width:143px;">Remove from start:</label><input type="number" step="1" id="par_rbeg" value="0"></input></div>
+            <div><label for="par_rend" style="width:143px;">Remove from end:</label><input type="number" step="1" id="par_rend" value="0"></input></div>
+            <input type="button" value="OK" onclick="close_win(this);exe_rename();" class="button"/>
+        </div>
+    </div>
+    <div id="win_saveas" class="win" style="display:none;">
+        <div class="head"><span class="label">Save As</span><span class="cross" onclick="close_win(this);"></span></div>
+        <div class="body">
+            <div><label for="par_format" style="width:80px;">Format:</label><select id="par_format" style="width:126;" onchange="format_change(this);"><option value="PSD" selected>PSD</option><option value="PNG">PNG</option><option value="JPG">JPG</option><option value="GIF">GIF</option></select></div>
+            <div><label for="par_quality" style="width:80px;" id="label_quality" disabled>Quality:</label><input type="number" step="1" id="par_quality" value="100" disabled></input></div>
+            <input type="button" value="OK" onclick="close_win(this);exe_saveas();" class="button"/>
+        </div>
+    </div>
+    <div id="win_border" class="win" style="display:none;">
+        <div class="head"><span class="label">Border</span><span class="cross" onclick="close_win(this);"></span></div>
+        <div class="body">
+            <div><label for="par_bsize" style="width:36px;">Size:</label><input type="number" step="1" id="par_bsize" value="10"></input></div>
+            <div><label for="par_bcolor" style="width:36px;">Color:</label><input type="color" id="par_bcolor"></input></div>
+            <input type="button" value="OK" onclick="close_win(this);exe_border();" class="button"/>
+        </div>
+    </div>
+    <div id="win_addtext" class="win" style="display:none;">
+        <div class="head"><span class="label">Add Text</span><span class="cross" onclick="close_win(this);"></span></div>
+        <div class="body">
+            <div><label for="par_text" style="width:35px;">Text:</label><input type="text" id="par_text" style="width:171px;"></input></div>
+            <div><label for="par_tsize" style="width:35px;">Size:</label><input type="number" step="1" id="par_tsize" value="24"></input><label for="par_tcolor" style="width:35px;">Color:</label><input type="color" id="par_tcolor"></input></div>
+            <div><label for="par_tfont" style="width:35px;">Font:</label><input type="text" id="par_tfont" value="DejaVuSans" style="width:171px;"></input></div>
+            <div><label for="par_tjust" style="width:80px;">Justification:</label><select id="par_tjust" style="width:126px;"><option value="Justification.LEFT" selected>Left</option><option value="Justification.CENTER">Center</option><option value="Justification.RIGHT">Right</option></select></div>
+            <div><label for="par_tx" style="width:35px;">Pos&nbsp;X:</label><input type="number" step="1" id="par_tx" value="0"></input><label for="par_ty" style="width:35px;">Pos&nbsp;Y:</label><input type="number" step="1" id="par_ty" value="0"></input></div>
+            <div><label for="par_tstart" style="width:80px;">Start Corner:</label><select id="par_tstart" style="width:126px;"><option value="Left Top" selected>Left Top</option><option value="Right Top">Right Top</option><option value="Center">Center</option><option value="Left Bottom">Left Bottom</option><option value="Right Bottom">Right Bottom</option></select></div>
+            <input type="button" value="OK" onclick="close_win(this);exe_addtext();" class="button"/>
+        </div>
+    </div>
+    <div id="win_script" class="win" style="display:none;">
+        <div class="head"><span class="label">Script</span><span class="cross" onclick="close_win(this);"></span></div>
+        <div class="body">
+            <div><label for="par_script" style="width:90px;">Custom Script:</label>
+            <select id="demo" style="width:112px;" onchange="demo_change(this)">
+                <option value="" disabled selected>- Load Demo -</option>
+                <option value="d.resizeImage(640, 480);">Resize Image</option>
+                <option value="d.crop([0,0,640,480]);">Crop Image</option>
+                <option value="d.name = 'MyFile';">Rename File</option>
+                <option value="d.saveAs(new File(d.name), new PhotoshopSaveOptions(), true);">Save PSD</option>
+                <option value="d.exportDocument(new File(d.name+'.png'), ExportType.SAVEFORWEB, new ExportOptionsSaveForWeb());">Export PNG</option>
+                <option value="d.resizeCanvas(640, 480, AnchorPosition.MIDDLECENTER);">Resize Canvas</option>
+                <option value="d.flatten();">Flatten Image</option>
+                <option value="d.close();">Close File</option>
+                <option value="d.rotateCanvas(90);">Rotate Canvas</option>
+                <option value="!">Last Script</option>
+            </select>
+            </div>
+            <div><textarea id="par_script" spellcheck="false" style="min-width:213px;width:213px;height:114px;"></textarea></div>
+            <div><input type="checkbox" id="par_reverse"><label for="par_reverse" style="padding-left:4px;">Reverse document order</label></div>
+            <input type="button" value="OK" onclick="close_win(this);exe_script();" class="button"/>
+        </div>
+    </div>
+  </body>
+</html>
