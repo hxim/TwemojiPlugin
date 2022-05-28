@@ -220,11 +220,20 @@ func_addtext: function(p) {
 }
 
         window.addEventListener("message", onMessage);
-        var running = false, last_script = '';
+        var running = false, last_script = '', func = null;
         var update_script = "function lc(doc){var c=0;for(var m=0;m<doc.layers.length;m++){if (doc.layers[m].typename==='ArtLayer') c++; else c+=lc(doc.layers[m]);}return c;} var s = 'MDC_INFO:'; for (var i = 0; i < app.documents.length; i++) { s += app.documents[i].source+'\\n'+app.documents[i].name+'\\n'+app.documents[i].width+'\\n'+app.documents[i].height+'\\n'+(app.documents[i]==app.activeDocument)+'\\n'+lc(app.documents[i])+'\\n'; } app.echoToOE(s);";
         function onMessage(e) {
             if (running && e.data.indexOf("MDC_INFO:") == 0) update_mdc(e.data.substring("MDC_INFO:".length));
-            else if (e.data == "done") { running = false; }
+            else if (e.data == "done") {
+                var callback = func;
+                running = false; func = null;
+                if (callback != null) callback();
+            }
+        }
+        function checkpp() {
+            if (window.parent == window.self) return;
+            running = true; func = update;
+            window.parent.postMessage("app.echoToOE('multi plugin init');", "*");
         }
         function update() {
             if (window.parent == window.self) return;
@@ -445,7 +454,7 @@ func_addtext: function(p) {
         }
     </script>
   </head>
-  <body onload="window.setInterval(update,3000);">
+  <body onload="checkpp();window.setInterval(update,3000);">
     <div id="bar">
         <div><input type="button" value="Resize" onclick="open_win('resize');" class="button"/></div>
         <div><input type="button" value="Crop" onclick="open_win('crop');" class="button"/></div>
