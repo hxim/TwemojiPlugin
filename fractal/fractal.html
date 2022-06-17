@@ -172,7 +172,7 @@ function update_webgl() {
         for (var y = 0; y < ch; y++) {
             var count = 0;
             for (var x = 0; x < cw; x++) {
-                var a = pixels[ofs++]; a+=pixels[ofs++]*256;a+=pixels[ofs++]*256;
+                var a = pixels[ofs++]; a+=pixels[ofs++]*256;a+=pixels[ofs++]*256*256;
                 if (pixels[ofs++] == 0) { count++; total++; pixel_data.push(null); } else { count = 0; pixel_data.push(a); }
                 if (count > max && y+max<ch && y-max>=0 && x+max<cw && x-max>=0) {
                     j = 1;
