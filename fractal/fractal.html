@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
 <style>
-    html, body { width: 100%; height: 100%; background-color: #474747; user-select: none; }
+    html, body { width: 100%; height: 100%; background-color: #474747; user-select: none; touch-action: none !important; }
     body, button, input, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; overflow: hidden; }
     label { line-height:21px; display: inline-block; margin: 2px 6px 0 0; }
     input, select { padding: 3px; box-sizing: border-box; margin: 0 2px; }
@@ -33,8 +33,8 @@
     .win > div.head { border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); height: 30px; font-size: 1.15em; background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.25) 100%); border-top-left-radius: 6px; border-top-right-radius: 6px; }
     .win > div.head span.label { display: inline-block; padding: 0.3em 0.5em; font-weight: bold; }
     .win > div.head span.cross { cursor: pointer; display: inline-block; background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI1NiAyNTYiIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2Ij48cGF0aCAgZD0ibTMyIDBsMjI0IDIyNC0zMiAzMi0yMjQtMjI0em0yMjQgMzJsLTIyNCAyMjQtMzItMzIgMjI0LTIyNHoiLz48L3N2Zz4=); background-size: 10px 10px; background-repeat: no-repeat; background-position: center; width: 30px; height: 30px; font-size: 1.3em; position: absolute; right: 0; filter: invert(0.78); }
-    .win > div.body { line-height: 30px; padding: 11px; overflow-y: auto; min-width: 200px; }
-    .win > div.body > input.button { margin-top: 7px; width: calc(100% - 3px); }
+    .win > div.body { line-height: 30px; padding: 8px 10px; overflow-y: auto; min-width: 200px; }
+    .win > div.body > input.button { margin-top: 5px; width: calc(100% - 3px); }
     .dpoint { position:absolute; top: 0; left: 0; width: 8px; height:16px; outline: 1px solid rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.8); box-shadow: 0px 1px 1px rgba(0,0,0,0.5), inset 1px 1px 0px rgba(255,255,255,0.4), inset -1px -1px 0px rgba(0,0,0,0.4); border-radius: 0 0 50% 50%; }
     .dpoint:hover { outline: 4px solid rgba(0,0,0,0.4); }
     #cont { position: absolute; left: 6px; top: 38px; right: 4px; bottom: 6px; overflow-y: scroll; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin; font-size: 0px; }
@@ -367,7 +367,7 @@ function update_palette_editor() {
     var canvas = document.getElementById("palette_setup");
     var cw = canvas.width, ch = canvas.height, ctx = canvas.getContext('2d');
     canvas.onclick = function(e) {
-        var x = (e || window.event).clientX - this.getBoundingClientRect().left, position = x / cw;
+        var x = e.clientX - this.getBoundingClientRect().left, position = x / cw;
         var cd = ctx.getImageData(Math.floor(x), 0, 1, 1).data, c = fromRgb(pal[0], [cd[0], cd[1], cd[2]]);
         for (var j = 0; j < pal[3].length - 1; j++) {
             if (pal[3][j][0] <= position && pal[3][j+1][0] >= position) {
@@ -393,6 +393,7 @@ function update_palette_editor() {
         var c = rgbToHex(toRgb(pal[0] == 1, [point[1], point[2], point[3]]));
         var dpoint = document.createElement('div');
         dpoint.className = "dpoint";
+        dpoint.style.touchAction = "none";
         dpoint.style.backgroundColor = c;
         dpoint.style.left = (position*cw-5)+"px";
         dpoint.setAttribute("data-index", j);
@@ -407,8 +408,8 @@ function update_palette_editor() {
                 window.setTimeout(function() { if (wantPreview) { repaint_colors(); } wantPreview = false; }, 500);
             }
         }
-        dpoint.onmousedown = function (e) {
-            e2 = (e || window.event);
+        dpoint.onpointerdown = function (e) {
+            e2 = e;
             if (e2.ctrlKey && pal[0]) {
                 var index = parseInt(this.getAttribute("data-index"));
                 var target = pal[3][index][1] + (e2.button == 0 ? 1 : -1);
@@ -417,7 +418,9 @@ function update_palette_editor() {
                 requestPreview();
                 return;
             }
-            if (e2.detail == 2) {
+            if (typeof clickcount !== 'undefined') clickcount++; else clickcount = 0;
+            window.setTimeout(function() { clickcount = 0; }, 400);
+            if (clickcount == 2) {
                 var dpoint1 = this;
                 var colpick = document.getElementById("colorpicker");
                 colpick.value = this.getAttribute("data-hex");
@@ -434,17 +437,17 @@ function update_palette_editor() {
                 colpick.click();
                 return;
             }
-            document.onmouseup = closeDragElement;
-            document.onmousemove = elementDrag;
+            document.onpointerup = closeDragElement;
+            document.onpointermove = elementDrag;
             elem = this; x = elem.offsetLeft; y = 0;
         }
         function elementDrag(e) {
-            x = (x - e2.clientX + (e || window.event).clientX);
-            y = (y - e2.clientY + (e || window.event).clientY);
+            e.preventDefault();
+            x = (x - e2.clientX) + e.clientX;
+            y = (y - e2.clientY) + e.clientY;
             elem.style.left = Math.min(cw-5,Math.max(-5, x)) + "px";
             elem.style.display = Math.abs(y) > 30 ? "none" : null;
-            e.preventDefault();
-            e2 = (e || window.event);
+            e2 = e;
             var palp2 = document.getElementById("pal_points");
             pal[3] = [];
             for (var i = 0; i < palp2.children.length; i++) {
@@ -463,7 +466,7 @@ function update_palette_editor() {
             requestPreview();
         }
         function closeDragElement() {
-            document.onmouseup = null; document.onmousemove = null;
+            document.onpointerup = null; document.onpointermove = null;
             update_palette_editor();
             palette_preview();
         }
@@ -471,19 +474,19 @@ function update_palette_editor() {
     }
     var pcanvas = document.getElementById("palette_preview");
     var e3 = null, x, x0, but = false, old_len = pal[1], old_ofs = pal[2], p0 = pixel_data.length == 0 ? 0 : pixel_data[0];
-    pcanvas.onmousedown = function (e) {
-        e3 = (e || window.event);
-        document.onmouseup = closeDragElementP;
-        document.onmousemove = elementDragP;
+    pcanvas.parentNode.onpointerdown = function (e) {
+        e3 = e;
+        document.onpointerup = closeDragElementP;
+        document.onpointermove = elementDragP;
         pcanvas.style.cursor = "grabbing";
         but = e.button == 0;
         x0 = e3.clientX - this.getBoundingClientRect().left;
         x = but ? 0 : x0;
     }
     function elementDragP(e) {
-        x = (x - e3.clientX + (e || window.event).clientX);
+        x = (x - e3.clientX) + e.clientX;
         e.preventDefault();
-        e3 = (e || window.event);
+        e3 = e;
         if (but) pal[2] = (old_ofs + Math.round(pal[1] * x / cw)) % pal[1];
         else {
             pal[1] = x <= 0 || x0 <= 0 ? 1 : Math.max(1, Math.round(old_len * (x / cw) / (x0 / cw)));
@@ -493,7 +496,7 @@ function update_palette_editor() {
         requestPreview();
     }
     function closeDragElementP() {
-        document.onmouseup = null; document.onmousemove = null;
+        document.onpointerup = null; document.onpointermove = null;
         update_palette_editor();
         palette_preview();
         pcanvas.style.cursor = "grab";
@@ -605,10 +608,10 @@ function navigate(newpos, skipupdate) {
     pos = newpos;
     if (!skipupdate) update();
 }
-function zoom(e, dir, sel) {
+function zoom(coord, dir, sel) {
     var canvas = document.getElementById("canvas"), cw = canvas.width, ch = canvas.height, bb = canvas.getBoundingClientRect();
-    var ex = (sel == null ? e.clientX : sel.left+sel.width/2) - bb.left;
-    var ey = (sel == null ? e.clientY : sel.top+sel.height/2) - bb.top;
+    var ex = (sel == null ? coord[0] : sel.left+sel.width/2) - bb.left;
+    var ey = (sel == null ? coord[1] : sel.top+sel.height/2) - bb.top;
     var rx = ((ex + 0.5) / bb.width) - 0.5, ry = 0.5 - ((ey + 0.5) / bb.height);
     var x = new Decimal(pos[0]);
     var y = new Decimal(pos[1]);
@@ -621,24 +624,25 @@ function zoom(e, dir, sel) {
 }
 function startsel(elem, e) {
     var seldiv = document.getElementById("sel"), sx = e.clientX, sy = e.clientY;
-    elem.onmousemove = function(e) {
-        if (seldiv.style.display == "none" && (Math.abs(e.clientX-sx) > 4 || Math.abs(e.clientY-sy) > 4)) seldiv.style.display = "unset";
+    document.onpointermove = function(e) {
+        e.preventDefault(); var mx = e.clientX, my = e.clientY;
+        if (seldiv.style.display == "none" && (Math.abs(mx-sx) > 4 || Math.abs(my-sy) > 4)) seldiv.style.display = "unset";
         if (seldiv.style.display != "none") {
-            seldiv.style.left = Math.min(e.clientX, sx) + "px";
-            seldiv.style.top = Math.min(e.clientY, sy) + "px";
-            seldiv.style.width = Math.abs(e.clientX - sx) + "px";
-            seldiv.style.height = Math.abs(e.clientY - sy) + "px";
+            seldiv.style.left = Math.min(mx, sx) + "px";
+            seldiv.style.top = Math.min(my, sy) + "px";
+            seldiv.style.width = Math.abs(mx - sx) + "px";
+            seldiv.style.height = Math.abs(my - sy) + "px";
         }
         if (e.buttons == 0) {
             seldiv.style.display = "none";
-            elem.onmousemove = elem.onmouseup = null;
+            document.onpointermove = document.onpointerup = null;
         }
     }
-    elem.onmouseup = function(e) {
+    document.onpointerup = function(e) {
         var sel = seldiv.style.display != "none" ? seldiv.getBoundingClientRect() : null;
         seldiv.style.display = "none";
-        elem.onmousemove = elem.onmouseup = null;
-        zoom(e, e.button == 0, sel);
+        document.onpointermove = document.onpointerup = null;
+        zoom([sx,sy], e.button == 0, sel);
     }
 }
 function download(e) {
@@ -846,21 +850,20 @@ function opentab(id) {
 }
 function dragElement(elmnt) {
     var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    elmnt.children[0].onmousedown = dragMouseDown;
+    elmnt.children[0].onpointerdown = dragMouseDown;
     function dragMouseDown(e) {
-        e = e || window.event; e.preventDefault();
+        e.preventDefault();
         pos3 = e.clientX; pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        document.onmousemove = elementDrag;
+        document.onpointerup = function () { document.onpointerup = null; document.onpointermove = null; };
+        document.onpointermove = elementDrag;
     }
     function elementDrag(e) {
-        e = e || window.event; e.preventDefault();
+        e.preventDefault();
         pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY; pos3 = e.clientX; pos4 = e.clientY;
         var w = document.body.offsetWidth, h = document.body.offsetHeight;
         elmnt.style.top = Math.max(elmnt.offsetHeight/2, Math.min(h-elmnt.offsetHeight/2, elmnt.offsetTop - pos2)) + "px";
         elmnt.style.left = Math.max(elmnt.offsetWidth/2, Math.min(w-elmnt.offsetWidth/2, elmnt.offsetLeft - pos1)) + "px";
     }
-    function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
 }
 function close_win(elem) {
     elem.parentNode.parentNode.style.display = 'block';
@@ -879,7 +882,7 @@ function open_win(id) {
         }
     } else {
         elem.style.display = "block";
-        if (elem.onmousedown == null) dragElement(elem);
+        if (elem.onpointerdown == null) dragElement(elem);
         if (id == "palette") { update_palette_editor(); palette_preview(); }
     }
 }
@@ -964,7 +967,7 @@ function btn(button, event) {
       </div>
       <div style="position:absolute;right:5px;top:2px;"><input type="button" id="download" value="" onclick="btn(this, event);" class="button"/></div>
     </div>
-    <div id="wrapper" onmousedown="startsel(this, event);">
+    <div id="wrapper" onpointerdown="startsel(this, event);">
     <canvas id="canvas" width="0" height="0"></canvas>
     <canvas id="canvas_webgl" width="0" height="0"></canvas>
     </div>
@@ -993,12 +996,11 @@ function btn(button, event) {
         <div class="body">
             <div><label for="pal_size" style="width:25px;">Size:</label><input type="number" step="1" id="pal_size" value="64" min="1" onchange="palette_preview();" style="width:60px;"></input><label for="pal_offset" style="width:35px;">Offset:</label><input type="number" step="1" id="pal_offset" value="0" min="0" onchange="palette_preview();" style="width:60px;"></input></div>
             <div><input type="checkbox" id="pal_preview" checked onchange="palette_preview();"><label for="pal_preview" style="padding-left:4px;">Preview</label><input type="checkbox" id="pal_type" onchange="palette_preview();update_palette_editor();"><label for="pal_type" style="padding-left:4px;">HSV mode</label></div>
-            <div style="height: 38px;position: relative;">
-            <div id="pal_points"><div class="dpoint"></div></div>
-            <div style="padding-top: 8px; line-height: 30px;"><canvas id="palette_setup" width="200" height="16" style="background-color: white;border-radius: 3px;"></canvas></div>
+            <div style="height: 35px;position: relative;"><div id="pal_points"></div>
+            <div style="padding-top: 8px; line-height: 27px;"><canvas id="palette_setup" width="200" height="16" style="background-color: white;"></canvas></div>
             <input type="color" id="colorpicker" style="overflow:hidden;position:absolute;top:0;left:0;opacity:0;pointer-events:none;width:1px;height:1px;"/>
             </div>
-            <div style="line-height: normal;"><canvas id="palette_preview" width="200" height="16" style="background-color: black;border-radius: 3px; cursor: grab;" title="Change offset with left button and size with right button."></canvas></div>
+            <div style="line-height: 30px;padding-top:3px;"><canvas id="palette_preview" width="200" height="16" style="background-color: black; cursor: grab;" title="Change offset with left button and size with right button."></canvas></div>
             <input type="button" value="OK" onclick="close_win(this);" class="button"/>
         </div>
     </div>
