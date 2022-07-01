@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+<style>
+    body { background-color: #474747; user-select: none; margin: 0; padding: 0; }
+    body, input, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; overflow: hidden; }
+    label { line-height:21px; display: inline-block; margin: 2px 6px 0 0; }
+    input, select { padding: 3px; box-sizing: border-box; margin: 0 2px; }
+    input[type=checkbox] { height: 26px; line-height: 26px; padding-right: 6px; }
+    select, input { background-color: #252525; border: 1px solid #252525; border-radius: 3px; transition: border 0.5s; }
+    input:not(.button):hover, select:hover, input:not(.button):focus, select:focus { border: 1px solid #3482f6; outline: none !important; }
+    .button { background-color: #606060; margin: 8px 0 0 1.5px; border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); border-left: 0px; border-right: 0px; padding: 7px 20px 8px 20px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+    .button:hover { background-color: #6a6a6a;}
+    .page { padding: 6px; }
+    .page > div { margin-bottom: 6px; }
+    .spinner {  margin: auto; border: 3px solid #5d5d5d; border-radius: 50%; border-top: 3px solid #c7c7c7; width: 14px; height: 14px; animation: spinner 2s linear infinite; }
+    @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+<script>
+window.addEventListener("message", onMessage);
+var _running = false, _callback = null, _buffer = null, _bounds = null;
+function onMessage(e) {
+    if (_running && e.data instanceof ArrayBuffer) _buffer = e.data;
+    else if (_running && e.data.indexOf("SELECTION.BOUNDS:") == 0) {
+        var b = e.data.split(":")[1].split(",");
+        if (b.length == 4) {
+            _bounds = b;
+            for (var i = 0; i < 4; i++) _bounds[i] = parseInt(_bounds[i]);
+        }
+    } else if (_running && e.data == "done") {
+        var callback = _callback, buffer = _buffer, bounds = _bounds;
+        running = false; _callback = null; _buffer = null; _bounds = null;
+        callback(buffer, bounds);
+    }
+
+}
+function runScript(s, callback) {
+    _running = true;
+    _callback = callback;
+    window.parent.postMessage(s, "*");
+}
+const scriptExtractSelection = function() {
+    var message = "No selection. Please make selection in Photopea.";
+    try {
+        var sel = null;
+        if (app.documents.length > 0) sel = app.activeDocument.selection.bounds; else alert(message);
+    }
+    catch(e) {
+        var sel = null; alert(message);
+    }
+    if (sel != null) {
+        app.echoToOE("SELECTION.BOUNDS:"+sel[0].value+","+sel[1].value+","+sel[2].value+","+sel[3].value);
+        var oldlayer = app.activeDocument.activeLayer;
+        app.activeDocument.activeLayer = app.activeDocument.layers[0];
+        var group = app.activeDocument.layerSets.add(), layer = group.artLayers.add();
+        app.activeDocument.selection.invert();
+        var white = new SolidColor(), black = new SolidColor();
+        white.rgb.red = 255; white.rgb.green = 255; white.rgb.blue = 255;
+        black.rgb.red = 0; black.rgb.green = 0; black.rgb.blue = 0;
+        app.activeDocument.selection.fill(white);
+        app.activeDocument.selection.invert();
+        app.activeDocument.selection.fill(black);
+        app.activeDocument.saveToOE("bmp");
+        group.remove();
+        app.activeDocument.activeLayer = oldlayer;
+    }
+}
+function fromSelection(width, height, func) {
+    var s = (""+scriptExtractSelection).trim();
+    if (s.indexOf("function()") == 0) s = s.substr("function()".length).trim();
+    if (s.indexOf("{") == 0) s = s.substr(1).trim();
+    if (s.lastIndexOf("}") == s.length-1) s = s.slice(0,-1).trim();
+    runScript(s, function(data, bounds) {
+        if (data == null || bounds == null) return;
+        var buff = new Uint8Array(data);
+        var bf = new Uint8Array(4), u32 = new Uint32Array(bf.buffer); u16 = new Uint16Array(bf.buffer);
+        var read_u32 = function(d,o) { for(var i=0; i<4; i++) bf[i]=d[o+i]; return u32[0]; }
+        var read_u16 = function(d,o) { for(var i=0; i<2; i++) bf[i]=d[o+i]; return u16[0]; }
+        var ioff = read_u32(buff, 10), w = read_u32(buff, 18), h = read_u32(buff, 22), bpp = read_u16(buff, 28);
+        if (bpp!=24 && bpp!=8 && bpp!=4 && bpp!=1) return;
+        openloading("Extracting selection...");
+        var row = 4* Math.floor((bpp * w + 31) / 32);
+        var getpixel = function (x, y) {
+            if (x < 0 || y < 0 || x > w || y > h) return 0;
+            var j = ioff + (h - y - 1) * row + ((x * bpp)>>>3);
+            var k = (bpp<=8) ? (54 + 4*(bpp==1 ? (buff[j]>>>(7-(x&7)))& 1 : bpp==4 ? (buff[j]>>>(4-4*(x&1)))&15 : buff[j])) : j;
+            return 1 - (buff[k] + buff[k+1] + buff[k+2]) / (255 * 3);
+        };
+        var output = [], w1 = width, h1 = height, p = (bounds[2]-bounds[0])/(bounds[3]-bounds[1]);
+        if (width/height > p) w1 = Math.round(height * p); else if (width/height < p) h1 = Math.round(width / p);
+        for (var i = 0; i < w1*h1; i++) output.push([]);
+        for (var y = bounds[1]; y < bounds[3]; y++) {
+            for (var x = bounds[0]; x < bounds[2]; x++) {
+                var xi = Math.max(0,Math.min(w1-1,Math.floor((x-bounds[0]+0.5)/(bounds[2]-bounds[0])*w1)));
+                var yi = Math.max(0,Math.min(h1-1,Math.floor((y-bounds[1]+0.5)/(bounds[3]-bounds[1])*h1)));
+                output[xi+yi*w1].push(getpixel(x, y));
+            }
+        }
+        var result = Array(width*height).fill(false), total = 0, first = null;
+        for (var i = 0; i < w1*h1; i++) {
+            const x1 = (i % w1), y1 = ((i / w1)>>0), x2 = Math.floor((width-w1)/2)+x1, y2 = Math.floor((height-h1)/2)+y1;
+            const v = output[i].length == 0 ? getpixel(bounds[0]+Math.floor((x1+0.5)/w1*(bounds[2]-bounds[0])),
+                                                       bounds[1]+Math.floor((y1+0.5)/h1*(bounds[3]-bounds[1])))
+                                            : output[i].reduce((a, b) => a + b, 0) / output[i].length;
+            if (v > 1/3) {
+                if (first == null) first = [x2, y2];
+                result[x2+width*y2] = true;
+                total++;
+            }
+        }
+        var tmp = result.slice(), stack = total > 0 ? [first] : [], visited = 1;
+        if (first != null) tmp[first[0]+first[1]*width] = false;
+        while (stack.length > 0) {
+            var c = stack.pop(), a = [];
+            if (c[0]+1<width && tmp[c[0]+1+c[1]*width]) a.push([c[0]+1,c[1]]);
+            if (c[0]-1>=0 && tmp[c[0]-1+c[1]*width]) a.push([c[0]-1,c[1]]);
+            if (c[1]+1<height && tmp[c[0]+(c[1]+1)*width]) a.push([c[0],c[1]+1]);
+            if (c[1]-1>=0 && tmp[c[0]+(c[1]-1)*width]) a.push([c[0],c[1]-1]);
+            if (a.length > 0) {
+                stack.push(c); stack.push(a[0]);
+                tmp[a[0][0]+a[0][1]*width] = false;
+                visited++;
+            }
+        }
+        if (visited == total) func(result); else { alert("Shape from selection is not contiguous."); openloading(""); }
+    });
+}
+
+function initCells(width, height, isCell) {
+    var pos = {}, cells = [];
+    for (var x = 0; x < width; x++) for (var y = 0; y < height; y++) {
+        if (!isCell(x, y)) continue;
+        var e = [];
+        function addedge(ex,ey) { var p = pos[ex+"_"+ey]; if (p != null) e.push(p); }
+        addedge(x-1,y);addedge(x+1,y);addedge(x,y-1);addedge(x,y+1);
+        var index = cells.length;
+        cells.push({i:index,x:x,y:y,e:e,walls:[true, true, true, true]});
+        pos[x+"_"+y] = index;
+        e.forEach(i => cells[i].e.push(index));
+    }
+    return cells;
+}
+function removeWalls(c, d) {
+    if (c.y > d.y) { c.walls[0] = d.walls[2] = false; }
+    if (c.x < d.x) { c.walls[1] = d.walls[3] = false; }
+    if (c.y < d.y) { c.walls[2] = d.walls[0] = false; }
+    if (c.x > d.x) { c.walls[3] = d.walls[1] = false; }
+}
+function progress(func, time, percent) {
+    var time1 = (new Date).getTime();
+    if (time1 - time[0] >= 200) {
+        time[0] = time1;
+        openloading("Generating... ("+Math.floor(100*percent)+"%)");
+        setTimeout(func, 0);
+    } else func();
+}
+
+// Depth-first (DFS)
+function generateDFS(cells, time, callbackFunc) {
+    // 1. Choose the initial cell, mark it as visited and push it to the stack
+    var init = Math.floor(Math.random() * cells.length);
+    var stack = [init], visitedTotal = 1;
+    cells[init].visited = true;
+    function stepDFS() {
+        for (var j = 0; j < 4096; j++) {
+            // 2. While the stack is not empty
+            if (stack.length == 0) { callbackFunc(); return; }
+
+            // 1. Pop a cell from the stack and make it a current cell
+            var current = stack.pop();
+
+            // 2. If the current cell has any neighbours which have not been visited
+            var unvisited = [];
+            for (var i = 0; i < cells[current].e.length; i++) if (!cells[cells[current].e[i]].visited) unvisited.push(cells[current].e[i]);
+            if (unvisited.length > 0) {
+                // 1. Push the current cell to the stack
+                stack.push(current);
+
+                // 2. Choose one of the unvisited neighbours
+                var chosen = unvisited[Math.floor(Math.random() * unvisited.length)];
+
+                // 3. Remove the wall between the current cell and the chosen cell
+                removeWalls(cells[chosen], cells[current]);
+
+                // 4. Mark the chosen cell as visited and push it to the stack
+                cells[chosen].visited = true;
+                visitedTotal++;
+                stack.push(chosen);
+            }
+        }
+        progress(stepDFS, time, visitedTotal / cells.length);
+    }
+    stepDFS();
+}
+
+// Kruskal's algorithm
+function generateKruskal(cells, time, callbackFunc) {
+    // 1. Create a list of all walls, and create a set for each cell, each containing just that one cell.
+    var wlist = [], w = 0;
+    for (var i = 0; i < cells.length; i++) cells[i].set = i;
+    for (var i = 0; i < cells.length; i++) for (var j = 0; j < cells[i].e.length; j++) {
+        var a = i, b = cells[i].e[j];
+        if (a < b) wlist.push([a,b]);
+    }
+    // Randomize order of walls
+    for (var i = wlist.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = wlist[i];
+        wlist[i] = wlist[j];
+        wlist[j] = temp;
+    }
+    function getSet(i) {
+        if (cells[i].set == i) return i; else return cells[i].set = getSet(cells[i].set);
+    }
+    function stepKruskal() {
+        // 2. For each wall, in some random order:
+        for (var w0 = w; w < w0 + 4096 && w < wlist.length; w++) {
+
+            // 1. If the cells divided by this wall belong to distinct sets:
+            var s0 = getSet(wlist[w][0]), s1 = getSet(wlist[w][1]);
+            if (s0 != s1) {
+                //Remove the current wall.
+                removeWalls(cells[wlist[w][0]], cells[wlist[w][1]]);
+
+                //Join the sets of the formerly divided cells.
+                cells[s1].set = s0;
+            }
+        }
+        if (w == wlist.length) callbackFunc();
+        else progress(stepKruskal, time, w / wlist.length)
+    }
+    stepKruskal();
+}
+
+// Prim's algorithm
+function generatePrim(cells, time, callbackFunc) {
+    // 1. Start with a grid full of walls.
+    // 2. Pick a cell, mark it as part of the maze. Add the walls of the cell to the wall list.
+    var wlist = [], visitedTotal = 1;
+    var init = Math.floor(Math.random() * cells.length);
+    cells[init].visited = true;
+    for (var i = 0; i < cells[init].e.length; i++) wlist.push([init,cells[init].e[i]]);
+    function stepPrim() {
+        for (var j = 0; j < 4096; j++) {
+            // 3. While there are walls in the list:
+            if (wlist.length == 0) { callbackFunc(); return; }
+
+            // 1. Pick a random wall from the list. If only one of the cells that the wall divides is visited, then:
+            var w = Math.floor(Math.random() * wlist.length);
+            var wall = wlist[w];
+            if (!cells[wall[1]].visited) {
+                // 1. Make the wall a passage and mark the unvisited cell as part of the maze.
+                removeWalls(cells[wall[0]], cells[wall[1]]);
+                cells[wall[1]].visited = true;
+                visitedTotal++;
+
+                // 2. Add the neighboring walls of the cell to the wall list.
+                for (var i = 0; i < cells[wall[1]].e.length; i++) if (!cells[wall[1]].e[i].visited) wlist.push([wall[1],cells[wall[1]].e[i]]);
+            }
+            // 2. Remove the wall from the list.
+            wlist.splice(w, 1);
+        }
+        progress(stepPrim, time, visitedTotal / cells.length);
+    }
+    stepPrim();
+}
+
+// Prim's algorithm (Modified version)
+function generatePrimMod(cells, time, callbackFunc) {
+    // Although the classical Prim's algorithm keeps a list of edges, for maze generation we could instead maintain a list of adjacent cells.
+    // If the randomly chosen cell has multiple edges that connect it to the existing maze, select one of these edges at random. This will
+    // tend to branch slightly more than the edge-based version above.
+    var clist = [], visitedTotal = 1;
+    var init = Math.floor(Math.random() * cells.length);
+    cells[init].visited = true;
+    for (var i = 0; i < cells[init].e.length; i++) clist.push(cells[init].e[i]);
+    function stepPrim() {
+        for (var j = 0; j < 4096; j++) {
+            if (clist.length == 0) { callbackFunc(); return; }
+            var c = Math.floor(Math.random() * clist.length);
+            var current = clist[c];
+            if (!cells[current].visited) {
+                cells[current].visited = true;
+                visitedTotal++;
+                var connecting = [];
+                for (var i = 0; i < cells[current].e.length; i++) if (cells[cells[current].e[i]].visited) connecting.push(cells[current].e[i]);
+                var chosen = connecting[Math.floor(Math.random() * connecting.length)];
+                removeWalls(cells[chosen], cells[current]);
+                for (var i = 0; i < cells[current].e.length; i++) if (!cells[cells[current].e[i]].visited) clist.push(cells[current].e[i]);
+            }
+            clist.splice(c, 1);
+        }
+        progress(stepPrim, time, visitedTotal / cells.length);
+    }
+    stepPrim();
+}
+
+// Wilson's algorithm
+function generateWilson(cells, time, callbackFunc) {
+    // We begin the algorithm by initializing the maze with one cell chosen arbitrarily.
+    var visitedTotal = 1, c = 1;
+    cells[0].visited = true;
+    function stepWilson() {
+        for (var c0 = c; c < c0 + 256 && c < cells.length; c++) {
+            // Then we start at a new cell chosen arbitrarily
+            if (c >= cells.length) { callbackFunc(); return; }
+            if (!cells[c].visited) {
+                // Perform a random walk until we reach a cell already in the maze—however, if at any point
+                // the random walk reaches its own path, forming a loop, we erase the loop from the path before proceeding
+                var path = [], cellonpath = {}, current = c;
+                while (!cells[current].visited) {
+                    if (cellonpath[current] != null) {
+                        var rep = cellonpath[current];
+                        for (var i = rep + 1; i < path.length; i++) cellonpath[path[i]] = null;
+                        path.length = rep + 1;
+                    } else path.push(current);
+                    cellonpath[current] = path.length - 1;
+                    current = cells[current].e[Math.floor(Math.random() * cells[current].e.length)];
+                }
+                // When the path reaches the maze, we add it to the maze.
+                path.push(current);
+                for (var i = 0; i < path.length; i++) {
+                    cells[path[i]].visited = true;
+                    if (i > 0) removeWalls(cells[path[i-1]], cells[path[i]]);
+                }
+            }
+        }
+        if (c == cells.length) callbackFunc();
+        else progress(stepWilson, time, c / cells.length)
+    }
+    stepWilson();
+}
+
+// Aldous-Broder algorithm
+function generateAldousBroder(cells, time, callbackFunc) {
+    // 1. Pick a random cell as the current cell and mark it as visited.
+    var visitedTotal = 1, c = Math.floor(Math.random() * cells.length);
+    cells[c].visited = true;
+    function stepAldousBroder() {
+        for (var j = 0; j < 4096; j++) {
+            // While there are unvisited cells
+            if (visitedTotal >= cells.length) { callbackFunc(); return; }
+
+            // 1. Pick a random neighbour.
+            var chosen = cells[c].e[Math.floor(Math.random() * cells[c].e.length)];
+
+            // 2. If the chosen neighbour has not been visited
+            if (!cells[chosen].visited) {
+                // 1. Remove the wall between the current cell and the chosen neighbour.
+                removeWalls(cells[c], cells[chosen]);
+
+                // 2. Mark the chosen neighbour as visited.
+                cells[chosen].visited = true;
+                visitedTotal++;
+            }
+            c = chosen;
+        }
+        progress(stepAldousBroder, time, visitedTotal / cells.length)
+    }
+    stepAldousBroder();
+}
+
+// Recursive division method
+function generateRecursive(cells, time, callbackFunc) {
+    // Mazes can be created with recursive division, an algorithm which works as follows: Begin with the
+    // maze's space with no walls. Call this a chamber. Divide the chamber with a randomly positioned wall
+    // (or multiple walls) where each wall contains a randomly positioned passage opening within it. Then
+    // recursively repeat the process on the subchambers until all chambers are minimum sized. This method
+    // results in mazes with long straight walls crossing their space, making it easier to see which areas
+    // to avoid.
+
+    var  w = 0, h = 0;
+    for (var i = 0; i < cells.length; i++) { w = Math.max(w, cells[i].x + 1); h = Math.max(h, cells[i].y + 1); }
+    var pos = Array(w * h), stack = [[0, 0, w-1, h-1]], areaTotal = w * h, areaDone = 0;
+    for (var i = 0; i < cells.length; i++) pos[cells[i].x+w*cells[i].y] = i;
+    var findCell = function(x, y) { return pos[x+w*y]; };
+    function stepRecursive() {
+        for (var j = 0; j < 4096; j++) {
+            if (stack.length == 0) { callbackFunc(); return; }
+            var box = stack.pop();
+            var dir = box[2]-box[0] >= box[3]-box[1] ? 0 : 1;
+            if (box[2+dir]-box[0+dir] <= 0) continue;
+            var d = box[0+dir] + 1 + Math.floor(Math.random() * (box[2+dir] - box[0+dir]));
+            stack.push([box[0],box[1],dir?box[2]:d-1,dir?d-1:box[3]]);
+            stack.push([dir?box[0]:d,dir?d:box[1],box[2],box[3]]);
+            var a = [];
+            for (var i = 0; i < box[3-dir] - box[1-dir] + 1; i++) {
+                var p = box[1-dir] + i;
+                var c1 = findCell(dir?p:d-1,dir?d-1:p), c2 = findCell(dir?p:d,dir?d:p);
+                if (c1 != null && c2 != null) a.push([c1,c2]);
+                if ((c1 == null || c2 == null || i == box[3-dir] - box[1-dir]) && a.length > 0) {
+                    var sel = a[Math.floor(Math.random() * a.length)];
+                    removeWalls(cells[sel[0]], cells[sel[1]]);
+                    a = [];
+                }
+            }
+            areaDone += box[3-dir] - box[1-dir];
+        }
+        progress(stepRecursive, time, areaDone / areaTotal)
+    }
+    stepRecursive();
+}
+
+function svgPathFromCanvas(canvas, ctx, fillColor) {
+    const w = canvas.width, h = canvas.height;
+    var imgData = ctx.getImageData(0, 0, w, h), pathSvg = "";
+    const m1 = [[0,-1],[1,0],[0,1],[-1,0]], m2 = [[-1,-1],[1,-1],[1,1],[-1,1]];
+    function pixelBlack(x, y) { return x<0||y<0||x>=w||y>=h?false:imgData.data[(y*w+x)*4] < 128; };
+    function getShapePoint(x, y, dir) { return {x:x + m2[dir][0]*0.5 + 0.5,y:y + m2[dir][1]*0.5 + 0.5}; }
+    ctx.globalCompositeOperation = "difference";
+    ctx.fillStyle = "#ffffff";
+    for (var y0 = 0; y0 < h; y0++) for (var x0 = 0; x0 < w; x0++) if (pixelBlack(x0, y0)) {
+        var dir = 1, x = x0, y = y0, path = [], sPoint = getShapePoint(x0, y0, 0);
+        ctx.beginPath();
+        ctx.moveTo(sPoint.x, sPoint.y); path.push(sPoint);
+        while (x != x0 || y != y0 || dir != 0) {
+            var x1 = x + m1[dir][0], y1 = y + m1[dir][1];
+            if (pixelBlack(x1, y1)) {
+                dir = (dir + 3) % 4; x = x1; y = y1;
+            } else {
+                dir = (dir + 1) % 4;
+                sPoint = getShapePoint(x, y, dir);
+                if (path.length > 1 && (path[path.length-2].x == sPoint.x || path[path.length-2].y == sPoint.y)) path.pop();
+                ctx.lineTo(sPoint.x, sPoint.y); path.push(sPoint);
+            }
+        }
+        ctx.closePath();
+        ctx.fill();
+        imgData = ctx.getImageData(0, 0, w, h);
+        pathSvg += "M" + path[0].x + " " + path[0].y;
+        for (var i = 1; i < path.length; i++) pathSvg += path[i].y==path[i-1].y?"h"+(path[i].x-path[i-1].x):"v"+(path[i].y-path[i-1].y); pathSvg += "z";
+    }
+    ctx.globalCompositeOperation = "source-over";
+    return "<path fill-rule=\"evenodd\" fill=\"" + fillColor + "\" d=\"" + pathSvg.replaceAll(" z","z").replaceAll(" -","-") + "\"/>";
+}
+
+function openloading(text) {
+    document.getElementById("loadingtext").innerText = text;
+    document.getElementById("loading").style.display = text.length == 0  ? "none" : "block";
+    document.getElementById("page").style.display = text.length == 0 ? "block" : "none";
+}
+
+function generate(event, sel) {
+    var width = parseInt(document.getElementById("mazewidth").value);
+    var height = parseInt(document.getElementById("mazeheight").value);
+    var shape = document.getElementById("shape").options[document.getElementById("shape").selectedIndex].value;
+    var algorithm = document.getElementById("algorithm").options[document.getElementById("algorithm").selectedIndex].value;
+    var wall = parseInt(document.getElementById("wallwidth").value), space = parseInt(document.getElementById("cellwidth").value) - wall;
+    var vector = document.getElementById("vector").checked;
+    var cellcolor = document.getElementById("cellcolor").value, wallcolor = document.getElementById("wallcolor").value;
+    var assmart = document.getElementById("smart").checked ? "true" : "false";
+    if (shape == "s" && sel == null) { fromSelection(width, height, function(sel) { generate(event, sel || []); }); return; }
+    if (sel != null && sel.length != width*height) return;
+    var isCell = shape == "e" ? function(x, y) { return Math.pow(x-(width-1)/2,2)/Math.pow(width/2,2) + Math.pow(y-(height-1)/2,2)/Math.pow(height/2,2) <= 1; } :
+                 shape == "d" ? function(x, y) { return Math.abs(x-(width-1)/2)/width + Math.abs(y-(height-1)/2)/height <= 1/2; } :
+                 shape == "t" ? function(x, y) { return Math.abs(x-(width-1)/2)/width + Math.abs(y/2-(height-1)/2)/height <= 1/2; } :
+                 shape == "s" ? function(x, y) { return sel[x+y*width]; } : function(x, y) { return true; };
+
+    openloading("Generating...");
+    setTimeout(function() {
+        var startTime = (new Date).getTime();
+        var cells = initCells(width, height, isCell);
+        var flist = { "DFS" : generateDFS, "Kruskal" : generateKruskal, "Prim" : generatePrim, "PrimMod" : generatePrimMod, "Wilson" : generateWilson, "AldousBroder" : generateAldousBroder, "Recursive": generateRecursive };
+        var generateFunction = flist[algorithm];
+        function createImage() {
+            openloading("Converting to " + (vector ? "vector" : "raster") + " image...");
+            window.setTimeout(function() {
+                // Generate raster or vector image on canvas
+                var canvas = document.createElement("canvas");
+                canvas.width = wall * (width + 1) + space * width;
+                canvas.height = wall * (height + 1) + space * height;
+                var svg = "<svg version=\"1.2\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 "+canvas.width+" "+canvas.height+"\" width=\""+canvas.width+"\" height=\""+canvas.height+"\">";
+                var ctx = canvas.getContext("2d");
+                if (vector) { ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+                ctx.fillStyle = vector ? "#000000" : cellcolor;
+                for (var i = 0; i < cells.length; i++) {
+                    ctx.fillRect(cells[i].x * (wall + space), cells[i].y * (wall + space), 2 * wall + space, 2 * wall + space);
+                }
+                if (vector) svg += "\n\t" + svgPathFromCanvas(canvas, ctx, cellcolor);
+                ctx.fillStyle = vector ? "#000000" : wallcolor;
+                for (var i = 0; i < cells.length; i++) {
+                    var x1 = cells[i].x, y1 = cells[i].y;
+                    if (cells[i].walls[0]) ctx.fillRect(x1 * (wall + space), y1 * (wall + space), 2 * wall + space, wall);
+                    if (cells[i].walls[1]) ctx.fillRect((x1 + 1) * (wall + space), y1 * (wall + space), wall, 2 * wall + space);
+                    if (cells[i].walls[2]) ctx.fillRect(x1 * (wall + space), (y1 + 1) * (wall + space), 2 * wall + space, wall);
+                    if (cells[i].walls[3]) ctx.fillRect(x1 * (wall + space), y1 * (wall + space), wall, 2* wall + space);
+                }
+                if (vector) svg += "\n\t" + svgPathFromCanvas(canvas, ctx, wallcolor) + "\n</svg>";
+                var data = vector ? "data:image/svg+xml," + encodeURIComponent(svg) : canvas.toDataURL("image/png");
+                if (window.parent != window.self && !event.ctrlKey && !event.altKey) runScript("app.open('" + data + "',null,"+assmart+");");
+                else if (!event.altKey) {
+                    var a = document.createElement("a");
+                    a.setAttribute("href", data);
+                    a.setAttribute("download", vector ? "image.svg" : "image.png");
+                    a.style.display = "none";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    var image = new Image();
+                    image.src = data;
+                    var win = window.open("");
+                    if (win) { win.document.write(image.outerHTML); win.document.close(); }
+                }
+                openloading("");
+                console.log("Maze " + width + " x " + height + " generated with " + algorithm + " in " + ((new Date).getTime() - startTime) + " ms.");
+            }, 0);
+        }
+        generateFunction(cells, [startTime], createImage);
+    }, 0);
+}
+</script>
+  </head>
+  <body>
+    <div id="loading" style="display:none;"><div style="padding:0;text-align:center;margin:0;position:absolute;top:50%;left:50%;width:90%;transform:translate(-50%,-50%);"><div class="spinner"></div><div id="loadingtext" style="padding-top:3px;"></div></div></div>
+    <div id="page" class="page">
+      <div><label for="algorithm" style="width:68px;">Algorithm:</label><select id="algorithm" style="width:146px;"><option value="DFS">Depth-first (DFS)</option><option value="Kruskal">Kruskal's</option><option value="Prim">Prim's</option><option value="PrimMod">Prim's (modified)</option><option value="Wilson">Wilson's</option><option value="AldousBroder" selected>Aldous-Broder</option><option value="Recursive">Recursive division</option></select></div>
+      <div><label style="width:68px;">Cell:</label><input type="color" id="cellcolor" value="#ffffff" style="width: 63px;"> <label style="min-width: 7px;">-</label><input type="number" id="cellwidth" min="1" value="10" step="1" style="width: 63px;"> <label>px</label></div>
+      <div><label style="width:68px;">Wall:</label><input type="color" id="wallcolor" value="#000000" style="width: 63px;"> <label style="min-width: 7px;">-</label><input type="number" id="wallwidth" min="1" value="2" step="1" style="width: 63px;"> <label>px</label></div>
+      <div><label style="width:68px;">Maze:</label><input type="number" id="mazewidth" min="1" value="18" step="1" style="width: 63px;"> <label style="min-width: 7px;">x</label><input type="number" id="mazeheight" min="1" value="18" step="1" style="width: 63px;"> <label>cells</label></div>
+      <div><label for="shape" style="width:68px;">Shape:</label><select id="shape" style="width:146px;"><option value="r">Square / Rectangle</option><option value="e">Circle / Ellipse</option><option value="d">Diamond</option><option value="t">Triangle</option><option value="s">From Selection</option></select></div>
+      <div><input type="checkbox" id="smart"><label for="smart" style="padding-left:4px;">Insert as Smart Object</label></div>
+      <div><input type="checkbox" id="vector"><label for="vector" style="padding-left:4px;">Convert to Vector Shape</label></div>
+      <input type="button" value="Generate" id="generate" onclick="generate(event);" class="button"/>
+    </div>
+  </body>
+</html>
