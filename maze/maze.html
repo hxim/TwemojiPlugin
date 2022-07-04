@@ -412,10 +412,10 @@ function svgPathFromCanvas(canvas, ctx, fillColor) {
     ctx.globalCompositeOperation = "difference";
     ctx.fillStyle = "#ffffff";
     for (var y0 = 0; y0 < h; y0++) for (var x0 = 0; x0 < w; x0++) if (pixelBlack(x0, y0)) {
-        var dir = 1, x = x0, y = y0, path = [], sPoint = getShapePoint(x0, y0, 0);
+        var dir = 0, x = x0, y = y0, path = [], sPoint = getShapePoint(x0, y0, 0);
         ctx.beginPath();
         ctx.moveTo(sPoint.x, sPoint.y); path.push(sPoint);
-        while (x != x0 || y != y0 || dir != 0) {
+        while (x != x0 || y != y0 || dir != 0 || path.length == 1) {
             var x1 = x + m1[dir][0], y1 = y + m1[dir][1];
             if (pixelBlack(x1, y1)) {
                 dir = (dir + 3) % 4; x = x1; y = y1;
