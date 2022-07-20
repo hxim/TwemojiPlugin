@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+<style>
+    body, html { background-color: #474747; user-select: none; margin: 0; padding: 0; width: 100%; height: 100%; }
+    body, input, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; overflow: hidden; }
+    label { line-height:21px; display: inline-block; margin: 2px 0 0 0; width: 69px; }
+    input, select { padding: 3px; box-sizing: border-box; margin: 0 2px; }
+    input[type=checkbox] { height: 26px; line-height: 26px; padding-right: 6px; }
+    input[type=number] { width: 69px; }
+    select, input { background-color: #252525; border: 1px solid #252525; border-radius: 3px; transition: border 0.5s; }
+    input:not(.button):hover, select:hover, input:not(.button):focus, select:focus { border: 1px solid #3482f6; outline: none !important; }
+    .button { width: 100%; background-color: #606060; margin: 0; border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); border-left: 0px; border-right: 0px; padding: 7px 20px 8px 20px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+    .button:hover { background-color: #6a6a6a;}
+    .page { position: absolute; top: 136px; left: 6px; right: 6px; bottom: 42px; overflow-y: auto; overflow-x: hidden; white-space:nowrap; }
+    .page > div { margin-bottom: 6px; }
+    svg { background-color:#527785; margin: 6px; }
+    #copt, #sopt { display: inline-block; text-align:center;font-weight:bold; }
+    .rbutton { display: inline-block; width: 19px; height: 22px; padding: 2px; margin: 2px 0 0 0; border: 0; font-size: 13px; background-color: #474747; border-radius: 3px; margin-left: 2px;}
+    .rbutton > .icon { background: url('data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDE1IDE1IiB3aWR0aD0iMTUiIGhlaWdodD0iMTUiPjxzdHlsZT4uYXtzdHJva2U6IzAwMDtzdHJva2UtbGluZWNhcDpzcXVhcmU7c3Ryb2tlLXdpZHRoOjB9PC9zdHlsZT48cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsYXNzPSJhIiBkPSJtMiAyaDExdjExaC0xMXptNyA1LjVjMC0wLjgtMC43LTEuNS0xLjUtMS41LTAuOCAwLTEuNSAwLjctMS41IDEuNSAwIDAuOCAwLjcgMS41IDEuNSAxLjUgMC44IDAgMS41LTAuNyAxLjUtMS41em0zIDNjMC0wLjgtMC43LTEuNS0xLjUtMS41LTAuOCAwLTEuNSAwLjctMS41IDEuNSAwIDAuOCAwLjcgMS41IDEuNSAxLjUgMC44IDAgMS41LTAuNyAxLjUtMS41em0tNiAwYzAtMC44LTAuNy0xLjUtMS41LTEuNS0wLjggMC0xLjUgMC43LTEuNSAxLjUgMCAwLjggMC43IDEuNSAxLjUgMS41IDAuOCAwIDEuNS0wLjcgMS41LTEuNXptNi02YzAtMC44LTAuNy0xLjUtMS41LTEuNS0wLjggMC0xLjUgMC43LTEuNSAxLjUgMCAwLjggMC43IDEuNSAxLjUgMS41IDAuOCAwIDEuNS0wLjcgMS41LTEuNXptLTYgMGMwLTAuOC0wLjctMS41LTEuNS0xLjUtMC44IDAtMS41IDAuNy0xLjUgMS41IDAgMC44IDAuNyAxLjUgMS41IDEuNSAwLjggMCAxLjUtMC43IDEuNS0xLjV6Ii8+PC9zdmc+'); filter:invert(0.78); background-repeat: no-repeat; background-position: center; width: 15px; height: 15px; display: inline-block; height: 100%;}
+    .rbutton:hover { background-color: #353535; }
+    
+</style>
+<script>
+    function updateSvg() {
+        var svgElem = document.getElementById("svgPreview");
+        var val = function(id) {
+            var v = document.getElementById(id).value, d = document.getElementById(id).getAttribute("data-default");
+            if (v.length == 0) v = document.getElementById(id).getAttribute("data-default");
+            try { return parseFloat(v); } catch { return parseFloat(d); }
+        };
+        svgElem.setAttribute("viewBox", "0 0 " + val("width") + " " + val("height"));
+        while (svgElem.firstChild) svgElem.removeChild(svgElem.firstChild);
+        var ss = Math.min(val("width"), val("height")) / 500;
+        var createElem = function(name, params, children) {
+            var newElem = document.createElementNS("http://www.w3.org/2000/svg", name);
+            if (params != null) for (var key in params) newElem.setAttribute(key, params[key]);
+            if (children != null) {
+                for (var i = 0; i < children.length; i++) newElem.appendChild(children[i]);
+            }
+            return newElem;
+        }
+        svgElem.appendChild(createElem("defs", {}, [
+            createElem("radialGradient", { id: "gradient-back", cx: "50%", cy: "50%", r: "50%", fx: "50%", fy: "50%" }, [createElem("stop", { offset: "25%", style : "stop-color:rgb(255,255,255); stop-opacity:1" }), createElem("stop", { offset: "25%", style : "stop-color:rgb(255,255,255); stop-opacity:0" })]),
+            createElem("radialGradient", { id: "gradient-mid", cx: "50%", cy: "50%", r: "50%", fx: "50%", fy: "50%" }, [createElem("stop", { offset: "25%", style : "stop-color:rgb(160,170,180); stop-opacity:" + val("shopacity") }), createElem("stop", { offset: "25%", style : "stop-color:rgb(160,170,180); stop-opacity:0" })]),
+            createElem("radialGradient", { id: "gradient-front", cx: "50%", cy: "50%", r: "50%", fx: "50%", fy: "50%" }, [createElem("stop", { offset: "25%", style : "stop-color:rgb(0,0,0); stop-opacity:" + val("shopacity") }), createElem("stop", { offset: "25%", style : "stop-color:rgb(0,0,0); stop-opacity:0" })])
+        ]));
+        svgElem.appendChild(createElem("filter", {id: "filter-back"}, [
+            createElem("feTurbulence", { type: "fractalNoise", baseFrequency: val("freq") / ss, numOctaves: val("octaves"), seed: val("seed") }),
+            createElem("feDisplacementMap", { "in": "SourceGraphic", scale: val("scale") * ss }),
+        ]));
+        svgElem.appendChild(createElem("filter", {id: "filter-mid"}, [
+            createElem("feTurbulence", { type: "fractalNoise", baseFrequency: val("freq") / ss, numOctaves: Math.round((val("octaves")+val("shoctaves"))/2), seed: val("seed") }),
+            createElem("feDisplacementMap", { "in": "SourceGraphic", scale: Math.round((val("scale")+val("shscale"))/2*ss) }),
+        ]));
+        svgElem.appendChild(createElem("filter", {id: "filter-front"}, [
+            createElem("feTurbulence", { type: "fractalNoise", baseFrequency: val("freq") / ss, numOctaves: val("shoctaves"), seed: val("seed") }),
+            createElem("feDisplacementMap", { "in": "SourceGraphic", scale: val("shscale") * ss }),
+        ]));
+        svgElem.appendChild(createElem("filter", {id: "filter-blur-back"}, [
+            createElem("feGaussianBlur", { "in": "SourceGraphic", stdDeviation: val("blur") * ss }),
+        ])); 
+        svgElem.appendChild(createElem("filter", {id: "filter-blur-mid"}, [
+            createElem("feGaussianBlur", { "in": "SourceGraphic", stdDeviation: Math.round((val("blur")+val("shblur"))/2*ss) }),
+        ])); 
+        svgElem.appendChild(createElem("filter", {id: "filter-blur-front"}, [
+            createElem("feGaussianBlur", { "in": "SourceGraphic", stdDeviation: val("shblur") * ss }),
+        ])); 
+
+        var rx = val("width"), ry = val("height"), cx = Math.round(rx / 2), cy = Math.round(ry / 2);
+        var scx = cx + rx * val("shoffsetx") / 100 / 4;
+        var scy = cy + ry * val("shoffsety") / 100 / 4;
+        var srx = rx * val("shsize") / 100 * ((100 - Math.abs(val("shoffsetx"))) / 100);
+        var sry = ry * val("shsize") / 100 * ((100 - Math.abs(val("shoffsety"))) / 100);
+        svgElem.appendChild(createElem("ellipse", {cx: cx, cy: cy, rx: rx, ry: ry, style: "fill:url(#gradient-back); filter: url(#filter-blur-back) url(#filter-back);"}));
+        svgElem.appendChild(createElem("ellipse", {cx: Math.round((cx+scx) / 2), cy: Math.round((cy+scy) / 2), rx: Math.round((rx+srx) / 2), ry: Math.round((ry+sry) / 2), style: "fill:url(#gradient-mid); filter: url(#filter-blur-mid) url(#filter-mid);"}));
+        svgElem.appendChild(createElem("ellipse", {cx: Math.round(scx), cy: Math.round(scy), rx: Math.round(srx), ry: Math.round(sry), style: "fill:url(#gradient-front); filter: url(#filter-blur-front) url(#filter-front);"}));
+    }
+    function randomize(e, sh, seed) {
+        if (seed) { document.getElementById("seed").value = 1 + (e.ctrlKey ? 0 : Math.floor(Math.random() * 1000)); updateSvg(); return; }
+        if (!sh && !e.ctrlKey) {
+            var orientation = Math.random() * 2 >= 1;
+            var size = 250 + Math.floor(Math.random() * 751);
+            document.getElementById("width").value = orientation ? 1000 : size;
+            document.getElementById("height").value = orientation ? size : 1000;
+        }
+        var list = document.getElementById("page").children;
+        for (var i = 0; i < list.length; i++) for (var j = 0; j < list[i].children.length; j++) {
+            var elem = list[i].children[j];
+            if (elem.tagName == "INPUT") {
+                if (sh && elem.id.indexOf("sh") != 0 || !sh && elem.id.indexOf("sh") == 0) continue;
+                if (e.ctrlKey) { elem.value = elem.getAttribute("data-default"); continue; }
+                if (elem.id == "width" || elem.id == "height") continue;
+                if (elem.id == "freq") {
+                    if (Math.random() * 2 >= 1) elem.value =(Math.floor(Math.random() * 10)+1)/1000;
+                    else elem.value = (Math.floor(Math.random() * 9)+2) / 100;
+                    continue;
+                }
+                var min = parseFloat(elem.min), max = parseFloat(elem.max), step = parseFloat(elem.step || "1");
+                var count = Math.floor((max - min) / step) + 1;
+                elem.value = min + Math.floor(Math.random() * count) * step;
+            }
+        }        
+        updateSvg();
+    }
+    function insert(e) {
+        const image = document.createElement("img");
+        document.getElementById("wrapper").appendChild(image);
+        image.onload = function () {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext('2d');
+            canvas.width = image.clientWidth;
+            canvas.height = image.clientHeight;
+            ctx.drawImage(image, 0, 0);
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            var b = [null, null, null, null];
+            for (var i = 0; i < imageData.length; i += 4) if (imageData[i + 3] !== 0) {
+                const x = (i / 4) % canvas.width, y = ~~((i / 4) / canvas.width);
+                b[0] = Math.min(x, b[0]||canvas.width);
+                b[1] = Math.min(y, b[1]||canvas.height);
+                b[2] = Math.max(x, b[2]||0);
+                b[3] = Math.max(y, b[3]||0);
+            }
+            var imageData2 = ctx.getImageData(b[0], b[1], b[2]-b[0], b[3]-b[1]);
+            const canvas2 = document.createElement("canvas");
+            canvas2.width = b[2]-b[0];
+            canvas2.height = b[3]-b[1];
+            canvas2.getContext('2d').putImageData(imageData2, 0, 0);
+            if (window.parent != window.self) window.parent.postMessage("app.open('" + canvas2.toDataURL('image/png') + "',null,true);", "*");
+            document.getElementById("wrapper").removeChild(image);
+        };
+        image.onerror = function() {
+            document.getElementById("wrapper").removeChild(image);
+        }
+        var svgPreview = document.getElementById("svgPreview");
+        var viewBox = svgPreview.getAttribute("viewBox"), w = parseFloat(svgPreview.getAttribute("width")), h = parseFloat(svgPreview.getAttribute("height"));
+        var a = viewBox.split(" ");
+        var scale = Math.max(parseFloat(a[2]),parseFloat(a[3])) / Math.max(w, h);
+        viewBox = Math.round(a[0]-a[2]/2)+" "+Math.round(a[1]-a[3]/2)+" "+Math.round(a[2]*2)+" "+Math.round(a[3]*2);
+        var svg = '<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="'+viewBox+'" width="'+Math.round(w*scale)+'" height="'+Math.round(h*scale)+'">'
+                + document.getElementById("svgPreview").innerHTML + "</svg>";
+        var dataUrl = "data:image/svg+xml;base64," + window.btoa(svg);
+        image.src = dataUrl;
+    }
+    window.onload = function() {
+        window.onresize = function() {
+            var w = Math.max(252, document.body.clientWidth - 12), h = Math.max(96, document.body.clientHeight - 18 - 256 - 35);
+            document.getElementById("svgPreview").setAttribute("width", w);
+            document.getElementById("svgPreview").setAttribute("height", h);
+            document.getElementById("page").style.top = (h + 7) + "px";
+            var list = document.getElementById("page").children;
+            for (var i = 0; i < list.length; i++) for (var j = 0; j < list[i].children.length; j++) {
+                var elem = list[i].children[j];
+                if (elem.id == "labelSeed") elem.style.width = ((w - 12) / 4 - 21) + "px";
+                else if (elem.id == "copt" || elem.id == "sopt") elem.style.width = ((w  - 4) / 2) + "px";
+                else if (elem.tagName == "LABEL" || elem.tagName == "INPUT") elem.style.width = ((w - 12) / 4) + "px";
+            }
+        }
+        window.onresize();
+        var list = document.getElementById("page").children;
+        for (var i = 0; i < list.length; i++) for (var j = 0; j < list[i].children.length; j++) {
+            var elem = list[i].children[j];
+            if (elem.tagName == "INPUT") {
+                elem.onchange = updateSvg;
+                elem.value = elem.getAttribute("data-default");
+            }
+        }
+
+        function setupNumberInput(labelElement) {
+            if (labelElement == null) return;
+            labelElement.style.cursor = "col-resize";
+            labelElement.onmousedown = function(e) {
+                var md = e, input = document.getElementById(this.htmlFor), old = parseFloat(input.value) || 0;
+                document.onmousemove = function(e) {
+                    const step = input.step || 1, scale = Math.min(100, (input.max - input.min)/step) / 100;
+                    input.value = Math.max(input.min,Math.min(input.max, old + Math.round((e.clientX - md.clientX) * scale) * step));
+                    input.onchange(e);
+                    e.preventDefault();
+                }
+                document.onmouseup = function() { document.onmousemove = document.onmouseup = null; }
+            }
+        }
+        var labels = document.body.getElementsByTagName('label');
+        for (var i = 0; i < labels.length; i++) if (labels[i].htmlFor != null && labels[i].htmlFor.length > 0) document.getElementById(labels[i].htmlFor).label = labels[i];
+        var inputs = document.body.querySelectorAll('input[type="number"]');
+        for (var i = 0; i < inputs.length; i++) setupNumberInput(inputs[i].label);
+    
+        updateSvg();
+    }
+</script>
+  </head>
+  <body>
+    <svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" width="288" height="127" id="svgPreview">
+        <defs>
+          <radialGradient id="gradient-back" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="25%" style="stop-color:white; stop-opacity:1"/><stop offset="25%" style="stop-color:white; stop-opacity:0"/></radialGradient>
+          <radialGradient id="gradient-mid" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="25%" style="stop-color:rgb(160,170,180); stop-opacity:0.38"/><stop offset="25%" style="stop-color:rgb(160,170,180); stop-opacity:0"/></radialGradient>
+          <radialGradient id="gradient-front" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="25%" style="stop-color:black; stop-opacity:0.38"/><stop offset="25%" style="stop-color:black; stop-opacity:0"/></radialGradient>
+       </defs>
+        <filter id="filter-back"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="4" seed="1" /><feDisplacementMap in="SourceGraphic" scale="170" /></filter>
+        <filter id="filter-mid"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="3" seed="1" /><feDisplacementMap in="SourceGraphic" scale="140" /></filter>
+        <filter id="filter-front"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="1" /><feDisplacementMap in="SourceGraphic" scale="110" /></filter>
+        <filter id="filter-blur-back"><feGaussianBlur in="SourceGraphic" stdDeviation="20" /></filter>
+        <filter id="filter-blur-mid"><feGaussianBlur in="SourceGraphic" stdDeviation="25" /></filter>
+        <filter id="filter-blur-front"><feGaussianBlur in="SourceGraphic" stdDeviation="30" /></filter>
+        <ellipse cx="500" cy="250" rx="1000" ry="500"  style="fill:url(#gradient-back); filter: url(#filter-blur-back) url(#filter-back);" />
+        <ellipse cx="500" cy="288" rx="830" ry="316"  style="fill:url(#gradient-mid); filter: url(#filter-blur-mid) url(#filter-mid);" />
+        <ellipse cx="500" cy="325" rx="660" ry="132"  style="fill:url(#gradient-front); filter: url(#filter-blur-front) url(#filter-front);" />
+    </svg>
+    <div id="page" class="page">
+      <div><div id="copt" style="width:142px;"><label style="width:auto;">Cloud options</label><button class="rbutton" title="Randomize" onclick="randomize(event,false);"><span class="icon"/></button></div>
+           <div id="sopt" style="width:142px;"><label style="width:auto;">Shadow options</label><button class="rbutton" title="Randomize" onclick="randomize(event,true);"><span class="icon"/></button></div></div>
+      <div><label for="width">Width:</label><input type="number" id="width" min="1" max="4096" value="" data-default="1000"> <label for="shopacity">Opacity:</label><input type="number" id="shopacity" min="0" max="1" step="0.01" value="" data-default="0.38"></div>
+      <div><label for="height">Height:</label><input type="number" id="height" min="1" max="4096" value="" data-default="500"> <label for="shsize">Size:</label><input type="number" id="shsize" min="0" max="100" value="" data-default="66"></div>
+      <div><label for="seed" id="labelSeed" style="width:48px;">Seed:</label><button class="rbutton" title="Randomize" onclick="randomize(event,false,true);"><span class="icon"/></button><input type="number" id="seed" min="1" max="1000" value="" data-default="1"> <label for="shoffsetx">Offset-X:</label><input type="number" id="shoffsetx" min="-100" max="100" value="" data-default="0"></div>
+      <div><label for="freq">Freq:</label><input type="number" id="freq" min="0.001" max="0.100" value="" data-default="0.012" step="0.001"> <label for="shoffsety">Offset-Y:</label><input type="number" id="shoffsety" min="-100" max="100" value="" data-default="60"></div>
+      <div><label for="octaves">Octaves:</label><input type="number" id="octaves" min="1" max="10" value="" data-default="4"> <label for="shoctaves">Octaves:</label><input type="number" id="shoctaves" min="1" max="10" value="" data-default="2"></div>
+      <div><label for="scale">Scale:</label><input type="number" id="scale" min="1" max="500" value="" data-default="170"> <label for="shscale">Scale:</label><input type="number" id="shscale" min="1" max="500" value="" data-default="110"></div>
+      <div><label for="blur">Blur:</label><input type="number" id="blur" min="0" max="100" value="" data-default="20"> <label for="shblur">Blur:</label><input type="number" id="shblur" min="0" max="100" value="" data-default="30"></div>
+    </div>
+    <div style="position: absolute; bottom: 6px; left: 6px; right: 6px; height: 35px">
+        <input type="button" value="Insert to Photopea" id="insert" onclick="insert(event);" class="button"/>
+    </div>
+    <div id="wrapper" style="position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;visibility:hidden;"></div>
+  </body>
+</html>
