@@ -229,7 +229,7 @@ executeAction(stringIDToTypeID("placedLayerEditContents"));\
 app.activeDocument.activeLayer = app.activeDocument.layers[0];\
 app.activeDocument.activeLayer.merge();\
 var ib=app.activeDocument.activeLayer.bounds;\
-var ibstr = app.activeDocument.width + "," + app.activeDocument.height + "," + ib[0].value + ","+ ib[1].value + ","+ ib[2].value + ","+ ib[3].value;\
+var ibstr = (Math.max(app.activeDocument.width,ib[2].value)-Math.min(0,ib[0].value)) + "," + (Math.max(app.activeDocument.height,ib[3].value)-Math.min(0,ib[1].value)) + "," + ib[0].value + ","+ ib[1].value + ","+ ib[2].value + ","+ ib[3].value;\
 app.activeDocument.close();\
 var b=app.activeDocument.activeLayer.bounds;\
 var bstr = b[0].value + ","+ b[1].value + ","+ b[2].value + ","+ b[3].value;\
@@ -254,8 +254,8 @@ executeAction(stringIDToTypeID("placedLayerEditContents"));\
 app.activeDocument.activeLayer = app.activeDocument.layers[0];\
 app.activeDocument.activeLayer.merge();\
 var ib=app.activeDocument.activeLayer.bounds;\
-w = w * app.activeDocument.width / (ib[2].value - ib[0].value);\
-h = h * app.activeDocument.height / (ib[3].value - ib[1].value);\
+w = w * (Math.max(app.activeDocument.width,ib[2].value)-Math.min(0,ib[0].value)) / (ib[2].value - ib[0].value);\
+h = h * (Math.max(app.activeDocument.height,ib[3].value)-Math.min(0,ib[1].value)) / (ib[3].value - ib[1].value);\
 app.activeDocument.close();\
 if ('+newWidth+'>0) { app.activeDocument.activeLayer.resize(100*('+newWidth+')/(w),100*('+newHeight+')/(h), AnchorPosition.MIDDLECENTER);\
 app.activeDocument.activeLayer.translate(('+newX+')-app.activeDocument.width/2,('+newY+')-app.activeDocument.height/2); }\
