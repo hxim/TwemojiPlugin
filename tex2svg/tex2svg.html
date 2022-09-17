@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+		<style>
+            * { border-style: solid; border-width: 0; }
+			body {  background-color:#474747; overflow: hidden; margin: 3px 8px 0 8px; }
+            body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
+            button { padding: 2px 5px 3px 5px; border-radius: 3px; background-color: #606060; border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.15); border-bottom-width: 1px;
+                     border-bottom-color: rgba(0, 0, 0, 0.6); overflow: hidden; text-align: center; white-space: nowrap; user-select: none; cursor: default; line-height: 17.5px; height: 26px;
+                     margin: 1px; }
+		    button:not(:disabled):hover { background-color: #6a6a6a; cursor: pointer; }
+            button:disabled { opacity: 0.5; pointer-events: none; }
+            #topbar { height: 32px; white-space: nowrap; position: relative; }
+			#cont { position: relative; }
+            #cont > div { position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: 0 auto; background-color: white; color: black; overflow:hidden; }
+            #c2 > mjx-container { transform: scale(1); transform-origin: left; }
+            #data { margin: 0; background-color: #252525; border-radius: 3px; width: 100%; box-sizing: border-box; padding: 4px; resize: none; }
+            #splitter { cursor: ns-resize; margin: 0; padding: 0; height: 6px; }
+			.win { position: absolute; z-index: 10; background-color: #474747;   top: 50%; left: 50%;  user-select: none; box-shadow: 0px 4px 30px rgba(0,0,0,0.25); display: none; border-radius: 6px; top:32px;bottom:4px;left:0;right:0; }
+			.win > div.head { border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); height: 30px; font-size: 1.15em;
+                               background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.25) 100%); border-top-left-radius: 6px; border-top-right-radius: 6px; }
+			.win > div.head span.label { display: inline-block; padding: 0.3em 0.5em; font-weight: bold; }
+			.win > div.head span.cross { cursor: pointer; display: inline-block; background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI1NiAyNTYiIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2Ij48cGF0aCAgZD0ibTMyIDBsMjI0IDIyNC0zMiAzMi0yMjQtMjI0em0yMjQgMzJsLTIyNCAyMjQtMzItMzIgMjI0LTIyNHoiLz48L3N2Zz4=);
+                                          background-size: 10px 10px; background-repeat: no-repeat; background-position: center; width: 30px; height: 30px; font-size: 1.3em; position: absolute; right: 0; filter: invert(0.78); }
+            #winbody { overflow: auto; position: absolute; top: 32px; bottom: 0; left: 4px; right: 0; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin;}
+			#winbody::-webkit-scrollbar { width: 10px; background: rgba(0,0,0,0.2); }
+			#winbody::-webkit-scrollbar-thumb { background: #222222; margin: 2px; }
+            #winbody .section { line-height: 24px; }            
+            #winbody hr { height: 1px; background-color: black; margin: 4px 0 0 0; }
+            #winbody > mjx-container {  display: inline-block; padding: 1px 3px; background-color: white; color: black; margin: 0; outline: solid 1px #474747; line-height: 24px; font-size: 12px; vertical-align: top;}
+            #winbody > mjx-container > svg { display: inline-block; }
+            #winbody > mjx-container:hover { background-color: #bee6ff; cursor: pointer;}
+            .MJX_LiveRegion { display: none; }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>MathJax = { options: { enableMenu: false }};</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+      
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+
+    window.addEventListener("message", onMessage);
+    var _running = false, _callback = null, _data = [], _donecount = 1;
+    function onMessage(e) {
+        if (_running && e.data == "done") {
+            _donecount--;
+            if (_donecount > 0) return;
+            var callback = _callback, data = _data;
+            _callback = null; _data = []; _running = false;
+            if (callback != null) callback(data);
+        } else if (_running && (e.data instanceof ArrayBuffer || typeof e.data === 'string')) _data.push(e.data);
+    }    
+    function runScript(s, callback, donecount = 1) {
+        if (_running) return;
+        _running = true;
+        _callback = callback;
+        _donecount = donecount;
+        window.parent.postMessage(s, "*");
+    }
+    function setsize() {
+        var ratio = document.getElementById("cont").firstChild.getBoundingClientRect().height/document.getElementById("data").getBoundingClientRect().height;
+        var width = Math.max(268, window.innerWidth - 16);
+        var height = Math.max(128, window.innerHeight - 50), hdata = 1 + ratio == 0 ? height / 2 : height / (1 + ratio);
+        var min = 40;
+        if (hdata < min) hdata = min; else if (height-hdata < min) hdata = height - min;
+        document.getElementById("data").setAttribute("style","width:"+(width)+"px;height:"+(hdata)+"px;");
+        document.getElementById("cont").setAttribute("style","height:"+(height+26)+"px;");
+        document.getElementById("c2").setAttribute("style","width:"+(width)+"px;height:"+(height-hdata)+"px;");
+        if (document.getElementById("win").display != "none" && document.getElementById("win").style.height != "") document.getElementById("win").style.height = (document.body.getBoundingClientRect().height-document.getElementById("cont").getBoundingClientRect().height-35) + "px";
+        document.getElementById("splitter").onmousedown = function() { splitterMouseDown(event,"data","c2", min); }
+    }
+    function splitterMouseDown(e, id1, id2, min) {
+        var elem = [document.getElementById(id1), document.getElementById(id2)];
+        var md = e, h = [elem[0].offsetHeight, elem[1].offsetHeight];
+        document.onmousemove = function(e) {
+            var d = Math.min(Math.max(e.clientY - md.clientY, -h[0] + min), h[1] - min);
+            elem[0].style.height = (h[0] + d) + "px";
+            elem[1].style.height = (h[1] - d) + "px";
+            e.preventDefault();
+        };
+        document.onmouseup = function() { document.onmousemove = document.onmouseup = null; }
+    }
+    function itemClick(code) {
+        symbols();
+        var el = document.getElementById("data");
+        if (el === document.activeElement) {
+              const [start, end] = [el.selectionStart, el.selectionEnd];
+              el.setRangeText(code, start, end, 'select');
+        } else document.getElementById("data").value += code;
+        update();
+    }
+
+    var working = false, lastinput = null, layerName = "", origSize = [149, 37];
+    function generateSymbols() {
+        working = true;
+        var output = document.getElementById("winbody");
+        output.style.display = "none";
+        var items = [
+            " Format, Accents, Color and Spacing","\\mathnormal{A}","\\mathrm{A}","\\mathit{A}","\\mathbf{A}","\\mathsf{A}","\\mathtt{A}","\\mathfrak{A}","\\mathcal{A}","\\mathbb{A}","\\mathscr{A}","\\boldsymbol{\\alpha}","a'","a''","\\hat{a}","\\bar{a}","\\grave{a}","\\acute{a}","\\dot{a}","\\ddot{a}","\\not{a}","\\mathring{a}","\\overrightarrow{a}","\\overleftarrow{a}","\\overline{a}","\\check{a}","\\breve{a}","\\vec{a}","\\tilde{a}","\\underline{a}","\\color{black}{A}","\\color{blue}{A}","\\color{brown}{A}","\\color{cyan}{A}","\\color{darkgray}{A}","\\color{gray}{A}","\\color{green}{A}","\\color{lightgray}{A}","\\color{lime}{A}","\\color{magenta}{A}","\\color{olive}{A}","\\color{orange}{A}","\\color{pink}{A}","\\color{purple}{A}","\\color{red}{A}","\\color{teal}{A}","\\color{violet}{A}","\\color{white}{A}","\\color{yellow}{A}","\\ ","\\quad","\\qquad",
+            " Common Functions and Expressions","\\frac{x}{y}","\\binom{x}{y}","\\lim\\limits_{x \\to \\infty}","x=y","x+y","x-y","{x}\\cdot{y}","(x)","\\{x\\}","x^y","x_y","\\sqrt[y]{x}","x!","x_1,\\dotsc,x_i","x_1+\\dotsb+x_i","\\bmod","\\pmod{x}","\\log","\\ln","\\max","\\min",
+            " Greek Letters","A","\\alpha","B","\\beta","\\Gamma","\\gamma","\\Delta","\\delta","E","\\epsilon","\\varepsilon","Z","\\zeta","H","\\eta","\\Theta","\\theta","\\vartheta","I","\\iota","K","\\kappa","\\varkappa","\\Lambda","\\lambda","M","\\mu","N","\\nu","\\Xi","\\xi","O","o","\\Pi","\\pi","\\varpi","P","\\rho","\\varrho","\\Sigma","\\sigma","\\varsigma","T","\\tau","\\Upsilon","\\upsilon","\\Phi","\\phi","\\varphi","X","\\chi","\\Psi","\\psi","\\Omega","\\omega",
+            " Sums, Integrals, Matrices and Similar","\\sum_a^b","\\prod_a^b","\\coprod_a^b","\\bigoplus_a^b","\\bigotimes_a^b","\\bigodot_a^b","\\bigcup_a^b","\\bigcap_a^b","\\biguplus_a^b","\\bigsqcup_a^b","\\bigvee_a^b","\\bigwedge_a^b","\\int_a^b","\\oint_a^b","\\iint_a^b","\\iiint_a^b","\\idotsint_a^b","\\begin{matrix}1&2\\\\3&4\\end{matrix}","\\begin{pmatrix}1&2\\\\3&4\\end{pmatrix}","\\begin{bmatrix}1&2\\\\3&4\\end{bmatrix}","\\begin{Bmatrix}1&2\\\\3&4\\end{Bmatrix}","\\begin{vmatrix}1&2\\\\3&4\\end{vmatrix}","\\begin{Vmatrix}1&2\\\\3&4\\end{Vmatrix}",
+            " Relation and Binary Symbols","<","\\leq","\\ll","\\subset","\\subseteq","\\nsubseteq","\\sqsubset","\\sqsubseteq","\\preceq","\\therefore",">","\\geq","\\gg","\\supset","\\supseteq","\\nsupseteq","\\sqsupset","\\sqsupseteq","\\succeq","\\because","=","\\doteq","\\equiv","\\approx","\\cong","\\simeq","\\sim","\\propto","\\neq","\\parallel","\\asymp","\\vdash","\\in","\\smile","\\models","\\perp","\\prec","\\sphericalangle","\\nparallel","\\bowtie","\\dashv","\\ni","\\frown","\\notin","\\mid","\\succ","\\measuredangle","\\pm","\\mp","\\times","\\div","\\ast","\\star","\\dagger","\\ddagger","\\cap","\\cup","\\uplus","\\sqcap","\\sqcup","\\vee","\\wedge","\\cdot","\\diamond","\\bigtriangleup","\\bigtriangledown","\\triangleleft","\\triangleright","\\bigcirc","\\bullet","\\wr","\\oplus","\\ominus","\\otimes","\\oslash","\\odot","\\circ","\\setminus","\\amalg",
+            " Set and Logic Notation, Delimiters","\\exists","\\nexists","\\forall","\\neg","\\cap","\\cup","\\subset","\\supset","\\in","\\notin","\\ni","\\land","\\lor","\\angle","\\rightarrow","\\leftarrow","\\leftrightarrow","\\mapsto","\\implies","\\impliedby","\\iff","\\Rightarrow","\\Leftarrow","\\Leftrightarrow","\\top","\\bot","\\emptyset","\\varnothing","\\rightleftharpoons","\\mid","\\|","/","\\backslash","\\{","\\}","\\langle","\\rangle","\\uparrow","\\downarrow","\\Uparrow","\\Downarrow","\\lceil","\\lfloor","\\rceil","\\rfloor",
+            " Other Symbols and Trigonometric Functions","\\partial","\\eth","\\hbar","\\imath","\\jmath","\\ell","\\Re","\\Im","\\wp","\\nabla","\\Box","\\infty","\\aleph","\\beth","\\gimel","\\complement","\\square","\\surd","\\blacksquare","\\triangle","\\sin","\\cos","\\tan","\\cot","\\arcsin","\\arccos","\\arctan","\\sinh","\\cosh","\\tanh","\\coth","\\sec","\\csc","\\cdots","\\vdots","\\ddots"];
+            MathJax.texReset();
+        function renderItem(index) {
+            if (items.length <= index) { working = false; output.style.display = ""; return; }
+            if (items[index][0] == " ") {
+                if (index > 0) output.appendChild(document.createElement('hr'));
+                element = document.createElement('div');
+                element.className = "section";
+                element.innerText = items[index].trim();
+                output.appendChild(element);
+                renderItem(index + 1);
+                return;
+            }
+            var options = MathJax.getMetricsFor(output);
+            MathJax.tex2svgPromise(items[index], options).then(function (node) {
+                node.title = items[index];
+                node.onclick = function() { itemClick(this.title); };
+                output.appendChild(node);
+                MathJax.startup.document.clear();
+                MathJax.startup.document.updateDocument();
+            }).then(function () {
+                renderItem(index + 1);
+            });
+        }
+        window.setTimeout(function(){ renderItem(0); },0);
+    }
+    function updateButtons() {
+        var empty = document.getElementById("data").value.trim().length == 0;
+        document.getElementById("btnclr").disabled = empty;
+        document.getElementById("btnsvg").disabled = empty;
+        document.getElementById("btnupd").disabled = empty || layerName.length == 0;
+        document.getElementById("btnins").disabled = empty;
+    }
+    function getSvgSize(svgElement) {
+        var baseValWidth = svgElement.width.baseVal;
+        var baseValHeight = svgElement.height.baseVal;
+        baseValWidth.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PX);
+        baseValHeight.convertToSpecifiedUnits(SVGLength.SVG_LENGTHTYPE_PX);
+        return [baseValWidth.valueInSpecifiedUnits, baseValHeight.valueInSpecifiedUnits];
+    }
+    function update(callback) {
+        var input = document.getElementById("data").value.trim();
+        updateButtons();
+        if (lastinput == input) return; else lastinput = input;
+        if (working) return;
+        working = true;
+        output = document.getElementById("c2");
+        output.innerHTML = '';
+        MathJax.texReset();
+        var options = MathJax.getMetricsFor(output);
+        MathJax.tex2svgPromise(input, options).then(function (node) {
+            output.appendChild(node);
+            MathJax.startup.document.clear();
+            MathJax.startup.document.updateDocument();
+        }).catch(function (err) {
+            output.appendChild(document.createElement('pre')).appendChild(document.createTextNode(err.message));
+        }).then(function () {
+            working = false;
+            var c3 = document.getElementById("c2").children[0];
+            if (c3 != null) {
+                c3.style.transform = "scale(1)";
+                var w1 = c3.getBoundingClientRect().width, w2 = c3.children[0].getBoundingClientRect().width;
+                if (w2 > w1) c3.style.transform = "scale("+w1/w2+")";
+            }
+            if (callback != null) callback();
+        });
+        cont.style.display = "block";
+        setsize();
+        window.onresize = setsize;
+    }
+    var wasFocused = false;
+    function symbols() {
+        var visible = document.getElementById('win').style.display == 'block';
+        document.getElementById('winbody').scroll(0, 0);
+        document.getElementById('win').style.display = visible ? 'none' : 'block';
+        if (!visible && document.getElementById("data") !== document.activeElement) {
+          const end = document.getElementById("data").value.length;
+          document.getElementById("data").setSelectionRange(end, end);
+        }
+        if (!visible) wasFocused = document.getElementById("data") === document.activeElement;
+        if (visible && wasFocused) document.getElementById("data").focus();
+    }
+    function cleardata() {
+        document.getElementById("data").value = "";
+        update();
+    }
+    function getSvgElement() {
+       var c2 = document.getElementById("c2");
+        if (c2.children.length == 0 || c2.children[0].children.length == 0) return null;
+        var svgElement = c2.children[0].children[0];
+        if (svgElement.tagName.toLowerCase() != "svg") return null;
+        return svgElement;
+    }
+    function downloadOrInsert(svg) {
+        var svgElement = getSvgElement();
+        if (svgElement == null) return;
+        var dataURI =  'data:image/svg+xml,' + encodeURIComponent(svgElement.outerHTML.trim());
+        if (svg) {
+            if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) { alert('not supported in IE.'); return; }
+            var element = document.createElement('a');
+            element.setAttribute('href', dataURI);
+            element.setAttribute('download', 'image.svg');
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        } else {
+            runScript('app.open("' + dataURI + '", null, true);', function() {
+                var newLayerName = btoa(document.getElementById("data").value.trim());
+                runScript("if (app.activeDocument.activeLayer.kind == 1) app.activeDocument.activeLayer.name = '$$' + atob('"+newLayerName+"') + '$$';", function() {
+                    layerName = newLayerName;
+                });
+            });
+        }
+    }
+    function updateLayer(fixSize) {
+        var svgElement = getSvgElement();
+        if (svgElement == null) return;
+        var dataURI =  'data:image/svg+xml,' + encodeURIComponent(svgElement.outerHTML.trim());
+        var oldLayerName = "Deleted:"+atob(layerName);
+        runScript('if (app.activeDocument.activeLayer.kind == 1) {\
+executeAction(stringIDToTypeID("placedLayerEditContents"));\
+app.activeDocument.activeLayer = app.activeDocument.layers[0];\
+app.activeDocument.activeLayer.merge();\
+var ib=app.activeDocument.activeLayer.bounds;\
+var ibstr = app.activeDocument.width + "," + app.activeDocument.height + "," + ib[0].value + ","+ ib[1].value + ","+ ib[2].value + ","+ ib[3].value;\
+app.activeDocument.close();\
+var b=app.activeDocument.activeLayer.bounds;\
+var bstr = b[0].value + ","+ b[1].value + ","+ b[2].value + ","+ b[3].value;\
+app.echoToOE("SIZES="+ ibstr + "," + bstr);\
+} else app.echoToOE("done");', function(data) {
+            if (data.length != 1 || !(typeof data[0] === 'string' && data[0].indexOf("SIZES=") == 0)) return;
+            var sizes = data[0].substring("SIZES=".length).split(",");
+            for (var i = 0; i < sizes.length; i++) sizes[i] = parseFloat(sizes[i]);
+            var scale = fixSize ? 1 : Math.round((1 / origSize[0] * (sizes[8] - sizes[6] - 1) / (sizes[4] - sizes[2]) * sizes[0]) +
+                                                 (1 / origSize[1] * (sizes[9] - sizes[7] - 1) / (sizes[5] - sizes[3]) * sizes[1])) / 2;
+            var newWidth =  getSvgSize(svgElement)[0] * scale;
+            var newHeight = getSvgSize(svgElement)[1] * scale;
+            var newX = sizes[6] - Math.floor(sizes[2] / (sizes[4] - sizes[2])  * (sizes[8] - sizes[6])) + (newWidth / 2), newY = sizes[7] - Math.floor(sizes[3] / (sizes[5] - sizes[3]) * (sizes[9] - sizes[7])) +  (newHeight / 2);
+            runScript('if (app.activeDocument.activeLayer.kind == 1) { app.activeDocument.activeLayer.name=atob("'+btoa(oldLayerName)+'");app.open("' + dataURI + '", null, true); }', function() {
+                var newLayerName = btoa(document.getElementById("data").value.trim());
+                runScript('if (app.activeDocument.activeLayer.kind == 1) {\
+app.activeDocument.activeLayer.name = "$$" + atob("'+newLayerName+'") + "$$";\
+var b=app.activeDocument.activeLayer.bounds;\
+var w = b[2].value - b[0].value;\
+var h = b[3].value - b[1].value;\
+executeAction(stringIDToTypeID("placedLayerEditContents"));\
+app.activeDocument.activeLayer = app.activeDocument.layers[0];\
+app.activeDocument.activeLayer.merge();\
+var ib=app.activeDocument.activeLayer.bounds;\
+w = w * app.activeDocument.width / (ib[2].value - ib[0].value);\
+h = h * app.activeDocument.height / (ib[3].value - ib[1].value);\
+app.activeDocument.close();\
+if ('+newWidth+'>0) { app.activeDocument.activeLayer.resize(100*('+newWidth+')/(w),100*('+newHeight+')/(h), AnchorPosition.MIDDLECENTER);\
+app.activeDocument.activeLayer.translate(('+newX+')-app.activeDocument.width/2,('+newY+')-app.activeDocument.height/2); }\
+var selLayer = app.activeDocument.activeLayer;\
+function del(doc,lname){for(var m=0;m<doc.layers.length;m++){if (doc.layers[m].typename=="ArtLayer") {if (doc.layers[m].name==lname) doc.layers[m].remove();} else del(doc.layers[m],lname);}};\
+del(app.activeDocument,atob("'+btoa(oldLayerName)+'"));\
+app.activeDocument.activeLayer = selLayer;\
+} else app.echoToOE("done");', function() {
+                    layerName = newLayerName;
+                    origSize = [getSvgSize(svgElement)[0], svgHeight = getSvgSize(svgElement)[1]];
+                },2);
+            });
+        },2);
+    }    
+    function getLayerName() {
+        runScript("var a = '', b = ''; if (app.documents.length > 0){ if (app.activeDocument.activeLayer.layers) { } else { if (app.activeDocument.activeLayer.kind == 1) a = app.activeDocument.activeLayer.name; if (a.length > 4) if (a[0] == '$' && a[1] == '$' && a[a.length-1] == '$' && a[a.length-2] == '$') b = a.substring(2,a.length-2); }} app.echoToOE('LAYERNAME=' + btoa(b));", function(data) {
+            if (data.length != 1 || !(typeof data[0] === 'string' && data[0].indexOf("LAYERNAME=") == 0)) return;
+            var newLayerName = data[0].substring("LAYERNAME=".length);
+            if (newLayerName != layerName) {
+                layerName = newLayerName;
+                if (layerName.length > 0) {
+                    document.getElementById("data").value = atob(layerName);
+                    update(function() {
+                        var svgElement = getSvgElement();
+                        if (svgElement != null) origSize = [getSvgSize(svgElement)[0], svgHeight = getSvgSize(svgElement)[1]];
+                    });
+                } else updateButtons();
+            }
+        });
+    }
+    </script>
+  </head>
+  <body onload="update(generateSymbols);window.setInterval(update, 200);window.setInterval(getLayerName, 500);">
+    <div id="topbar">
+<button id="btnsym" onclick="symbols();" onfocus="event.preventDefault(); if (event.relatedTarget) { event.relatedTarget.focus(); }">Symbols...</button>
+<button id="btnclr" onclick="cleardata();">Clear</button>
+<button id="btnsvg" onclick="downloadOrInsert(true);">SVG</button>
+<button id="btnupd" onclick="updateLayer(event.ctrlKey);" disabled>Update</button>
+<button id="btnins" onclick="downloadOrInsert(false);">Insert</button>
+</div>
+
+<textarea id="data" onchange="update()" spellcheck="false" style="height:120px;">x = {-b \pm \sqrt{b^2-4ac} \over 2a}.</textarea>
+<hr id="splitter"/>
+    <div id="cont"><div id="c2" style="height:266px"></div></div>
+    <div id="win" class="win">
+        <div class="head"><span class="label">Tools and Symbols</span><span id="closebutton" class="cross" onclick="symbols();"></span></div>
+        <div class="body" id="winbody"></div>
+    </div>
+  </body>
+</html>
