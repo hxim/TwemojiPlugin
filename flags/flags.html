@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0" />
+<style>
+    * { border-style: solid; border-width: 0; }
+    body {  background-color:#474747; overflow: hidden; margin: 3px 2px 0 2px; user-select: none; }
+    body, button, input, textarea, select, label { font-family: "Open Sans", Sans-Serif; font-size: 13px; color: #d5d5d5; vertical-align: top; }
+    .spinner {  margin: auto; border: 3px solid #5d5d5d; border-radius: 50%; border-top: 3px solid #c7c7c7; width: 14px; height: 14px; animation: spinner 2s linear infinite; }
+    @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    label { line-height:17px; display: inline-block; margin-top: 2px; }
+    input { box-sizing: border-box; line-height: 17.5px; }
+    input[type="button"] { width: 116px; background-color: #606060; margin: 10px 0 0 0; padding: 2px 5px 3px 5px; cursor: pointer; border-left: 0px; border-right: 0px; }
+    input[type="text"] { width: 110px; border-radius: 3px;  margin: 0 2px 0 2px; padding: 3px; }
+    select { width: 120px; height: 26px; padding: 2px 2px 3px 2px; margin: 0 0 0 2px; overflow: hidden; }
+    input[type="button"], select { border-radius: 3px; border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); }
+    input[type="text"], select { background-color: #252525; border: 1px solid #252525; transition: border 0.5s; }
+    input[type="button"]:not(:disabled):hover { background-color: #6a6a6a;}
+    input[type="text"]:hover, select:not(:disabled):hover, input[type="text"]:focus, select:not(:disabled):focus { border: 1px solid #3482f6; outline: none !important; }
+    input[type="button"]:disabled { opacity: 0.5; pointer-events: none; }
+    select:disabled { opacity: 0.7; pointer-events: none; }
+    #bar { height: 50px; white-space: nowrap; }
+    #bar a { display: inline-block; line-height: 0; border-radius: 3px; padding: 1px; margin: 0 0 0 2px; vertical-align: top; position: relative; cursor: pointer; }
+    #bar a > img {  filter: invert(0.78);  padding: 2px;}
+    #bar a:hover { background-color: rgba(0,0,0,0.25); }
+    #header { height: 28px; line-height: 28px; position: relative; white-space: nowrap; }
+    #header > div  { margin-top: 0; margin-bottom: 0; }
+    #header > div > span { font-style: italic; font-size: 12px; cursor: pointer; }
+    #cont { overflow-y: scroll; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin; height: 395px; }
+    #cont::-webkit-scrollbar, #info > div.body::-webkit-scrollbar { width: 10px; background: rgba(0,0,0,0.2); }
+    #cont::-webkit-scrollbar-thumb,  #info > div.body::-webkit-scrollbar-thumb { background: #222222; margin: 2px; }
+    #cont > div { height: 32px; line-height: 28px; position: relative; cursor: pointer; white-space: nowrap; }
+    #cont > div:hover { background-color: #6a6a6a; }
+    .flag { width: 32px; height: 24px; display: inline-block; vertical-align: middle; margin: 4px 8px 4px 4px; }
+    .info1, .info2, .info3 { height: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: top; margin: 4px 0; line-height: 24px; }
+    .info1 { width: calc(100% - 180px); min-width: 62px; }
+    .info2, .info3 { width: 62px; text-align: right;}
+    
+    .win { position: absolute; z-index: 10; background-color: #474747; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0px 4px 30px rgba(0,0,0,0.25); border-radius: 6px; }
+    .win > div.head { border-top-width: 1px; border-top-color: rgba(255,255,255,0.15); border-bottom-width: 1px; border-bottom-color: rgba(0,0,0,0.6); height: 30px; font-size: 1.15em;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.25) 100%); border-top-left-radius: 6px; border-top-right-radius: 6px; }
+    .win > div.head span.label { display: inline-block; padding: 0.4em 0.5em; font-weight: bold; overflow: hidden; white-space: nowrap; width: 240px; text-overflow: ellipsis;}
+    .win > div.head span.cross { cursor: pointer; display: inline-block; background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI1NiAyNTYiIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2Ij48cGF0aCAgZD0ibTMyIDBsMjI0IDIyNC0zMiAzMi0yMjQtMjI0em0yMjQgMzJsLTIyNCAyMjQtMzItMzIgMjI0LTIyNHoiLz48L3N2Zz4=);
+                                  background-size: 10px 10px; background-repeat: no-repeat; background-position: center; width: 30px; height: 30px; font-size: 1.3em; position: absolute; right: 0; filter: invert(0.78); }
+    .win > div.body { padding: 11px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin;  min-width: 246px; }
+    .lvalue { font-weight: bold; max-width: 170px; }
+    .fs { width: 116px; height: 87px; background-color: #606060; display: inline-block; cursor: pointer; position: relative; }
+    .fs.disabled { cursor: default; }
+    .fs:not(.disabled):hover { background-color: #6a6a6a;}
+    .fi { padding: 4px 0; }
+    #d_flag, #d_shape { width: 100px; height: 71px; display: inline-block; vertical-align: middle; position: absolute; top: 8px; left: 8px; }
+
+</style>
+<script src="https://cdn.jsdelivr.net/npm/d3@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script>
+<script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+<script>
+
+const codes = 'AFALDZADAOAGARAMAWAUATAZBHBDBBBYBEBZBJBTBOBABWBRBNBGBFBIKHCMCACVCFTDCLCOKMCKCRHRCUCYCZCDDKDJDMDOTLECEGSVGQEREESZETFMFJFIFRGAGEDEGHGRGDGTGNGWGYHTHNHUISINIDIRIQILITCIJMJPJOKZKENLKIXKKWKGLALVLBLSLRLYLILTLUMGMWMYMVMLMTMHMRMUMXMDMCMNMEMAMZMMNANRNPNLNZNINENGNUKPMKMPNOOMPKPWPAPGPYCNPEPHPLPTQAIECGRORURWKNLCVCWSSMSASNRSSCSLSGSXSKSISBSOZAKRSSESLKPSSDSRSECHSYSTTWTJTZTHBSGMTGTOTTTNTRTMTVUGUAAEGBUSUYUZVUVAVEVNYEZMZW';
+var _list = [], _history = [], _sortCol = 'Name', _sortReverse = false;
+function insertImage(url) {
+  if (window.parent != window.self) window.parent.postMessage('app.open("'+url+'",null,true);', '*');
+}
+function imageCallback(res) {
+    var url = Object.values(res.query.pages)[0].imageinfo[0].url;
+    insertImage(url);
+}
+function getFlagStyle(elem, isEmblem) {
+    if (isEmblem) return 'background-position: center; background-size: contain; background-image: url(' + elem['data-url-emblem'] + '); background-repeat: no-repeat; background-color: white;';
+    else return 'background-position: center; background-size: contain; background-image: url(' + elem['data-url-flag'] + '); background-repeat: no-repeat;';
+}
+function switchFlagEmblem(elem, event) {
+    if (elem.children.length == 0) return;
+    if (elem.children[0]['data-url-flag'] == null || elem.children[0]['data-url-emblem'] == null) return;
+    if ((event || window.event).button != 2) return;
+    if (elem.children[0]['data-url-flag'].length == 0 || elem.children[0]['data-url-emblem'].length == 0) return;
+    var isEmblem = elem.children[0].style.backgroundImage.indexOf(elem.children[0]['data-url-flag']) > 0;
+    elem.children[0].style = getFlagStyle(elem.children[0], isEmblem);
+    if (isEmblem) elem.title = 'Click to insert emblem to Photopea\nRight-click to switch to flag';
+    else elem.title = 'Click to insert flag to Photopea\nRight-click to switch to emblem';
+
+}
+function flagClick(elem, event) {
+    if (elem.children.length == 0) return;
+    if (elem.children[0]['data-url-flag'] == null || elem.children[0]['data-url-emblem'] == null) return;
+    var url = (elem.children[0].style.backgroundImage.indexOf(elem.children[0]['data-url-flag']) > 0) ? elem.children[0]['data-url-flag'] : elem.children[0]['data-url-emblem'];
+    if (url.length == 0) return;
+    if (url.indexOf('/Special:FilePath/') >= 0) {
+        var name = url.substring(url.indexOf('/Special:FilePath/') + '/Special:FilePath/'.length);
+        while (document.body.lastElementChild.tagName.toLowerCase() == 'script') document.body.removeChild(document.body.lastElementChild);
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://en.wikipedia.org/w/api.php?action=query&titles=File:'+name+'&prop=imageinfo&iiprop=url&format=json&origin=*&callback=imageCallback';
+        document.body.appendChild(script);
+    } else insertImage(url);
+}
+function shapeClick(elem) {
+    if (elem.children.length > 0 && elem.children[0].children.length > 0 &&  elem.children[0].children[0].tagName.toLowerCase() == 'svg') {
+        var width = elem.children[0].clientWidth, height = elem.children[0].clientHeight;
+        var svgContent = elem.children[0].children[0].innerHTML;
+        var dataUri = 'data:image/svg+xml,' + encodeURIComponent("<svg version=\"1.2\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 "+width+" "+height+"\" width=\""+width+"\" height=\""+height+"\">\n\t" + svgContent + "\n</svg>");
+        insertImage(dataUri);
+    }
+}
+function shapeCallback(res){
+        var w = 100, h = 71;
+        var json = JSON.parse(Object.values(res.query.pages)[0].revisions[0].slots.main['*']).data;
+        var singleFeature = json.type == 'Feature';
+        if (singleFeature) json = turf.rewind(json,{reverse:true}); else json.features = json.features.map(function(feature) { return turf.rewind(feature,{reverse:true}); });
+        var b = d3.geoBounds(json), x = (b[0][0]+b[1][0])/2;
+        if (b[0][0]-b[1][0]>180) x = (b[0][0]-180+b[1][0])/2;
+        if (b[0][0]-b[1][0]<-180) x = (b[0][0]+180+b[1][0])/2;
+        var projection = d3.geoMercator().rotate([-x,0]);
+        var path = d3.geoPath().projection(projection);
+        projection.fitSize([w, h], json);
+        var svg = d3.select('#d_shape').append('svg').attr('width', w).attr('height', h).attr('style', 'fill: #d5d5d5;');
+        svg.selectAll('path').data(singleFeature ? [json] : json.features).enter().append('path').attr('d', path);
+}
+function renderShape(url) {
+    var elem = document.getElementById('d_shape');
+    while (elem.firstChild) elem.removeChild(elem.lastChild);
+    if (url == null) return;
+    var filename = url.value.substring(url.value.indexOf('Data:'));
+    while (document.body.lastElementChild.tagName.toLowerCase() == 'script') document.body.removeChild(document.body.lastElementChild);
+    var script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://commons.wikimedia.org/w/api.php?action=query&prop=revisions&rvslots=*&rvprop=content&format=json&titles='+filename+'&origin=*&callback=shapeCallback';
+    document.body.appendChild(script);
+}
+function renderDetail(data) {
+    document.getElementById('d_title').innerText = data.objLabel.value + (data.code != null ? ' (' + data.code.value + ')' : '');
+    document.getElementById('d_title').title = data.objLabel.value + (data.code != null ? ' (' + data.code.value + ')' : '');
+    document.getElementById('d_name').innerText = data.objLabel.value;
+    document.getElementById('d_population').innerText = data.population != null ? Math.round(parseFloat(data.population.value)).toLocaleString('en') : '-';
+    document.getElementById('d_area').innerText = data.area != null ? (parseFloat(data.area.value) < 100 ? Math.round(parseFloat(data.area.value)*10)/10 : Math.round(parseFloat(data.area.value)).toLocaleString('en')) : '-';
+    document.getElementById('d_description').innerText = data.description != null ? data.description.value[0].toUpperCase() + data.description.value.substring(1) : '-';
+    document.getElementById('d_locationLabel').innerText = data.code != null && data.code.value.length == 2 ? 'Continent:' : 'Country:';
+    document.getElementById('d_locationValue').innerText = data.location.value;
+    document.getElementById('d_flag')['data-url-flag'] = data.flag != null ? data.flag.value : '';
+    document.getElementById('d_flag')['data-url-emblem'] = data.emblem != null ? data.emblem.value : '';
+    document.getElementById('d_flag').style = data.flag != null ? getFlagStyle(document.getElementById('d_flag'),false) :
+                                              data.emblem != null ? getFlagStyle(document.getElementById('d_flag'),true) : '';
+    var flagParent = document.getElementById('d_flag').parentNode;
+    if (data.flag != null && data.emblem == null) flagParent.title = 'Click to insert flag to Photopea';
+    if (data.flag != null && data.emblem != null) flagParent.title = 'Click to insert flag to Photopea\nRight-click to switch to emblem';
+    if (data.flag == null && data.emblem != null) flagParent.title = 'Click to insert emblem to Photopea';
+    if (data.flag == null && data.emblem == null) flagParent.removeAttribute('title');
+    flagParent.className = 'fs' + (data.flag == null && data.emblem == null ? ' disabled' : '');
+    document.getElementById('d_shape').parentNode.className = 'fs' + (data.shape == null ? ' disabled' : '');
+
+    if (data.region != null) {
+        document.getElementById('regions')['data-obj'] = data.obj.value.substring(data.obj.value.lastIndexOf('/')+1);
+        document.getElementById('regions').onclick = function() {
+            _history.push([document.getElementById('filter').value,document.getElementById('continent').selectedIndex,_list]);
+            document.getElementById('win_detail').style.display = 'none';
+            document.getElementById('filter').value = '';
+            document.getElementById('continent').disabled = true;
+            document.getElementById('continent').selectedIndex = 0;
+            update(this['data-obj']);
+        }
+        document.getElementById('regions').disabled = false;
+    } else {
+        document.getElementById('regions')['data-obj'] = '';
+        document.getElementById('regions').onclick = null;
+        document.getElementById('regions').disabled = true;
+    }
+    renderShape(data.shape);
+    open_win('detail');
+}
+function renderList() {
+    var filter = document.getElementById('filter').value.toLowerCase();
+    var continent = document.getElementById('continent').options[document.getElementById('continent').selectedIndex].value.toLowerCase();
+    _list.sort((a,b) => a.objLabel.value.localeCompare(b.objLabel.value));
+    if (_sortCol == 'Population') _list.sort((a,b) => (a.population == null ? 0 : a.population.value) - (b.population == null ? 0 : b.population.value));
+    if (_sortCol == 'Area') _list.sort((a,b) => (a.area == null ? 0 : a.area.value) - (b.area == null ? 0 : b.area.value));
+    if (_sortReverse) _list.reverse();
+    var cont = document.getElementById('cont');
+    while (cont.firstChild) cont.removeChild(cont.lastChild);
+    cont.scrollTo(0, 0);
+    for (var i = 0; i < _list.length; i++) {
+        var name = _list[i].objLabel.value, code = _list[i].code == null ? '' : _list[i].code.value;
+        var popul = _list[i].population != null ? (parseFloat(_list[i].population.value)/1000000).toFixed(2) : '';
+        var area = _list[i].area != null ? (parseFloat(_list[i].area.value)/1000).toFixed(2) : '';
+        if (name.toLowerCase().indexOf(filter) < 0 && code.toLowerCase().indexOf(filter) < 0) continue;
+        if (continent.length > 0 && _list[i].location.value.toLowerCase().indexOf(continent) < 0) continue;
+        var flagstyle = _list[i].flag != null ? 'background-position: center; background-size: contain; background-image: url(' + _list[i].flag.value + '); background-repeat: no-repeat;' :
+                        _list[i].emblem != null ? 'background-position: center; background-size: contain; background-image: url(' + _list[i].emblem.value + '); background-repeat: no-repeat;background-color: white;' : '';
+        for (var j = 0; j < codes.length; j+=2) {
+            if (_list[i].code != null && codes.substring(j,j+2) == _list[i].code.value) flagstyle = 'background: -'+(2+36*((j/2)%16))+'px -'+(2+28*(((j/2)/16)>>0))+'px no-repeat url(flags.png);';
+        }
+        var div = document.createElement('div'); div.className = 'list';
+        var divf = document.createElement('div'); divf.className = 'flag'; divf.style = flagstyle;
+        div.appendChild(divf);
+        var divn = document.createElement('div'); divn.className = 'info1';
+        divn.appendChild(document.createTextNode(name));
+        var divp = document.createElement('div'); divp.className = 'info2';
+        divp.appendChild(document.createTextNode(popul));
+        var diva = document.createElement('div'); diva.className = 'info3';
+        diva.appendChild(document.createTextNode(area));
+        div.appendChild(divn);
+        div.appendChild(divp);
+        div.appendChild(diva);
+        div.title = name;
+        div.id = 'item_' + i;
+        div.onclick = function() {
+            var index = parseInt(this.id.substring('item_'.length));
+            renderDetail(_list[index]);
+        }
+        cont.appendChild(div);
+    }
+}
+function openloading(text) {
+    document.getElementById('loadingtext').innerText = text;
+    document.getElementById('loading').style.display = text.length == 0  ? 'none' : 'block';
+    document.getElementById('page').style.display = text.length == 0 ? 'block' : 'none';
+}
+function back() {
+    if (_history.length == 0) return;
+    var h = _history.pop();
+    document.getElementById('win_detail').style.display = 'none';
+    document.getElementById('filter').value = h[0]
+    document.getElementById('continent').disabled = _history.length > 0;
+    document.getElementById('continent').selectedIndex = h[1];
+    _list = h[2];
+    setsize();
+    renderList();
+}
+function setsize() {
+    document.getElementById('back').style.display = _history.length == 0 ? 'none' : 'inline-block' ;
+    document.getElementById('cont').setAttribute('style','height:'+(window.innerHeight-document.getElementById('bar').offsetHeight-8)+'px;');
+    document.getElementById('filter').setAttribute('style','width:'+Math.max(80,window.innerWidth-169+(_history.length == 0 ? 32 : 0))+'px;');
+    document.getElementById('header').setAttribute('style','width:'+document.getElementById('cont').clientWidth+'px;');
+}
+
+function update(parent) {
+    window.setTimeout(function() {
+    class SPARQLQueryDispatcher {
+        constructor( endpoint ) { this.endpoint = endpoint; }
+        query( sparqlQuery ) {
+            const fullUrl = this.endpoint + '?query=' + encodeURIComponent( sparqlQuery );
+            const headers = { 'Accept': 'application/sparql-results+json' };
+            return fetch( fullUrl, { headers } ).then( body => body.json() );
+        }
+    }
+    const endpointUrl = 'https://query.wikidata.org/sparql';
+    const sparqlQuery = parent == null ?
+`SELECT DISTINCT ?obj ?objLabel ?code (?objDescription AS ?description) (GROUP_CONCAT(DISTINCT STR(?continentLabel); separator=", ") AS ?location) (MAX(?countryPopulation) AS ?population) (MAX(?countryArea) AS ?area) (MAX(?flag1) as ?flag) (MAX(?emblem1) as ?emblem) (MAX(?shape1) as ?shape) (true AS ?region)
+WHERE
+{
+{?obj wdt:P31 wd:Q3624078} UNION {?obj wdt:P31 wd:Q6256}.
+?obj wdt:P297 ?code .
+OPTIONAL{?obj wdt:P30 ?continent .}
+OPTIONAL{?obj wdt:P1082 ?countryPopulation .}
+OPTIONAL{?obj wdt:P2046 ?countryArea .}
+OPTIONAL{?obj wdt:P41 ?flag1 .}
+OPTIONAL{?obj wdt:P94 ?emblem1 .}
+OPTIONAL{?obj wdt:P3896 ?shape1 .}
+FILTER NOT EXISTS {?obj wdt:P31 wd:Q3024240}
+FILTER NOT EXISTS {?obj wdt:P31 wd:Q28171280}
+SERVICE wikibase:label {
+bd:serviceParam wikibase:language "en".
+?obj rdfs:label ?objLabel .
+?obj schema:description ?objDescription .
+?continent rdfs:label ?continentLabel
+}
+}
+GROUP BY ?obj ?objLabel ?code ?objDescription
+ORDER BY ?objLabel` :
+`SELECT DISTINCT ?obj ?objLabel ?code (?objDescription AS ?description) (GROUP_CONCAT(DISTINCT STR(?countryLabel); separator=", ") AS ?location) (MAX(?regionPopulation) AS ?population) (MAX(?regionArea) AS ?area) (MAX(?flag1) as ?flag) (MAX(?emblem1) as ?emblem) (MAX(?shape1) as ?shape) (SAMPLE(?hasregion) AS ?region)
+WHERE
+{
+wd:*PARENT* wdt:P150 ?obj .
+OPTIONAL{?obj wdt:P300 ?code .}
+OPTIONAL{?obj wdt:P17 ?country .}
+OPTIONAL{?obj wdt:P1082 ?regionPopulation .}
+OPTIONAL{?obj wdt:P2046 ?regionArea .}
+OPTIONAL{?obj wdt:P41 ?flag1 .}
+OPTIONAL{?obj wdt:P94 ?emblem1 .}
+OPTIONAL{?obj wdt:P3896 ?shape1 .}
+OPTIONAL{?obj wdt:P582|wdt:P576 ?ended .}
+OPTIONAL{
+SELECT ?obj (true AS ?hasregion) WHERE {
+  ?obj wdt:P150 ?x .
+} GROUP BY ?obj
+}
+FILTER(!BOUND(?ended))
+SERVICE wikibase:label {
+bd:serviceParam wikibase:language "en,[AUTO_LANGUAGE],fr,ar,be,bg,bn,ca,cs,da,de,el,es,et,fa,fi,he,hi,hu,hy,id,it,ja,jv,ko,nb,nl,eo,pa,pl,pt,ro,ru,sh,sk,sr,sv,sw,te,th,tr,uk,yue,vec,vi,zh" .
+?obj rdfs:label ?objLabel.
+?obj schema:description ?objDescription .
+?country rdfs:label ?countryLabel
+}
+}
+GROUP BY ?obj ?objLabel ?code ?objDescription
+ORDER BY ?objLabel`.replaceAll('*PARENT*', parent);
+    const queryDispatcher = new SPARQLQueryDispatcher( endpointUrl );
+    queryDispatcher.query( sparqlQuery ).then( function(p) { _list = p.results.bindings; renderList(); openloading(''); } );
+    }, 1);
+    setsize();
+    window.onresize = setsize;
+    document.getElementById('cont').scrollTo(0, 0);
+    openloading('Loading...');
+}
+
+function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  elmnt.children[0].onmousedown = dragMouseDown;
+  function dragMouseDown(e) {
+    e = e || window.event; e.preventDefault();
+    pos3 = e.clientX; pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
+  function elementDrag(e) {
+    e = e || window.event; e.preventDefault();
+    pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
+    pos3 = e.clientX; pos4 = e.clientY;
+    var h = document.getElementById('bar').offsetHeight + document.getElementById('cont').offsetHeight + 14;
+    var w = document.getElementById('cont').offsetWidth + 4;
+    elmnt.style.top = Math.max(elmnt.offsetHeight/2, Math.min(h-elmnt.offsetHeight/2, elmnt.offsetTop - pos2)) + 'px';
+    elmnt.style.left = Math.max(elmnt.offsetWidth/2, Math.min(w-elmnt.offsetWidth/2, elmnt.offsetLeft - pos1)) + 'px';
+  }
+  function closeDragElement() { document.onmouseup = null; document.onmousemove = null; }
+}
+function close_win(elem) {
+    elem.parentNode.parentNode.style.display = 'none';
+}
+function open_win(id) {
+    var elem = document.getElementById('win_' + id);
+    var visible = elem.style.display != 'none';
+    var list = document.body.children;
+    for (var i = 0; i < list.length; i++) if (list[i].id.indexOf('win_') == 0) list[i].style.display = 'none';
+    if (!visible) elem.style.display = 'block';
+    if (elem.onmousedown == null) dragElement(elem);
+}
+
+function sort(elem) {
+    if (_sortCol == elem.innerText) _sortReverse = !_sortReverse; else { _sortReverse = false; _sortCol = elem.innerText; }
+    var header = document.getElementById('header');
+    for (var i = 0; i < header.children.length; i++) if (header.children[i].children.length > 0) header.children[i].style.textDecoration = 'none';
+    elem.parentElement.style.textDecoration = 'underline';
+    renderList();
+}
+
+
+</script>
+</head>
+<body onload="update();">
+<div id="loading" style="display:none;"><div style="padding:0;text-align:center;margin:0;position:absolute;top:50%;left:50%;width:90%;transform:translate(-50%,-50%);"><div class="spinner"></div><div id="loadingtext" style="padding-top:3px;"></div></div></div>
+<div id="page" class="page">
+  <div id="bar">
+    <a onclick="back();" title="Back" id="back" style="display:none;">
+    <img src="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDM4IDM4IiB3aWR0aD0iMzgiIGhlaWdodD0iMzgiPjxzdHlsZT48L3N0eWxlPjxwYXRoICBkPSJtNC42IDE3LjJsMTMuNC0xMy40cTAuOC0wLjggMS45LTAuOCAxLjEgMCAxLjggMC44bDEuNiAxLjVxMC44IDAuOCAwLjggMS45IDAgMS4xLTAuOCAxLjhsLTYgNi4xaDE0LjRxMS4xIDAgMS44IDAuNyAwLjYgMC44IDAuNiAxLjl2Mi42cTAgMS4xLTAuNiAxLjktMC43IDAuNy0xLjggMC43aC0xNC40bDYgNi4xcTAuOCAwLjcgMC44IDEuOCAwIDEuMS0wLjggMS45bC0xLjYgMS41cS0wLjggMC44LTEuOCAwLjgtMS4xIDAtMS45LTAuOGwtMTMuNC0xMy4zcS0wLjctMC44LTAuNy0xLjkgMC0xLjEgMC43LTEuOHoiLz48L3N2Zz4=" width="20" height="20">
+    </a>
+    <input type="text" id="filter" onchange="renderList()" placeholder="Search"></input>
+    <select id="continent" onchange="renderList()"><option value="" selected>All</option><option value="Africa">Africa</option><option value="Asia">Asia</option><option value="Europe">Europe</option><option value="Oceania">Oceania</option><option value="North America">North America</option><option value="South America">South America</option></select>
+    <br/>
+    <div id="header">
+    <div class="flag"></div><div class="info1" style="text-decoration: underline;"><span onclick="sort(this);">Name</span></div><div class="info2"><span onclick="sort(this);">Population</span></div><div class="info3"><span onclick="sort(this);">Area</span></div>
+    </div>
+  </div>
+  <div id="cont"></div>
+  <div id="win_detail" class="win" style="display:none;">
+    <div class="head"><span class="label" id="d_title"></span><span class="cross" onclick="close_win(this);"></span></div>
+    <div class="body">
+      <div style="margin-bottom:4px;"><div class="fs" onclick="flagClick(this);" onmousedown="switchFlagEmblem(this, event);" oncontextmenu="return false;"><div id="d_flag"></div></div><div style="width:12px;display:inline-block;"></div><div class="fs"  onclick="shapeClick(this);" title="Click to insert shape to Photopea"><div id="d_shape"></div></div></div>
+      <div class="fi"><label style="width:75px;">Name:</label><label class="lvalue" id="d_name"></label></div>
+      <div class="fi"><label style="width:75px;">Population:</label><label class="lvalue" id="d_population"></label></div>
+      <div class="fi"><label style="width:75px;">Area:</label><label class="lvalue" id="d_area"></label><label class="lvalue">&nbsp;km</label><label class="lvalue" style="line-height:16px;"><sup>2</sup></label></div>
+      <div class="fi"><label style="width:75px;">Description:</label><label class="lvalue" id="d_description"></label></div>
+      <div class="fi"><label style="width:75px;" id="d_locationLabel">Continent:</label><label class="lvalue" id="d_locationValue"></label></div>
+      <input type="button" value="OK" onclick="close_win(this);" /><div style="width:12px;display:inline-block;"></div><input type="button" value="Regions..." id="regions" />
+    </div>
+  </div>
+</div>
+</body>
+</html>
