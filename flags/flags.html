@@ -72,16 +72,15 @@ function getFlagStyle(elem, isEmblem) {
     if (isEmblem) return 'background-position: center; background-size: contain; background-image: url(' + elem['data-url-emblem'] + '); background-repeat: no-repeat; background-color: white;';
     else return 'background-position: center; background-size: contain; background-image: url(' + elem['data-url-flag'] + '); background-repeat: no-repeat;';
 }
-function switchFlagEmblem(elem, event) {
+function switchFlagEmblem(elem) {
     if (elem.children.length == 0) return;
     if (elem.children[0]['data-url-flag'] == null || elem.children[0]['data-url-emblem'] == null) return;
-    if ((event || window.event).button != 2) return;
     if (elem.children[0]['data-url-flag'].length == 0 || elem.children[0]['data-url-emblem'].length == 0) return;
     var isEmblem = elem.children[0].style.backgroundImage.indexOf(elem.children[0]['data-url-flag']) > 0;
     elem.children[0].style = getFlagStyle(elem.children[0], isEmblem);
     if (isEmblem) elem.title = 'Click to insert emblem to Photopea\nRight-click to switch to flag';
     else elem.title = 'Click to insert flag to Photopea\nRight-click to switch to emblem';
-
+    return false;
 }
 function flagClick(elem, event) {
     if (elem.children.length == 0) return;
@@ -366,7 +365,7 @@ function sort(elem) {
   <div id="win_detail" class="win" style="display:none;">
     <div class="head"><span class="label" id="d_title"></span><span class="cross" onclick="close_win(this);"></span></div>
     <div class="body">
-      <div style="margin-bottom:4px;"><div class="fs" onclick="flagClick(this);" onmousedown="switchFlagEmblem(this, event);" oncontextmenu="return false;"><div id="d_flag"></div></div><div style="width:12px;display:inline-block;"></div><div class="fs"  onclick="shapeClick(this);" title="Click to insert shape to Photopea"><div id="d_shape"></div></div></div>
+      <div style="margin-bottom:4px;"><div class="fs" onclick="flagClick(this);" oncontextmenu="return switchFlagEmblem(this);"><div id="d_flag"></div></div><div style="width:12px;display:inline-block;"></div><div class="fs"  onclick="shapeClick(this);" title="Click to insert shape to Photopea"><div id="d_shape"></div></div></div>
       <div class="fi"><label style="width:75px;">Name:</label><label class="lvalue" id="d_name"></label></div>
       <div class="fi"><label style="width:75px;">Population:</label><label class="lvalue" id="d_population"></label></div>
       <div class="fi"><label style="width:75px;">Area:</label><label class="lvalue" id="d_area"></label><label class="lvalue">&nbsp;km</label><label class="lvalue" style="line-height:16px;"><sup>2</sup></label></div>
