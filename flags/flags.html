@@ -45,11 +45,12 @@
     .win > div.head span.cross { cursor: pointer; display: inline-block; background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI1NiAyNTYiIHdpZHRoPSIyNTYiIGhlaWdodD0iMjU2Ij48cGF0aCAgZD0ibTMyIDBsMjI0IDIyNC0zMiAzMi0yMjQtMjI0em0yMjQgMzJsLTIyNCAyMjQtMzItMzIgMjI0LTIyNHoiLz48L3N2Zz4=);
                                   background-size: 10px 10px; background-repeat: no-repeat; background-position: center; width: 30px; height: 30px; font-size: 1.3em; position: absolute; right: 0; filter: invert(0.78); }
     .win > div.body { padding: 11px; overflow-y: auto; scrollbar-color: #222222 rgba(0,0,0,0.2); scrollbar-width: thin;  min-width: 246px; }
-    .lvalue { font-weight: bold; max-width: 170px; }
+    .lvalue { font-weight: bold; max-width: 167px; }
     .fs { width: 116px; height: 87px; background-color: #606060; display: inline-block; cursor: pointer; position: relative; }
     .fs.disabled { cursor: default; }
     .fs:not(.disabled):hover { background-color: #6a6a6a;}
     .fi { padding: 4px 0; }
+    .fi > label:first-child { width: 78px; }
     #d_flag, #d_shape { width: 100px; height: 71px; display: inline-block; vertical-align: middle; position: absolute; top: 8px; left: 8px; }
 
 </style>
@@ -73,9 +74,9 @@ function getFlagStyle(elem, isEmblem) {
     else return 'background-position: center; background-size: contain; background-image: url(' + elem['data-url-flag'] + '); background-repeat: no-repeat;';
 }
 function switchFlagEmblem(elem) {
-    if (elem.children.length == 0) return;
-    if (elem.children[0]['data-url-flag'] == null || elem.children[0]['data-url-emblem'] == null) return;
-    if (elem.children[0]['data-url-flag'].length == 0 || elem.children[0]['data-url-emblem'].length == 0) return;
+    if (elem.children.length == 0) return false;
+    if (elem.children[0]['data-url-flag'] == null || elem.children[0]['data-url-emblem'] == null) return false;
+    if (elem.children[0]['data-url-flag'].length == 0 || elem.children[0]['data-url-emblem'].length == 0) return false;
     var isEmblem = elem.children[0].style.backgroundImage.indexOf(elem.children[0]['data-url-flag']) > 0;
     elem.children[0].style = getFlagStyle(elem.children[0], isEmblem);
     if (isEmblem) elem.title = 'Click to insert emblem to Photopea\nRight-click to switch to flag';
@@ -366,11 +367,11 @@ function sort(elem) {
     <div class="head"><span class="label" id="d_title"></span><span class="cross" onclick="close_win(this);"></span></div>
     <div class="body">
       <div style="margin-bottom:4px;"><div class="fs" onclick="flagClick(this);" oncontextmenu="return switchFlagEmblem(this);"><div id="d_flag"></div></div><div style="width:12px;display:inline-block;"></div><div class="fs"  onclick="shapeClick(this);" title="Click to insert shape to Photopea"><div id="d_shape"></div></div></div>
-      <div class="fi"><label style="width:75px;">Name:</label><label class="lvalue" id="d_name"></label></div>
-      <div class="fi"><label style="width:75px;">Population:</label><label class="lvalue" id="d_population"></label></div>
-      <div class="fi"><label style="width:75px;">Area:</label><label class="lvalue" id="d_area"></label><label class="lvalue">&nbsp;km</label><label class="lvalue" style="line-height:16px;"><sup>2</sup></label></div>
-      <div class="fi"><label style="width:75px;">Description:</label><label class="lvalue" id="d_description"></label></div>
-      <div class="fi"><label style="width:75px;" id="d_locationLabel">Continent:</label><label class="lvalue" id="d_locationValue"></label></div>
+      <div class="fi"><label>Name:</label><label class="lvalue" id="d_name"></label></div>
+      <div class="fi"><label>Population:</label><label class="lvalue" id="d_population"></label></div>
+      <div class="fi"><label>Area:</label><label class="lvalue" id="d_area"></label><label class="lvalue">&nbsp;km</label><label class="lvalue" style="line-height:16px;"><sup>2</sup></label></div>
+      <div class="fi"><label>Description:</label><label class="lvalue" id="d_description"></label></div>
+      <div class="fi"><label id="d_locationLabel">Continent:</label><label class="lvalue" id="d_locationValue"></label></div>
       <input type="button" value="OK" onclick="close_win(this);" /><div style="width:12px;display:inline-block;"></div><input type="button" value="Regions..." id="regions" />
     </div>
   </div>
